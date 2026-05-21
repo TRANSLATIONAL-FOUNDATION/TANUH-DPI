@@ -51,7 +51,9 @@
 
             if (tabName === 'Dashboard' && window.initDashboard) window.initDashboard();
             if (tabName === 'PrivacyFilter' && window.PF_init) window.PF_init();
-            if ((tabName === 'PDF2FHIR' || tabName === 'PDF2NHCX') && window.initApiAccess) window.initApiAccess();
+            if ((tabName === 'PDF2FHIR' || tabName === 'PDF2NHCX' || tabName === 'ForgeryDetection') && window.initApiAccess) {
+                window.initApiAccess();
+            }
         }
 
         try { mixpanel.track('Page View', { 'page_title': tabName }); } catch(e) {}
