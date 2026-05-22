@@ -259,6 +259,8 @@ pdf_uploads/
 fhir_results/
 nhcx_results/
 markdown_results/
+executables/
+session_logger_data/
 
 # test_files/ — ignore PDFs/data but keep test scripts
 test_files/*.pdf

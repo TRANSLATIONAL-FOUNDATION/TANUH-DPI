@@ -30,7 +30,8 @@ if settings.MYSQL_USER and settings.MYSQL_PASSWORD:
     logger.info("Using MySQL: %s", settings.MYSQL_HOST)
 else:
     USE_SQLITE = True
-    _db_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    _db_dir = os.environ.get('SQLITE_DATA_DIR', os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    os.makedirs(_db_dir, exist_ok=True)
     _db_path = os.path.join(_db_dir, "local_session.db")
     db_url = f"sqlite:///{_db_path}"
     connect_args = {"check_same_thread": False}

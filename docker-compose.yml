@@ -141,11 +141,13 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - GCS_CREDENTIALS_JSON=/app/gcs-service-account.json
+      - SQLITE_DATA_DIR=/app/data
     volumes:
       - ./server-ca.pem:/app/server-ca.pem:ro
       - ./client-cert.pem:/app/client-cert.pem:ro
       - ./client-key.pem:/app/client-key.pem:ro
       - ./gcs-service-account.json:/app/gcs-service-account.json:ro
+      - ./session_logger_data:/app/data
 
   privacy-filter:
     build:
