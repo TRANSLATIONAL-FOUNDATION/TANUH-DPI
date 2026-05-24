@@ -1348,3 +1348,255 @@ h1, h2, h3, h4, h5, h6, strong, b, .bold, .tablinks, .validate-btn, .process-btn
     width: 16px;
     height: 16px;
 }
+
+/* ── In-Page User Guide Layout (docs-style) ────────────────────────────── */
+.guide-layout {
+    display: flex;
+    gap: 0;
+    min-height: 600px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+}
+.guide-sidebar {
+    width: 250px;
+    min-width: 250px;
+    background: #fafcfc;
+    border-right: 1px solid var(--border);
+    padding: 18px 0;
+    overflow-y: auto;
+    max-height: 78vh;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+}
+.guide-sidebar::-webkit-scrollbar { width: 4px; }
+.guide-sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.guide-sidebar-title {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: #94a3b8;
+    padding: 10px 20px 4px;
+    margin-top: 4px;
+}
+.guide-sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 20px 7px 24px;
+    color: #64748b;
+    text-decoration: none;
+    font-size: 0.84rem;
+    font-weight: 450;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    cursor: pointer;
+}
+.guide-sidebar a i {
+    font-size: 0.78rem;
+    width: 16px;
+    text-align: center;
+    opacity: 0.7;
+}
+.guide-sidebar a:hover {
+    color: var(--primary);
+    background: rgba(20, 134, 140, 0.06);
+}
+.guide-sidebar a.active {
+    color: var(--primary);
+    border-left-color: var(--primary);
+    background: rgba(20, 134, 140, 0.08);
+    font-weight: 600;
+}
+.guide-sidebar a.active i { opacity: 1; }
+.guide-content {
+    flex: 1;
+    padding: 32px 40px;
+    overflow-y: auto;
+    max-height: 78vh;
+    line-height: 1.7;
+}
+.guide-content::-webkit-scrollbar { width: 5px; }
+.guide-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.guide-section { display: none; }
+.guide-section.active { display: block; }
+.guide-section h2 {
+    font-size: 1.6rem;
+    color: var(--text-dark);
+    margin: 0 0 8px;
+    font-weight: 700;
+}
+.guide-section h3 {
+    font-size: 1.2rem;
+    margin: 24px 0 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dark);
+    font-weight: 600;
+}
+.guide-section h3:first-child { margin-top: 0; }
+.guide-section h4 {
+    font-size: 0.95rem;
+    margin: 18px 0 8px;
+    color: #334155;
+    font-weight: 600;
+}
+.guide-section p {
+    font-size: 0.92rem;
+    color: #334155;
+    margin-bottom: 12px;
+}
+.guide-section ul, .guide-section ol {
+    margin-bottom: 14px;
+    padding-left: 1.4rem;
+    font-size: 0.9rem;
+    color: #334155;
+}
+.guide-section li { margin-bottom: 4px; }
+.guide-section a { color: var(--primary); font-weight: 500; }
+.guide-section a:hover { text-decoration: underline; }
+.guide-section code {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.82rem;
+    background: #f0fdfa;
+    color: #0e6a6f;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+.guide-section pre {
+    background: #1e293b;
+    border-radius: 8px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    margin: 12px 0 18px;
+    font-size: 0.82rem;
+    line-height: 1.6;
+}
+.guide-section pre code {
+    color: #e2e8f0;
+    background: none;
+    padding: 0;
+}
+.guide-section table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 18px;
+    font-size: 0.86rem;
+}
+.guide-section th, .guide-section td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+.guide-section th {
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748b;
+    background: #f8fffe;
+}
+.guide-section .guide-hero {
+    background: linear-gradient(135deg, #daf3f4 0%, #edfcfd 100%);
+    border: 1px solid rgba(20, 134, 140, 0.12);
+    border-radius: 10px;
+    padding: 28px;
+    margin-bottom: 24px;
+}
+.guide-section .guide-hero h2 { margin-bottom: 8px; }
+.guide-section .guide-hero p { color: #64748b; font-size: 0.95rem; margin: 0; }
+.guide-callout {
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-left: 4px solid;
+    font-size: 0.88rem;
+    line-height: 1.6;
+}
+.guide-callout strong { display: block; margin-bottom: 4px; }
+.guide-callout-info { background: #eff6ff; border-color: #3b82f6; }
+.guide-callout-warning { background: #fffbeb; border-color: #f59e0b; color: #92400e; }
+.guide-callout-success { background: #ecfdf5; border-color: #10b981; }
+.guide-pipeline {
+    position: relative;
+    padding-left: 28px;
+    margin: 16px 0;
+}
+.guide-pipeline-step {
+    position: relative;
+    padding: 10px 0 18px;
+    border-left: 2px solid var(--border);
+    padding-left: 20px;
+}
+.guide-pipeline-step:last-child { border-left-color: transparent; }
+.guide-pipeline-step::before {
+    content: '';
+    position: absolute;
+    left: -7px;
+    top: 14px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px var(--primary);
+}
+.guide-pipeline-step h4 {
+    font-size: 0.9rem;
+    margin: 0 0 4px;
+    color: var(--text-dark);
+}
+.guide-pipeline-step p {
+    font-size: 0.84rem;
+    color: #64748b;
+    margin: 0;
+}
+.guide-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+    margin: 16px 0;
+}
+.guide-card {
+    background: #f8fffe;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    transition: all 0.2s;
+}
+.guide-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(20, 134, 140, 0.08);
+}
+.guide-card .card-icon {
+    font-size: 1.4rem;
+    color: var(--primary);
+    margin-bottom: 8px;
+}
+.guide-card h4 { font-size: 0.92rem; margin: 0 0 4px; }
+.guide-card p { font-size: 0.82rem; color: #64748b; margin: 0; }
+.guide-flow-diagram {
+    background: #1e293b;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 16px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: #e2e8f0;
+    overflow-x: auto;
+    white-space: pre;
+    line-height: 1.5;
+}
+@media (max-width: 768px) {
+    .guide-layout { flex-direction: column; }
+    .guide-sidebar { width: 100%; min-width: 100%; position: static; max-height: none; border-right: none; border-bottom: 1px solid var(--border); }
+    .guide-content { max-height: none; padding: 20px 16px; }
+}
+
+/* ── Team Card Min Height Fix ───────────────────────────────────────────── */
+.fg-team-card {
+    min-height: 200px;
+}
