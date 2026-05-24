@@ -10,9 +10,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-latest]
+        os: [ubuntu-22.04, ubuntu-24.04-arm, windows-latest, macos-latest]
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             artifact_name: PrivacyFilterApp-ubuntu-latest
             zip_name: PrivacyFilterApp-ubuntu-latest.zip
           - os: ubuntu-24.04-arm
