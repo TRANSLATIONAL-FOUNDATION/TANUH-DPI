@@ -24,8 +24,9 @@ jobs:
           script: |
             set -e
             cd ~/TANUH-DPI
-            git fetch origin main
-            git reset --hard origin/main
+            git stash
+            git pull origin main
+            git stash pop || echo "Stash pop had conflicts — local overrides preserved"
             echo "Code updated to: $(git rev-parse --short HEAD)"
 
       - name: Write .env from secrets
