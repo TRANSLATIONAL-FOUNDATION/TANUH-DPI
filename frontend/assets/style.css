@@ -210,11 +210,13 @@ h1, h2, h3, h4, h5, h6, strong, b, .bold, .tablinks, .validate-btn, .process-btn
 .file-input-wrapper { flex: 1; }
 .file-input-wrapper input { position: absolute; width: 0.1px; height: 0.1px; opacity: 0; }
 .file-input-wrapper label {
-    display: flex; align-items: center; gap: 12px; padding: 12px 16px;
-    background: #f8fafc; border: 2px dashed var(--border); border-radius: 8px;
-    cursor: pointer; color: var(--text-light);
+    display: flex; align-items: center; gap: 12px; padding: 16px 20px;
+    background: #f0fdfa; border: 2px dashed var(--primary); border-radius: 10px;
+    cursor: pointer; color: var(--primary); font-weight: 500; font-size: 0.95rem;
+    transition: all 0.2s ease;
 }
-.file-input-wrapper label:hover { border-color: var(--primary); background: #eff6ff; }
+.file-input-wrapper label i { font-size: 1.3rem; }
+.file-input-wrapper label:hover { background: #ccfbf1; border-color: #0d9488; box-shadow: 0 2px 8px rgba(14,106,111,0.12); }
 
 .process-btn {
     background: var(--primary); color: white; border: none; padding: 0 24px;
