@@ -6,9 +6,16 @@
     <button class="sub-tab-btn" onclick="openSubTab('PrivacyFilter','pf-sub-api',this)">
         <i class="fas fa-code"></i> API Access
     </button>
-    <button class="sub-tab-btn" onclick="openSubTab('PrivacyFilter','pf-sub-docs',this)">
-        <i class="fas fa-book"></i> Docs
+    <button class="sub-tab-btn" onclick="openSubTab('PrivacyFilter','pf-sub-runlocally',this)">
+        <i class="fas fa-download"></i> Run Locally
     </button>
+    <button class="sub-tab-btn" onclick="openSubTab('PrivacyFilter','pf-sub-docs',this)">
+        <i class="fas fa-book"></i> User Guide
+    </button>
+    <button class="sub-tab-btn" onclick="openSubTab('PrivacyFilter','pf-sub-team',this)">
+        <i class="fas fa-users"></i> Team
+    </button>
+    <div class="ai-badge ai-badge-off" id="pfAiBadge" style="margin-left:auto;margin-bottom:0;"><span class="ai-badge-dot"></span> <span id="pfAiText">Checking...</span></div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
@@ -21,11 +28,11 @@
         <h2><i class="fas fa-user-shield" style="color:var(--primary)"></i> Privacy Filter</h2>
         <p>De-identify medical documents using AI-powered PII detection.</p>
     </div>
-    <div class="tab-header-logos">
+    <!-- <div class="tab-header-logos">
         <img src="assets/tanuh.png" alt="Tanuh Logo" class="logo">
         <img src="assets/MoE_Logo.svg" alt="Ministry of Education Logo" class="logo">
         <img src="assets/IISc_Logo.png" alt="IISc Logo" class="logo">
-    </div>
+    </div> -->
 </div>
 
 <div class="info-notes" style="margin-bottom: 20px; padding: 15px; border-left: 4px solid #14868C; background-color: #f0fdfa; border-radius: 6px;">
@@ -78,12 +85,12 @@
             <button id="pfDlOriginal" onclick="PF_downloadFile('original')" class="pf-dl-btn pf-dl-btn-original" disabled>
                 <i class="fas fa-download"></i>
                 <span class="pf-dl-btn-label">Download Original</span>
-                <span class="pf-dl-btn-sub" id="pfDlOriginalSub">Processing...</span>
+                <!-- <span class="pf-dl-btn-sub" id="pfDlOriginalSub">Processing...</span> -->
             </button>
             <button id="pfDlRedacted" onclick="PF_downloadFile('redacted')" class="pf-dl-btn pf-dl-btn-redacted" disabled>
                 <i class="fas fa-file-download"></i>
                 <span class="pf-dl-btn-label">Download Redacted</span>
-                <span class="pf-dl-btn-sub" id="pfDlRedactedSub">Processing...</span>
+                <!-- <span class="pf-dl-btn-sub" id="pfDlRedactedSub">Processing...</span> -->
             </button>
         </div>
 
@@ -156,7 +163,7 @@
         <span>Get a Demo Token</span>
         <span class="pf-demo-token-badge">FREE</span>
     </div>
-    <p style="font-size:0.88rem;color:#64748b;margin:0 0 6px;">Demo tokens are valid for <strong>7 days</strong>. Pass as: <code>Authorization: Bearer &lt;token&gt;</code></p>
+    <p style="font-size:0.88rem;color:#64748b;margin:0 0 6px;">Demo tokens are valid for <strong>1 day</strong>. Pass as: <code>Authorization: Bearer &lt;token&gt;</code></p>
     <form id="pfApiTokenForm" class="pf-demo-token-form" autocomplete="off" novalidate>
         <div class="pf-demo-token-fields">
             <div class="pf-demo-token-field">
@@ -201,7 +208,7 @@
             <tr><td><span class="api-method get">GET</span></td><td><code>/api/supported-types</code></td><td>List of accepted file extensions</td></tr>
             <tr><td><span class="api-method post">POST</span></td><td><code>/api/redact</code></td><td>Multipart upload, returns detected entities + redacted file URL</td></tr>
             <tr><td><span class="api-method get">GET</span></td><td><code>/api/files/{kind}/{key}</code></td><td>Download originals or redacted outputs</td></tr>
-            <tr><td><span class="api-method post">POST</span></td><td><code>/api/demo-token</code></td><td>Request a 7-day demo JWT</td></tr>
+            <tr><td><span class="api-method post">POST</span></td><td><code>/api/demo-token</code></td><td>Request a 1-day demo JWT</td></tr>
             <tr><td><span class="api-method get">GET</span></td><td><code>/api/stats</code></td><td>Service usage statistics</td></tr>
         </tbody>
     </table>
@@ -213,12 +220,12 @@
 <div class="api-section-box">
     <h4 style="margin:0 0 8px; font-size:0.9rem; color:var(--text-dark);">curl</h4>
     <div class="api-code-block">
-        <pre style="margin:0; white-space:pre-wrap;">TOKEN=$(curl -s -X POST https://privacy-filter.tanuh.org/api/demo-token \
+        <pre style="margin:0; white-space:pre-wrap;">TOKEN=$(curl -s -X POST https://dpi-dev.tanuh.ai/privacy-filter/api/demo-token \
   -H "Content-Type: application/json" \
   -d '{"name":"Your Name","email":"you@example.com"}' \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
 
-curl -X POST https://privacy-filter.tanuh.org/api/redact \
+curl -X POST https://dpi-dev.tanuh.ai/privacy-filter/api/redact \
   -H "Authorization: Bearer $TOKEN" \
   -F "file=@/path/to/document.pdf"</pre>
         <button class="btn-copy" onclick="copyCodeBlock(this)">Copy</button>
@@ -231,14 +238,14 @@ curl -X POST https://privacy-filter.tanuh.org/api/redact \
         <pre style="margin:0; white-space:pre-wrap;">import requests
 
 resp = requests.post(
-    "https://privacy-filter.tanuh.org/api/demo-token",
+    "https://dpi-dev.tanuh.ai/privacy-filter/api/demo-token",
     json={"name": "Your Name", "email": "you@example.com"},
 )
 token = resp.json()["access_token"]
 
 with open("document.pdf", "rb") as f:
     r = requests.post(
-        "https://privacy-filter.tanuh.org/api/redact",
+        "https://dpi-dev.tanuh.ai/privacy-filter/api/redact",
         headers={"Authorization": f"Bearer {token}"},
         files={"file": ("document.pdf", f, "application/pdf")},
         timeout=600,
@@ -270,87 +277,448 @@ print(r.json()["entity_counts"])</pre>
 </div><!-- /pf-sub-api -->
 
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- SUB: Run Locally -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div id="pf-sub-runlocally" class="sub-content" style="display:none">
+
+<div class="tab-header">
+    <div class="tab-header-text">
+        <h2><i class="fas fa-download" style="color:var(--primary)"></i> Run Locally (Offline Mode)</h2>
+        <p>Download a lightweight executable for your OS. On first launch it automatically downloads the AI models (~500 MB one-time). After that, everything runs fully offline on your machine.</p>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 25px 0;">
+    <a href="/downloads/PrivacyFilterApp-ubuntu-latest.zip" download style="text-decoration:none; background:#fff; border:2px solid #e2e8f0; border-radius:12px; padding:25px; text-align:center; transition: border-color 0.2s, box-shadow 0.2s;" onmouseover="this.style.borderColor='#14868C'; this.style.boxShadow='0 4px 12px rgba(20,134,140,0.15)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
+        <i class="fab fa-linux" style="font-size:3rem; color:#14868C; margin-bottom:12px;"></i>
+        <h3 style="margin:0 0 6px 0; color:#0f172a;">Linux x86_64</h3>
+        <p style="margin:0; color:#64748b; font-size:14px;">Binary</p>
+    </a>
+    <a href="/downloads/PrivacyFilterApp-ubuntu-24.04-arm.zip" download style="text-decoration:none; background:#fff; border:2px solid #e2e8f0; border-radius:12px; padding:25px; text-align:center; transition: border-color 0.2s, box-shadow 0.2s;" onmouseover="this.style.borderColor='#14868C'; this.style.boxShadow='0 4px 12px rgba(20,134,140,0.15)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
+        <i class="fab fa-linux" style="font-size:3rem; color:#14868C; margin-bottom:12px;"></i>
+        <h3 style="margin:0 0 6px 0; color:#0f172a;">Linux ARM64</h3>
+        <p style="margin:0; color:#64748b; font-size:14px;">Binary</p>
+    </a>
+    <a href="/downloads/PrivacyFilterApp-windows-latest.zip" download style="text-decoration:none; background:#fff; border:2px solid #e2e8f0; border-radius:12px; padding:25px; text-align:center; transition: border-color 0.2s, box-shadow 0.2s;" onmouseover="this.style.borderColor='#14868C'; this.style.boxShadow='0 4px 12px rgba(20,134,140,0.15)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
+        <i class="fab fa-windows" style="font-size:3rem; color:#14868C; margin-bottom:12px;"></i>
+        <h3 style="margin:0 0 6px 0; color:#0f172a;">Windows</h3>
+        <p style="margin:0; color:#64748b; font-size:14px;">Portable EXE</p>
+    </a>
+    <a href="/downloads/PrivacyFilterApp-macos-latest.zip" download style="text-decoration:none; background:#fff; border:2px solid #e2e8f0; border-radius:12px; padding:25px; text-align:center; transition: border-color 0.2s, box-shadow 0.2s;" onmouseover="this.style.borderColor='#14868C'; this.style.boxShadow='0 4px 12px rgba(20,134,140,0.15)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
+        <i class="fab fa-apple" style="font-size:3rem; color:#14868C; margin-bottom:12px;"></i>
+        <h3 style="margin:0 0 6px 0; color:#0f172a;">macOS</h3>
+        <p style="margin:0; color:#64748b; font-size:14px;">Binary</p>
+    </a>
+</div>
+
+<div style="background:#fff; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1); padding:25px; margin:20px 0;">
+    <h3 style="margin-bottom:20px;">Setup Steps (All Platforms)</h3>
+
+    <div style="margin-bottom:20px; padding:15px; border-left:4px solid #14868C; background:#f0fdfa; border-radius:0 6px 6px 0;">
+        <h4 style="margin:0 0 8px 0; color:#0f766e;">1. Download Executable</h4>
+        <p style="margin:0; color:#0f766e; font-size:14px;">
+            Download the lightweight binary for your OS from the links above.
+        </p>
+    </div>
+
+    <div style="margin-bottom:20px; padding:15px; border-left:4px solid #14868C; background:#f0fdfa; border-radius:0 6px 6px 0;">
+        <h4 style="margin:0 0 8px 0; color:#0f766e;">2. Unzip &amp; Make Executable</h4>
+        <p style="margin:0; color:#0f766e; font-size:14px;">
+            Extract the ZIP file. On Linux/Mac run: <code style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">chmod +x PrivacyFilterApp</code>
+        </p>
+    </div>
+
+    <div style="margin-bottom:20px; padding:15px; border-left:4px solid #14868C; background:#f0fdfa; border-radius:0 6px 6px 0;">
+        <h4 style="margin:0 0 8px 0; color:#0f766e;">3. Launch the App (First Run — Downloads Models)</h4>
+        <p style="margin:0 0 8px 0; color:#0f766e; font-size:14px;">
+            Double-click the executable and click <strong>Start Server</strong>. On the first run, the app automatically downloads two AI models from HuggingFace (~500 MB total). This requires an internet connection once.
+        </p>
+        <p style="margin:0; color:#64748b; font-size:13px;">
+            Models: <code style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">openai/privacy-filter</code> + <code style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">dslim/bert-base-NER</code> — cached at <code style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">~/.privacy_filter/models/</code>
+        </p>
+    </div>
+
+    <div style="margin-bottom:20px; padding:15px; border-left:4px solid #14868C; background:#f0fdfa; border-radius:0 6px 6px 0;">
+        <h4 style="margin:0 0 8px 0; color:#0f766e;">4. Open Browser</h4>
+        <p style="margin:0; color:#0f766e; font-size:14px;">
+            Once models are loaded, click "Open Browser" to access the full Privacy Filter interface at <code style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">http://localhost:8003</code>.
+        </p>
+    </div>
+
+    <div style="margin-bottom:20px; padding:15px; border-left:4px solid #14868C; background:#f0fdfa; border-radius:0 6px 6px 0;">
+        <h4 style="margin:0 0 8px 0; color:#0f766e;">5. Upload &amp; Redact (Fully Offline)</h4>
+        <p style="margin:0; color:#0f766e; font-size:14px;">
+            Upload any supported document (PDF, DOCX, images, DICOM, text). All subsequent runs are completely offline — no internet needed.
+        </p>
+    </div>
+
+    <div style="padding:12px 15px; background:#fef3c7; border-left:4px solid #f59e0b; border-radius:0 6px 6px 0;">
+        <p style="margin:0; color:#92400e; font-size:14px;">
+            <strong><i class="fas fa-shield-alt"></i> Privacy:</strong> All data stays on your machine. Models are downloaded once from HuggingFace and cached locally. After the first run, zero internet or cloud API calls are made.
+        </p>
+    </div>
+</div>
+
+<div style="text-align:center; margin:20px 0;">
+    <a href="javascript:void(0)" onclick="openSubTab('PrivacyFilter','pf-sub-docs',document.querySelector('#PrivacyFilter .sub-tab-btn:nth-child(4)')); setTimeout(function(){ guideNav('pf-guide-container','pg-runlocally',document.querySelector('#pf-guide-container .guide-sidebar a[onclick*=pg-runlocally]')); },100);" style="display:inline-flex; align-items:center; gap:8px; padding:10px 24px; background:#14868C; color:#fff; border-radius:8px; text-decoration:none; font-size:14px; font-weight:600; transition:background 0.2s;" onmouseover="this.style.background='#0E6C71'" onmouseout="this.style.background='#14868C'">
+        <i class="fas fa-book-open"></i> More Details in User Guide
+    </a>
+</div>
+
+</div><!-- /pf-sub-runlocally -->
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
 <!-- SUB: Docs -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <div id="pf-sub-docs" class="sub-content" style="display:none">
 
 <div class="tab-header">
     <div class="tab-header-text">
-        <h2><i class="fas fa-book" style="color:var(--primary)"></i> Privacy Filter Documentation</h2>
-        <p>Technical overview of the Privacy Filter service architecture and capabilities.</p>
+        <h2><i class="fas fa-book" style="color:var(--primary)"></i> Privacy Filter User Guide</h2>
+        <p>Complete guide for the Privacy Filter — AI-powered PII detection, redaction pipeline, supported formats, and API integration.</p>
     </div>
 </div>
 
-<div class="api-section-box">
-    <h3 style="margin:0 0 12px; color:var(--primary);">Overview</h3>
-    <p style="font-size:0.9rem; color:#334155; line-height:1.7;">
-        The Privacy Filter is an AI-powered document de-identification service that detects and redacts Personally Identifiable Information (PII) and Protected Health Information (PHI) from clinical and administrative documents. It uses a multi-layered detection approach combining transformer-based NER models with deterministic rule-based detectors.
-    </p>
-</div>
+<div id="pf-guide-container">
+<div class="guide-layout">
 
-<div class="api-section-box">
-    <h3 style="margin:0 0 12px; color:var(--primary);">Architecture</h3>
-    <ul style="padding-left:18px; font-size:0.88rem; color:#334155; line-height:1.8;">
-        <li><strong>Primary Model:</strong> <code>openai/privacy-filter</code> (HuggingFace token-classification) — detects personal PII including names, dates, identification numbers</li>
-        <li><strong>Secondary NER Model:</strong> <code>dslim/bert-base-NER</code> — detects organisations, locations, and named entities</li>
-        <li><strong>Rule-Based Detectors:</strong> Deterministic regex patterns for tax IDs, IFSC codes, IBAN, SSN, EIN, Aadhaar numbers, emails, URLs, and labeled fields</li>
-        <li><strong>OCR Engine:</strong> Scanned PDFs are OCR'd at 200 DPI before detection</li>
-        <li><strong>Redaction:</strong> Detected spans are replaced with entity-type labels (e.g., [PERSON], [EMAIL]) in the output document</li>
-    </ul>
-</div>
+    <nav class="guide-sidebar">
+        <div class="guide-sidebar-title">Getting Started</div>
+        <a class="active" onclick="guideNav('pf-guide-container','pg-video',this)"><i class="fas fa-play-circle"></i> Video Demo</a>
+        <a onclick="guideNav('pf-guide-container','pg-overview',this)"><i class="fas fa-info-circle"></i> Overview</a>
+        <a onclick="guideNav('pf-guide-container','pg-howto',this)"><i class="fas fa-list-ol"></i> How to Use</a>
+        <div class="guide-sidebar-title">Technical</div>
+        <a onclick="guideNav('pf-guide-container','pg-pipeline',this)"><i class="fas fa-project-diagram"></i> Detection Pipeline</a>
+        <a onclick="guideNav('pf-guide-container','pg-formats',this)"><i class="fas fa-file-alt"></i> Supported Formats</a>
+        <a onclick="guideNav('pf-guide-container','pg-privacy',this)"><i class="fas fa-shield-alt"></i> Privacy &amp; Data</a>
+        <div class="guide-sidebar-title">Integrate</div>
+        <a onclick="guideNav('pf-guide-container','pg-runlocally',this)"><i class="fas fa-download"></i> Run Locally</a>
+        <a onclick="guideNav('pf-guide-container','pg-api',this)"><i class="fas fa-code"></i> API Reference</a>
+        <a onclick="guideNav('pf-guide-container','pg-config',this)"><i class="fas fa-cog"></i> Configuration</a>
+        <a onclick="guideNav('pf-guide-container','pg-source',this)"><i class="fab fa-github"></i> Source Code</a>
+    </nav>
 
-<div class="api-section-box">
-    <h3 style="margin:0 0 12px; color:var(--primary);">Supported Input Formats</h3>
-    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:10px;">
-        <div style="background:#f0fdfa; padding:10px 14px; border-radius:8px; text-align:center;">
-            <i class="fas fa-file-pdf" style="color:var(--primary); font-size:1.5rem;"></i>
-            <div style="font-size:0.82rem; color:#334155; margin-top:4px;">PDF</div>
+    <div class="guide-content">
+
+        <!-- Video Demo -->
+        <div id="pg-video" class="guide-section active">
+            <h2>Video Demonstration</h2>
+            <p>Watch a walkthrough of the Privacy Filter in action — upload a document, detect PII entities, and download the redacted output.</p>
+            <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.12);">
+                <iframe src="https://www.youtube.com/embed/1XzeHiMFjwc" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+            </div>
+            <div class="guide-callout guide-callout-info">
+                <strong>What you will see</strong>
+                Upload a clinical or administrative document, watch the AI detect personal information (names, IDs, dates, addresses), and download the redacted version — typically in under 30 seconds.
+            </div>
         </div>
-        <div style="background:#f0fdfa; padding:10px 14px; border-radius:8px; text-align:center;">
-            <i class="fas fa-file-word" style="color:var(--primary); font-size:1.5rem;"></i>
-            <div style="font-size:0.82rem; color:#334155; margin-top:4px;">DOCX</div>
+
+        <!-- Overview -->
+        <div id="pg-overview" class="guide-section">
+            <div class="guide-hero">
+                <span style="display:inline-block;background:var(--primary);color:#fff;font-size:0.72rem;font-weight:600;padding:2px 10px;border-radius:20px;margin-bottom:10px;">CPU-Based &mdash; No GPU Required</span>
+                <h2>Privacy Filter</h2>
+                <p>AI-powered document de-identification service that detects and redacts Personally Identifiable Information (PII) and Protected Health Information (PHI) from clinical and administrative documents.</p>
+            </div>
+
+            <h3>Key Capabilities</h3>
+            <table>
+                <thead><tr><th>Feature</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td>AI-Powered Detection</td><td>Transformer-based NER models identify names, dates, IDs, and medical record numbers</td></tr>
+                    <tr><td>Rule-Based Detectors</td><td>Regex patterns for Aadhaar, PAN, IFSC, SSN, emails, phone numbers, and more</td></tr>
+                    <tr><td>Multi-Format Support</td><td>PDF, DOCX, images (PNG/JPG/TIFF), plain text, CSV, Markdown, and DICOM files</td></tr>
+                    <tr><td>OCR Integration</td><td>Scanned PDFs are automatically OCR'd at 200 DPI before PII detection</td></tr>
+                    <tr><td>On-Premises Processing</td><td>All data stays on the server &mdash; no external API calls, fully DPDP Act compliant</td></tr>
+                    <tr><td>Fast Processing</td><td>Typically 10&ndash;30 seconds per document on CPU</td></tr>
+                </tbody>
+            </table>
         </div>
-        <div style="background:#f0fdfa; padding:10px 14px; border-radius:8px; text-align:center;">
-            <i class="fas fa-file-image" style="color:var(--primary); font-size:1.5rem;"></i>
-            <div style="font-size:0.82rem; color:#334155; margin-top:4px;">PNG / JPG / TIFF</div>
+
+        <!-- How to Use -->
+        <div id="pg-howto" class="guide-section">
+            <h2>How to Use</h2>
+            <p>Follow these three steps to de-identify a document.</p>
+
+            <div class="guide-pipeline">
+                <div class="guide-pipeline-step">
+                    <h4>1. Upload Document</h4>
+                    <p>Navigate to the Privacy Filter tab and click <strong>"Choose document to redact..."</strong>. Upload a PDF, DOCX, image, or text file. Maximum file size is 25 MB.</p>
+                </div>
+                <div class="guide-pipeline-step">
+                    <h4>2. Redact Document</h4>
+                    <p>Click <strong>"Redact Document"</strong>. The AI will scan for personal information using transformer models and regex rules. Processing takes 10&ndash;30 seconds.</p>
+                </div>
+                <div class="guide-pipeline-step">
+                    <h4>3. Review &amp; Download</h4>
+                    <p>Review detected entities in the results panel. The service replaces PII with type labels (e.g., [PERSON], [EMAIL], [AADHAAR]). Download the original and redacted versions.</p>
+                </div>
+            </div>
+
+            <div class="guide-callout guide-callout-warning">
+                <strong>Accuracy Notice</strong>
+                AI detections may be incomplete or incorrect. Please review every output before use in production. The system prioritizes recall (catching more PII) over precision.
+            </div>
         </div>
-        <div style="background:#f0fdfa; padding:10px 14px; border-radius:8px; text-align:center;">
-            <i class="fas fa-file-alt" style="color:var(--primary); font-size:1.5rem;"></i>
-            <div style="font-size:0.82rem; color:#334155; margin-top:4px;">TXT / CSV / MD</div>
+
+        <!-- Detection Pipeline -->
+        <div id="pg-pipeline" class="guide-section">
+            <h2>Detection Pipeline</h2>
+            <p>The Privacy Filter uses a three-layer detection pipeline to maximize PII coverage.</p>
+
+            <h3>Layer 1 &mdash; Primary NER</h3>
+            <p>The <code>openai/privacy-filter</code> HuggingFace token-classification model detects personal PII entities: names, dates of birth, ID numbers, addresses, phone numbers, and medical record numbers.</p>
+
+            <h3>Layer 2 &mdash; Secondary NER</h3>
+            <p>The <code>dslim/bert-base-NER</code> model provides additional coverage for organisations, locations, and named entities that the primary model may miss.</p>
+
+            <h3>Layer 3 &mdash; Rule-Based Detectors</h3>
+            <p>Deterministic regex patterns catch structured identifiers:</p>
+            <table>
+                <thead><tr><th>Pattern</th><th>Example</th></tr></thead>
+                <tbody>
+                    <tr><td>Aadhaar Number</td><td>1234 5678 9012</td></tr>
+                    <tr><td>PAN Card</td><td>ABCDE1234F</td></tr>
+                    <tr><td>IFSC Code</td><td>SBIN0001234</td></tr>
+                    <tr><td>SSN / Tax ID</td><td>123-45-6789</td></tr>
+                    <tr><td>Email Address</td><td>user@example.com</td></tr>
+                    <tr><td>Phone Number</td><td>+91 98765 43210</td></tr>
+                    <tr><td>IBAN / EIN</td><td>International bank account numbers</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Processing Flow</h3>
+            <div class="guide-pipeline">
+                <div class="guide-pipeline-step"><h4>1. Upload &amp; Format Detection</h4><p>File type identified. Images and scanned PDFs are routed through OCR.</p></div>
+                <div class="guide-pipeline-step"><h4>2. Text Extraction</h4><p>Text extracted via native parsing (PDF/DOCX) or Tesseract OCR (images/scanned).</p></div>
+                <div class="guide-pipeline-step"><h4>3. NER Inference</h4><p>Both transformer models run in parallel on extracted text.</p></div>
+                <div class="guide-pipeline-step"><h4>4. Rule Scan</h4><p>Regex patterns scan for structured identifiers (Aadhaar, PAN, SSN, etc.).</p></div>
+                <div class="guide-pipeline-step"><h4>5. Entity Merging</h4><p>Overlapping detections from all layers merged and deduplicated.</p></div>
+                <div class="guide-pipeline-step"><h4>6. Redacted Output</h4><p>PII replaced with type labels. Redacted file generated in original format.</p></div>
+            </div>
         </div>
-        <div style="background:#f0fdfa; padding:10px 14px; border-radius:8px; text-align:center;">
-            <i class="fas fa-x-ray" style="color:var(--primary); font-size:1.5rem;"></i>
-            <div style="font-size:0.82rem; color:#334155; margin-top:4px;">DICOM</div>
+
+        <!-- Supported Formats -->
+        <div id="pg-formats" class="guide-section">
+            <h2>Supported Input Formats</h2>
+            <p>The Privacy Filter accepts a wide range of document formats for PII detection and redaction.</p>
+
+            <table>
+                <thead><tr><th>Format</th><th>Extensions</th><th>Notes</th></tr></thead>
+                <tbody>
+                    <tr><td>PDF</td><td><code>.pdf</code></td><td>Digital and scanned (auto-OCR at 200 DPI)</td></tr>
+                    <tr><td>Word Documents</td><td><code>.docx</code></td><td>Text and tables extracted</td></tr>
+                    <tr><td>Images</td><td><code>.png</code>, <code>.jpg</code>, <code>.jpeg</code>, <code>.tif</code>, <code>.tiff</code></td><td>OCR applied automatically</td></tr>
+                    <tr><td>Plain Text</td><td><code>.txt</code>, <code>.md</code>, <code>.log</code></td><td>Direct text processing</td></tr>
+                    <tr><td>Structured Data</td><td><code>.csv</code></td><td>Row-by-row PII detection</td></tr>
+                    <tr><td>Medical Imaging</td><td><code>.dcm</code>, <code>.dicom</code></td><td>DICOM metadata + embedded text</td></tr>
+                </tbody>
+            </table>
         </div>
+
+        <!-- Privacy & Data -->
+        <div id="pg-privacy" class="guide-section">
+            <h2>Privacy &amp; Data Handling</h2>
+            <p>The Privacy Filter is designed with data minimization as a core principle.</p>
+
+            <ul>
+                <li><strong>On-premises only</strong> &mdash; all processing happens locally, no data leaves the server</li>
+                <li><strong>No storage</strong> &mdash; uploaded files are deleted immediately after processing</li>
+                <li><strong>No logging</strong> &mdash; no document content is logged or persisted to disk</li>
+                <li><strong>Anonymous tracking</strong> &mdash; visitor IPs stored as one-way hashes only</li>
+                <li><strong>DPDP Act compliant</strong> &mdash; meets India's data protection requirements for data minimization</li>
+            </ul>
+
+            <div class="guide-callout guide-callout-success">
+                <strong>No External API Calls</strong>
+                Unlike cloud-based solutions, the Privacy Filter runs entirely on-premises. Your documents never leave your infrastructure. Both NER models run locally on CPU.
+            </div>
+        </div>
+
+        <!-- Run Locally -->
+        <div id="pg-runlocally" class="guide-section">
+            <h2>Run Locally (Offline Mode)</h2>
+            <p>Download a lightweight executable for your operating system. No Python, no pip, no cloud APIs needed. On the first launch, the app automatically downloads the required AI models (~500 MB one-time). After that, all PII detection and redaction happens entirely on your machine without any internet connection.</p>
+
+            <div class="guide-callout guide-callout-info">
+                <strong>AI Models — One-Time Download</strong>
+                The app uses two models: <code>openai/privacy-filter</code> (PII detection) and <code>dslim/bert-base-NER</code> (auxiliary NER). On first launch, both are downloaded from HuggingFace (~500 MB total) and cached at <code>~/.privacy_filter/models/</code>. Subsequent launches load from cache in ~30 seconds — no internet required.
+            </div>
+
+            <h3>Download</h3>
+            <div class="guide-card-grid">
+                <a href="/downloads/PrivacyFilterApp-ubuntu-latest.zip" download class="guide-card" style="text-decoration:none;text-align:center;">
+                    <div class="card-icon"><i class="fab fa-linux"></i></div>
+                    <h4>Linux x86_64</h4>
+                    <p>Binary</p>
+                </a>
+                <a href="/downloads/PrivacyFilterApp-ubuntu-24.04-arm.zip" download class="guide-card" style="text-decoration:none;text-align:center;">
+                    <div class="card-icon"><i class="fab fa-linux"></i></div>
+                    <h4>Linux ARM64</h4>
+                    <p>Binary</p>
+                </a>
+                <a href="/downloads/PrivacyFilterApp-windows-latest.zip" download class="guide-card" style="text-decoration:none;text-align:center;">
+                    <div class="card-icon"><i class="fab fa-windows"></i></div>
+                    <h4>Windows</h4>
+                    <p>Portable EXE</p>
+                </a>
+                <a href="/downloads/PrivacyFilterApp-macos-latest.zip" download class="guide-card" style="text-decoration:none;text-align:center;">
+                    <div class="card-icon"><i class="fab fa-apple"></i></div>
+                    <h4>macOS</h4>
+                    <p>Binary</p>
+                </a>
+            </div>
+
+            <h3>Setup Steps</h3>
+            <div class="guide-pipeline">
+                <div class="guide-pipeline-step"><h4>1. Download Executable</h4><p>Download the lightweight binary for your OS from the links above.</p></div>
+                <div class="guide-pipeline-step"><h4>2. Unzip &amp; Make Executable</h4><p>Extract the ZIP file. On Linux/Mac run: <code>chmod +x PrivacyFilterApp</code></p></div>
+                <div class="guide-pipeline-step"><h4>3. First Launch — Model Download</h4><p>Double-click the executable and click <strong>Start Server</strong>. On first run, the app downloads two AI models from HuggingFace (~500 MB). This requires internet once. Models are cached at <code>~/.privacy_filter/models/</code> for all future runs.</p></div>
+                <div class="guide-pipeline-step"><h4>4. Open Browser</h4><p>Once models are loaded, click "Open Browser" to access the full Privacy Filter interface at <code>http://localhost:8003</code>.</p></div>
+                <div class="guide-pipeline-step"><h4>5. Upload &amp; Redact (Fully Offline)</h4><p>Upload any supported document (PDF, DOCX, images, DICOM, text). All subsequent runs are completely offline — no internet needed.</p></div>
+            </div>
+
+            <h3>Supported Formats</h3>
+            <table>
+                <thead><tr><th>Format</th><th>Extensions</th><th>Notes</th></tr></thead>
+                <tbody>
+                    <tr><td>PDF</td><td>.pdf</td><td>Native text + OCR fallback for scanned pages</td></tr>
+                    <tr><td>Word</td><td>.docx</td><td>Paragraph text extraction</td></tr>
+                    <tr><td>Images</td><td>.png, .jpg, .jpeg, .tif, .tiff</td><td>OCR via Tesseract (bundled)</td></tr>
+                    <tr><td>DICOM</td><td>.dcm, .dicom</td><td>Medical imaging metadata redaction</td></tr>
+                    <tr><td>Text</td><td>.txt, .csv, .md, .log</td><td>Direct text processing</td></tr>
+                </tbody>
+            </table>
+
+            <div class="guide-callout guide-callout-success">
+                <strong>About Run Locally — Secure Local Execution</strong>
+                This feature enables running the Privacy Filter completely locally. Models are downloaded once from HuggingFace on first launch and cached on your machine. After that, all processing occurs within your local environment with zero external connections, ensuring data privacy and security. The service operates independently, making it ideal for confidential or sensitive data handling. For those interested in contributing, the source code is publicly available and contributions are welcome.
+            </div>
+        </div>
+
+        <!-- API Reference -->
+        <div id="pg-api" class="guide-section">
+            <h2>API Reference</h2>
+            <p>Integrate the Privacy Filter into your own pipelines using the REST API.</p>
+
+            <div class="guide-callout guide-callout-warning">
+                <strong>Test version only</strong>
+                This endpoint is intended for evaluation. Do not send production PHI/PII without contacting TANUH for a hardened deployment.
+            </div>
+
+            <h3>Endpoints</h3>
+            <table>
+                <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>GET</strong></td><td><code>/api/health</code></td><td>Liveness + model status</td></tr>
+                    <tr><td><strong>GET</strong></td><td><code>/api/supported-types</code></td><td>List of accepted file extensions</td></tr>
+                    <tr><td><strong>POST</strong></td><td><code>/api/demo-token</code></td><td>Request a 1-day demo JWT</td></tr>
+                    <tr><td><strong>POST</strong></td><td><code>/api/redact</code></td><td>Upload file, returns detected entities + redacted file URL</td></tr>
+                    <tr><td><strong>GET</strong></td><td><code>/api/files/{kind}/{key}</code></td><td>Download originals or redacted outputs</td></tr>
+                    <tr><td><strong>GET</strong></td><td><code>/api/stats</code></td><td>Service usage statistics</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Quick Start (curl)</h3>
+            <pre><code># 1. Get a demo token
+TOKEN=$(curl -s -X POST https://dpi-dev.tanuh.ai/privacy-filter/api/demo-token \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Your Name","email":"you@example.com"}' \
+  | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
+
+# 2. Redact a document
+curl -X POST https://dpi-dev.tanuh.ai/privacy-filter/api/redact \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@/path/to/document.pdf"</code></pre>
+
+            <h3>Python Example</h3>
+            <pre><code>import requests
+
+resp = requests.post(
+    "https://dpi-dev.tanuh.ai/privacy-filter/api/demo-token",
+    json={"name": "Your Name", "email": "you@example.com"},
+)
+token = resp.json()["access_token"]
+
+with open("document.pdf", "rb") as f:
+    r = requests.post(
+        "https://dpi-dev.tanuh.ai/privacy-filter/api/redact",
+        headers={"Authorization": f"Bearer {token}"},
+        files={"file": ("document.pdf", f, "application/pdf")},
+        timeout=600,
+    )
+print(r.json()["entity_counts"])</code></pre>
+        </div>
+
+        <!-- Configuration -->
+        <div id="pg-config" class="guide-section">
+            <h2>Configuration</h2>
+            <p>Environment variables for deploying the Privacy Filter service.</p>
+
+            <table>
+                <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>STORAGE_BACKEND</code></td><td>local</td><td>Storage backend (local filesystem)</td></tr>
+                    <tr><td><code>LOCAL_DATA_DIR</code></td><td>/tmp/data</td><td>Directory for temporary file storage</td></tr>
+                    <tr><td><code>KEYCLOAK_AUTH_ENABLED</code></td><td>false</td><td>Enable/disable JWT authentication</td></tr>
+                    <tr><td><code>SECRET_KEY</code></td><td>&mdash;</td><td>JWT signing secret for demo tokens</td></tr>
+                    <tr><td><code>EXTRA_REDACTION_KEYWORDS</code></td><td>&mdash;</td><td>Additional keywords to always redact</td></tr>
+                    <tr><td><code>DISABLED_RULE_DETECTORS</code></td><td>&mdash;</td><td>Comma-separated rule detectors to skip</td></tr>
+                    <tr><td><code>PRIVACY_FILTER_OCR_DPI</code></td><td>200</td><td>OCR resolution for scanned documents</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Docker Deployment</h3>
+            <pre><code># Standalone
+docker build -t privacy-filter -f privacy_filter/Dockerfile .
+docker run -p 8003:8003 -e KEYCLOAK_AUTH_ENABLED=false privacy-filter
+
+# With Docker Compose
+docker compose up -d privacy-filter</code></pre>
+        </div>
+
+        <!-- Source Code -->
+        <div id="pg-source" class="guide-section">
+            <h2>Source Code</h2>
+            <p>The Privacy Filter is open-source and available on GitHub.</p>
+            <div class="guide-card-grid">
+                <a href="https://github.com/tanuh-bcd/privacy-filter-app" target="_blank" class="guide-card" style="text-decoration:none;">
+                    <div class="card-icon"><i class="fab fa-github"></i></div>
+                    <h4>Privacy Filter</h4>
+                    <p>NER-based PII detection and redaction service</p>
+                </a>
+                <a href="https://github.com/tanuh-bcd/TANUH-DPI" target="_blank" class="guide-card" style="text-decoration:none;">
+                    <div class="card-icon"><i class="fab fa-github"></i></div>
+                    <h4>DPI Portal</h4>
+                    <p>Frontend application and Docker orchestration</p>
+                </a>
+            </div>
+        </div>
+
     </div>
 </div>
-
-<div class="api-section-box">
-    <h3 style="margin:0 0 12px; color:var(--primary);">Privacy &amp; Data Handling</h3>
-    <ul style="padding-left:18px; font-size:0.88rem; color:#334155; line-height:1.8;">
-        <li>All processing happens on-premises — no data leaves the server</li>
-        <li>Uploaded files are deleted after processing</li>
-        <li>Visitor IPs are stored as one-way hashes only</li>
-        <li>No document content is logged or persisted</li>
-        <li>Compliant with DPDP Act requirements for data minimization</li>
-    </ul>
-</div>
-
-<div class="api-section-box">
-    <h3 style="margin:0 0 12px; color:var(--primary);">Configuration</h3>
-    <p style="font-size:0.88rem; color:#334155; margin-bottom:10px;">Self-hosted deployments can be tuned via environment variables:</p>
-    <table class="api-endpoint-table">
-        <thead>
-            <tr><th>Variable</th><th>Description</th></tr>
-        </thead>
-        <tbody>
-            <tr><td><code>EXTRA_REDACTION_KEYWORDS</code></td><td>Additional keywords to always redact</td></tr>
-            <tr><td><code>DISABLED_RULE_DETECTORS</code></td><td>Comma-separated list of rule detectors to skip</td></tr>
-            <tr><td><code>ENABLE_NER_MODEL</code></td><td>Enable/disable secondary NER model</td></tr>
-            <tr><td><code>PRIVACY_FILTER_OCR_DPI</code></td><td>OCR resolution for scanned PDFs (default: 200)</td></tr>
-            <tr><td><code>KEYCLOAK_AUTH_ENABLED</code></td><td>Enable/disable JWT authentication</td></tr>
-        </tbody>
-    </table>
 </div>
 
 </div><!-- /pf-sub-docs -->
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- SUB: Team -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div id="pf-sub-team" class="sub-content" style="display:none">
+
+    <div class="tab-header">
+    <div class="tab-header-text">
+        <h2><i class="fas fa-users" style="color:var(--primary)"></i> Privacy Filter Team</h2>
+        <p>The team behind the Privacy Filter system.</p>
+    </div>
+</div>
+
+<div style="padding:20px;background:white;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);margin:20px 0;">
+    <!-- <h3>Team Members</h3> -->
+    <div class="fg-team-grid">
+        <a href="https://www.linkedin.com/in/ashwin-rajkumar/" target="_blank" style="text-decoration:none;">
+            <div class="fg-team-card"><img src="assets/ashwin.png" alt="Dr. Ashwin RajKumar"><div class="team-name">Dr. Ashwin RajKumar</div><div class="team-role">(Breast Cancer Detection)<br>Program Manager</div><div class="team-org">TANUH AI-CoE</div></div>
+        </a>
+    </div>
+</div>
+</div><!-- /pf-sub-team -->
