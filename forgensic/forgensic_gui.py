@@ -717,6 +717,21 @@ class ForgensicApp(ctk.CTk):
         self._build_header()
         self._build_content()
         self._build_footer()
+        
+        # macOS UI Responsiveness Hack
+        if sys.platform == "darwin":
+            self.after(200, self._mac_focus_hack)
+
+    def _mac_focus_hack(self):
+        """Forces macOS to assign window focus and kickstarts the event loop"""
+        try:
+            self.wm_attributes('-topmost', 1)
+            self.focus_force()
+            self.update_idletasks()
+            self.update()
+            self.wm_attributes('-topmost', 0)
+        except Exception:
+            pass
 
     # ── HEADER ────────────────────────────────────────────────────────────────
     def _build_header(self):
