@@ -98,8 +98,10 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           password: ${{ secrets.VM_PASSWORD }}
+          command_timeout: 5m
           script: |
-            sleep 10
+            echo "Waiting 60s for containers to initialize (Privacy Filter NER model needs ~40s)..."
+            sleep 60
             PASS=true
             for svc in "ABDM API|http://localhost:8000/health" \
                        "NHCX API|http://localhost:8001/health" \
