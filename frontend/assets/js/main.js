@@ -28,7 +28,7 @@
         const pf   = isLocal ? 'http://localhost:8003' : `${window.location.origin}/privacy-filter`;
         checkServiceHealth('clinicalAiBadge', 'clinicalAiText', `${abdm}/health`, 'AI ON', 'AI OFF');
         checkServiceHealth('insuranceAiBadge', 'insuranceAiText', `${nhcx}/health`, 'AI ON', 'AI OFF');
-        checkServiceHealth('pfAiBadge', 'pfAiText', `${pf}/api/health`, 'CPU READY', 'OFFLINE');
+        checkServiceHealth('pfAiBadge', 'pfAiText', `${pf}/api/health`, 'CPU Ready', 'Offline');
     }
 
     // ── Tab Management ──────────────────────────────────────────────────────────
@@ -37,9 +37,6 @@
     async function openTab(evt, tabName) {
         document.querySelectorAll(".tabcontent").forEach(el => el.style.display = "none");
         document.querySelectorAll(".tablinks").forEach(el => el.classList.remove("active"));
-
-        const contentWrap = document.querySelector('.content-container');
-        if (contentWrap) contentWrap.classList.toggle('full-width-home', tabName === 'Home');
 
         const container = document.getElementById(tabName);
         if (container) {
@@ -51,22 +48,12 @@
                 loadedTabs.add(tabName);
             }
 
-            if (tabName === 'Home' && window.initDashboard) window.initDashboard();
+            if (tabName === 'Dashboard' && window.initDashboard) window.initDashboard();
             if (tabName === 'PrivacyFilter' && window.PF_init) window.PF_init();
             if ((tabName === 'PDF2FHIR' || tabName === 'PDF2NHCX' || tabName === 'ForgeryDetection') && window.initApiAccess) {
                 window.initApiAccess();
             }
             checkAllServiceBadges();
-
-            const aiBadgeBar = document.querySelector('.header-ai-bar');
-            if (aiBadgeBar) {
-                aiBadgeBar.style.display = (tabName === 'ForgeryDetection') ? 'none' : '';
-            }
-        }
-
-        // Smoothly scroll back to the top when navigating to a new tab
-        if (evt) {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         try { mixpanel.track('Page View', { 'page_title': tabName }); } catch(e) {}
@@ -77,8 +64,7 @@
         if (!el) return;
         try {
             let fileName = tabId.toLowerCase();
-            if (fileName === 'home') fileName = 'home';
-            else if (fileName === 'pdf2fhir') fileName = 'clinical';
+            if (fileName === 'pdf2fhir') fileName = 'clinical';
             else if (fileName === 'pdf2nhcx') fileName = 'insurance';
             else if (fileName === 'privacyfilter') fileName = 'privacyfilter';
             else if (fileName === 'forgerydetection') fileName = 'forgery';
@@ -180,10 +166,52 @@
 
     // Init
     document.addEventListener('DOMContentLoaded', () => {
-        openTab(null, 'Home');
-        document.getElementById('navHome')?.classList.add('active');
+        openTab(null, 'PDF2FHIR');
+        document.getElementById('navClinical')?.classList.add('active');
         if (window.initDashboard) window.initDashboard();
         setInterval(checkAllServiceBadges, 30000);
     });
+
+    // ── Feedback Submission (shared across all 4 services) ────────────────
+    window.DPI_submitFeedback = async function (btn) {
+        const wrap = btn.closest('.dpi-feedback-form-wrap');
+        if (!wrap) return;
+        const service  = wrap.dataset.service || "Unknown";
+        const nameEl   = wrap.querySelector('.dpi-fb-name');
+        const placeEl  = wrap.querySelector('.dpi-fb-place');
+        const textEl   = wrap.querySelector('.dpi-fb-text');
+        const feedback = (textEl?.value || "").trim();
+        if (!feedback) {
+            window.showToast?.("Missing Feedback", "Please write your feedback before submitting.", "error", 4000);
+            textEl?.focus();
+            return;
+        }
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+        const isLocal = window.location.hostname === 'localhost';
+        const loggerUrl = isLocal ? 'http://localhost:8002' : `${window.location.origin}/session-logger`;
+        try {
+            const r = await fetch(`${loggerUrl}/logs/feedback`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    service, name: (nameEl?.value || "").trim() || "Anonymous",
+                    place: (placeEl?.value || "").trim() || "Anonymous place",
+                    feedback, ip_address: null,
+                }),
+                signal: AbortSignal.timeout(10000),
+            });
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            if (nameEl) nameEl.value = "";
+            if (placeEl) placeEl.value = "";
+            if (textEl) textEl.value = "";
+            window.showToast?.("Thank You!", "Your feedback has been submitted successfully.", "info", 5000);
+        } catch (e) {
+            window.showToast?.("Submission Failed", `Could not submit feedback: ${e.message}`, "error", 5000);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Feedback';
+        }
+    };
 
 })();

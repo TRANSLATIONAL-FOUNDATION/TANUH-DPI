@@ -15,10 +15,14 @@ GET  /api/stats                 → live usage counters
 POST /api/demo-token            → self-service JWT (name + email → signed token)
 POST /api/redact                → multipart upload; returns RedactionResult  [auth required]
 GET  /api/files/{kind}/{key}    → download originals or redacted outputs      [auth required]
+GET  /api/render-pages/{kind}/{key} → render document pages as images for preview
+GET  /api/page-image/{key}/{page_num} → serve a rendered page image
+POST /api/apply-redactions      → apply user-drawn redaction boxes            [auth required]
 """
 from __future__ import annotations
 
 import gc
+import io
 import logging
 import os
 import tempfile
@@ -27,7 +31,7 @@ import uuid
 from collections import Counter
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import httpx
 from dotenv import load_dotenv
@@ -289,6 +293,230 @@ async def download_file(
     if not p.exists():
         raise HTTPException(status_code=404, detail="File not found")
     return FileResponse(p, filename=key.split("__", 1)[-1])
+
+
+# ---------------------------------------------------------------------------
+# Visual preview: render document pages as images
+# ---------------------------------------------------------------------------
+
+_PAGE_RENDER_DIR = Path(tempfile.gettempdir()) / "pf_pages"
+_PAGE_RENDER_DPI = 150
+
+
+def _find_stored_file(kind: str, key: str, storage=None) -> Path | None:
+    """Search all possible locations for a stored file."""
+    if storage is None:
+        storage = get_storage()
+    for tmp_base in ["pf_uploads", "pf_redacted"]:
+        p = Path(tempfile.gettempdir()) / tmp_base / key
+        if p.exists():
+            return p
+    try:
+        p = storage.local_path(kind, key)
+        if p.exists():
+            return p
+    except Exception:
+        pass
+    return None
+
+
+def _render_document_pages(file_path: Path, key: str) -> List[Dict[str, Any]]:
+    """Convert a document to page images. Returns [{page, url, width, height}]."""
+    out_dir = _PAGE_RENDER_DIR / key
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    suffix = file_path.suffix.lower()
+    pages_info: List[Dict[str, Any]] = []
+
+    if suffix == ".pdf":
+        import fitz
+        with fitz.open(file_path) as doc:
+            for i, page in enumerate(doc):
+                zoom = _PAGE_RENDER_DPI / 72.0
+                mat = fitz.Matrix(zoom, zoom)
+                pix = page.get_pixmap(matrix=mat, alpha=False)
+                img_path = out_dir / f"page_{i}.png"
+                pix.save(str(img_path))
+                pages_info.append({"page": i, "url": f"/api/page-image/{key}/{i}", "width": pix.width, "height": pix.height})
+
+    elif suffix in {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp"}:
+        from PIL import Image as PILImage
+        img = PILImage.open(file_path).convert("RGB")
+        img_path = out_dir / "page_0.png"
+        img.save(img_path, "PNG")
+        pages_info.append({"page": 0, "url": f"/api/page-image/{key}/0", "width": img.width, "height": img.height})
+
+    elif suffix in {".dcm", ".dicom"}:
+        import pydicom
+        from PIL import Image as PILImage
+        import numpy as np
+        ds = pydicom.dcmread(str(file_path), force=True)
+        try:
+            arr = ds.pixel_array
+            if arr.ndim == 2:
+                norm = ((arr - arr.min()) / (arr.max() - arr.min() + 1e-9) * 255).astype(np.uint8)
+                img = PILImage.fromarray(norm, "L").convert("RGB")
+            else:
+                img = PILImage.fromarray(arr).convert("RGB")
+            img_path = out_dir / "page_0.png"
+            img.save(img_path, "PNG")
+            pages_info.append({"page": 0, "url": f"/api/page-image/{key}/0", "width": img.width, "height": img.height})
+        except Exception:
+            logger.warning("DICOM has no pixel data for preview")
+
+    elif suffix == ".nii" or str(file_path).lower().endswith(".nii.gz"):
+        try:
+            import nibabel as nib
+            from PIL import Image as PILImage
+            import numpy as np
+            nii = nib.load(str(file_path))
+            data = np.asanyarray(nii.dataobj)
+            if data.ndim >= 3:
+                mid_slice = data[:, :, data.shape[2] // 2]
+            else:
+                mid_slice = data
+            norm = ((mid_slice - mid_slice.min()) / (mid_slice.max() - mid_slice.min() + 1e-9) * 255).astype(np.uint8)
+            img = PILImage.fromarray(norm, "L").convert("RGB")
+            img_path = out_dir / "page_0.png"
+            img.save(img_path, "PNG")
+            pages_info.append({"page": 0, "url": f"/api/page-image/{key}/0", "width": img.width, "height": img.height})
+        except Exception:
+            logger.warning("NIfTI preview failed")
+
+    return pages_info
+
+
+@app.get("/api/render-pages/{kind}/{key}")
+async def render_pages(
+    kind: str, key: str,
+    _claims: Dict[str, Any] = Depends(require_bearer),
+):
+    if kind not in {"uploads", "redacted"}:
+        raise HTTPException(status_code=404, detail="Unknown kind")
+    storage = get_storage()
+    file_path = _find_stored_file(kind, key, storage)
+    if file_path is None:
+        raise HTTPException(status_code=404, detail="File not found")
+    pages = _render_document_pages(file_path, key)
+    return {"pages": pages, "text_only": False}
+
+
+@app.get("/api/page-image/{key}/{page_num}")
+async def page_image(key: str, page_num: int):
+    img_path = _PAGE_RENDER_DIR / key / f"page_{page_num}.png"
+    if not img_path.exists():
+        raise HTTPException(status_code=404, detail="Page image not found")
+    return FileResponse(img_path, media_type="image/png")
+
+
+# ---------------------------------------------------------------------------
+# Apply user-drawn redaction boxes
+# ---------------------------------------------------------------------------
+
+class ApplyRedactionsRequest(BaseModel):
+    job_id: str
+    source_key: str
+    boxes: List[Dict[str, Any]]
+    image_width: int
+    image_height: int
+
+
+@app.post("/api/apply-redactions")
+async def apply_redactions(
+    body: ApplyRedactionsRequest,
+    _claims: Dict[str, Any] = Depends(require_bearer),
+):
+    storage = get_storage()
+    tmp_upload = _find_stored_file("uploads", body.source_key, storage)
+    if tmp_upload is None:
+        raise HTTPException(status_code=404, detail="Original file not found")
+
+    suffix = tmp_upload.suffix.lower()
+    original_name = body.source_key.split("__", 1)[-1] if "__" in body.source_key else body.source_key
+    out_ext = Path(original_name).suffix.lower() or suffix
+
+    redacted_key = f"{body.job_id}__redacted_edited{out_ext}"
+    tmp_redact_dir = Path(tempfile.gettempdir()) / "pf_redacted"
+    tmp_redact_dir.mkdir(parents=True, exist_ok=True)
+    redacted_path = tmp_redact_dir / redacted_key
+
+    try:
+        if suffix == ".pdf":
+            _apply_boxes_pdf(tmp_upload, body.boxes, body.image_width, body.image_height, redacted_path)
+        elif suffix in {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp"}:
+            _apply_boxes_image(tmp_upload, body.boxes, body.image_width, body.image_height, redacted_path, suffix)
+        elif suffix in {".dcm", ".dicom"}:
+            _apply_boxes_dicom(tmp_upload, body.boxes, body.image_width, body.image_height, redacted_path)
+        else:
+            raise HTTPException(status_code=415, detail=f"Editing not supported for {suffix}")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("apply-redactions failed")
+        raise HTTPException(status_code=500, detail=str(e))
+
+    with open(redacted_path, "rb") as fh:
+        storage.save("redacted", redacted_key, fh.read())
+
+    preview_pages = _render_document_pages(redacted_path, redacted_key)
+    return {
+        "redacted_key": redacted_key,
+        "redacted_url": storage.url("redacted", redacted_key),
+        "preview_pages": preview_pages,
+    }
+
+
+def _apply_boxes_pdf(src: Path, boxes: List[Dict], img_w: int, img_h: int, out: Path):
+    import fitz
+    doc = fitz.open(src)
+    for box in boxes:
+        page_idx = int(box.get("page", 0))
+        if page_idx >= len(doc):
+            continue
+        page = doc[page_idx]
+        pw, ph = page.rect.width, page.rect.height
+        sx, sy = pw / img_w, ph / img_h
+        rect = fitz.Rect(box["x"] * sx, box["y"] * sy, (box["x"] + box["w"]) * sx, (box["y"] + box["h"]) * sy)
+        page.add_redact_annot(rect, fill=(0, 0, 0))
+    for page in doc:
+        page.apply_redactions(images=fitz.PDF_REDACT_IMAGE_PIXELS)
+    doc.save(str(out), garbage=4, deflate=True, clean=True)
+    doc.close()
+
+
+def _apply_boxes_image(src: Path, boxes: List[Dict], img_w: int, img_h: int, out: Path, suffix: str = ".png"):
+    from PIL import Image as PILImage, ImageDraw
+    img = PILImage.open(src).convert("RGB")
+    draw = ImageDraw.Draw(img)
+    sx, sy = img.width / img_w, img.height / img_h
+    for box in boxes:
+        draw.rectangle([box["x"] * sx, box["y"] * sy, (box["x"] + box["w"]) * sx, (box["y"] + box["h"]) * sy], fill=(0, 0, 0))
+    if suffix in {".jpg", ".jpeg"}:
+        img.save(out, "JPEG", quality=95)
+    elif suffix in {".tif", ".tiff"}:
+        img.save(out, "TIFF")
+    elif suffix == ".bmp":
+        img.save(out, "BMP")
+    else:
+        img.save(out, "PNG")
+
+
+def _apply_boxes_dicom(src: Path, boxes: List[Dict], img_w: int, img_h: int, out: Path):
+    import pydicom
+    import numpy as np
+    ds = pydicom.dcmread(str(src), force=True)
+    try:
+        arr = ds.pixel_array.copy()
+    except Exception:
+        raise HTTPException(status_code=415, detail="DICOM has no pixel data")
+    h_actual, w_actual = arr.shape[0], arr.shape[1] if arr.ndim >= 2 else 1
+    sx, sy = w_actual / img_w, h_actual / img_h
+    for box in boxes:
+        y0, y1 = max(0, int(box["y"] * sy)), min(h_actual, int((box["y"] + box["h"]) * sy))
+        x0, x1 = max(0, int(box["x"] * sx)), min(w_actual, int((box["x"] + box["w"]) * sx))
+        arr[y0:y1, x0:x1, ...] = 0 if arr.ndim == 2 else 0
+    ds.PixelData = arr.tobytes()
+    ds.save_as(str(out), write_like_original=False)
 
 
 @app.get("/api/stats")
