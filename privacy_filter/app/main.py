@@ -109,7 +109,7 @@ async def health():
     ready = service.engine_ready()
     return HealthResponse(
         status="ok" if ready else "loading",
-        model="MedDeID",
+        model="Privacy Filter",
         device="cpu",
         model_loaded=ready,
     )
