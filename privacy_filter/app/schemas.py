@@ -23,6 +23,7 @@ class Entity(BaseModel):
     word: Optional[str] = Field(None, description="Detected text/value, if readable")
     start: Optional[int] = None
     end: Optional[int] = None
+    bbox: Optional[dict] = Field(None, description="Bounding box {x1, y1, x2, y2, page} for pixel regions")
 
 
 class RedactionResult(BaseModel):

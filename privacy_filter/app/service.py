@@ -93,12 +93,24 @@ def _phi_to_entity(phi) -> Dict[str, Any]:
         # Pixel text region with no readable content — surface the key/label.
         word = getattr(phi, "metadata_key", None)
 
+    bbox = getattr(phi, "bbox", None)
+    bbox_dict = None
+    if bbox is not None:
+        bbox_dict = {
+            "x1": int(getattr(bbox, "x1", 0)),
+            "y1": int(getattr(bbox, "y1", 0)),
+            "x2": int(getattr(bbox, "x2", 0)),
+            "y2": int(getattr(bbox, "y2", 0)),
+            "page": int(getattr(bbox, "page", 0) or 0),
+        }
+
     return {
         "entity_group": getattr(phi, "label", "PHI") or "PHI",
         "score": float(getattr(phi, "confidence", 1.0) or 1.0),
         "word": word,
         "start": None,
         "end": None,
+        "bbox": bbox_dict,
     }
 
 

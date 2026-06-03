@@ -28,7 +28,7 @@
         const pf   = isLocal ? 'http://localhost:8003' : `${window.location.origin}/privacy-filter`;
         checkServiceHealth('clinicalAiBadge', 'clinicalAiText', `${abdm}/health`, 'AI ON', 'AI OFF');
         checkServiceHealth('insuranceAiBadge', 'insuranceAiText', `${nhcx}/health`, 'AI ON', 'AI OFF');
-        checkServiceHealth('pfAiBadge', 'pfAiText', `${pf}/api/health`, 'CPU Ready', 'Offline');
+        checkServiceHealth('pfAiBadge', 'pfAiText', `${pf}/api/health`, 'CPU READY', 'OFFLINE');
     }
 
     // ── Tab Management ──────────────────────────────────────────────────────────
@@ -37,6 +37,9 @@
     async function openTab(evt, tabName) {
         document.querySelectorAll(".tabcontent").forEach(el => el.style.display = "none");
         document.querySelectorAll(".tablinks").forEach(el => el.classList.remove("active"));
+
+        const contentWrap = document.querySelector('.content-container');
+        if (contentWrap) contentWrap.classList.toggle('full-width-home', tabName === 'Home');
 
         const container = document.getElementById(tabName);
         if (container) {
@@ -48,12 +51,22 @@
                 loadedTabs.add(tabName);
             }
 
-            if (tabName === 'Dashboard' && window.initDashboard) window.initDashboard();
+            if (tabName === 'Home' && window.initDashboard) window.initDashboard();
             if (tabName === 'PrivacyFilter' && window.PF_init) window.PF_init();
             if ((tabName === 'PDF2FHIR' || tabName === 'PDF2NHCX' || tabName === 'ForgeryDetection') && window.initApiAccess) {
                 window.initApiAccess();
             }
             checkAllServiceBadges();
+
+            const aiBadgeBar = document.querySelector('.header-ai-bar');
+            if (aiBadgeBar) {
+                aiBadgeBar.style.display = (tabName === 'ForgeryDetection') ? 'none' : '';
+            }
+        }
+
+        // Smoothly scroll back to the top when navigating to a new tab
+        if (evt) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         try { mixpanel.track('Page View', { 'page_title': tabName }); } catch(e) {}
@@ -64,7 +77,8 @@
         if (!el) return;
         try {
             let fileName = tabId.toLowerCase();
-            if (fileName === 'pdf2fhir') fileName = 'clinical';
+            if (fileName === 'home') fileName = 'home';
+            else if (fileName === 'pdf2fhir') fileName = 'clinical';
             else if (fileName === 'pdf2nhcx') fileName = 'insurance';
             else if (fileName === 'privacyfilter') fileName = 'privacyfilter';
             else if (fileName === 'forgerydetection') fileName = 'forgery';
@@ -166,8 +180,8 @@
 
     // Init
     document.addEventListener('DOMContentLoaded', () => {
-        openTab(null, 'PDF2FHIR');
-        document.getElementById('navClinical')?.classList.add('active');
+        openTab(null, 'Home');
+        document.getElementById('navHome')?.classList.add('active');
         if (window.initDashboard) window.initDashboard();
         setInterval(checkAllServiceBadges, 30000);
     });

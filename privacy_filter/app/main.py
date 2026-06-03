@@ -26,6 +26,7 @@ import io
 import logging
 import os
 import tempfile
+import threading
 import time
 import uuid
 from collections import Counter
@@ -67,6 +68,38 @@ def _fire_log(payload: dict) -> None:
         logger.warning("[session-logger] fire-and-forget failed: %s", exc)
 
 
+_CLEANUP_TTL_SECONDS = int(os.getenv("PF_FILE_TTL_SECONDS", "1800"))  # 30 min default
+_CLEANUP_INTERVAL_SECONDS = int(os.getenv("PF_CLEANUP_INTERVAL_SECONDS", "300"))  # 5 min
+
+_CLEANUP_DIRS = [
+    Path(tempfile.gettempdir()) / "pf_uploads",
+    Path(tempfile.gettempdir()) / "pf_redacted",
+    Path(tempfile.gettempdir()) / "pf_pages",
+    Path("./data/uploads"),
+    Path("./data/redacted"),
+]
+
+
+def _cleanup_old_files():
+    """Background thread: delete files older than TTL from all temp/data dirs."""
+    while True:
+        time.sleep(_CLEANUP_INTERVAL_SECONDS)
+        cutoff = time.time() - _CLEANUP_TTL_SECONDS
+        for d in _CLEANUP_DIRS:
+            if not d.exists():
+                continue
+            for item in d.iterdir():
+                try:
+                    if item.is_file() and item.stat().st_mtime < cutoff:
+                        item.unlink()
+                    elif item.is_dir() and item.stat().st_mtime < cutoff:
+                        import shutil
+                        shutil.rmtree(item, ignore_errors=True)
+                except Exception:
+                    pass
+        logger.debug("File cleanup pass complete (TTL=%ds)", _CLEANUP_TTL_SECONDS)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Warm up the engine so the first request is fast.
@@ -74,6 +107,10 @@ async def lifespan(app: FastAPI):
         service.engine_ready()
     except Exception:
         logger.exception("MedDeID engine failed to initialise at startup")
+    t = threading.Thread(target=_cleanup_old_files, daemon=True)
+    t.start()
+    logger.info("File cleanup thread started (TTL=%ds, interval=%ds)",
+                _CLEANUP_TTL_SECONDS, _CLEANUP_INTERVAL_SECONDS)
     yield
 
 
