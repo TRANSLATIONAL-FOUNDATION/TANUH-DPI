@@ -17,12 +17,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-COPY requirements.txt .
+COPY privacy_filter/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app/ ./app/
+COPY common/ ./common/
+COPY privacy_filter/__init__.py ./privacy_filter/__init__.py
+COPY privacy_filter/app/ ./app/
 
 ENV LOCAL_DATA_DIR=/tmp/data
+ENV PYTHONPATH=/app
 RUN mkdir -p /tmp/data/uploads /tmp/data/redacted /tmp/hf_cache
 
 EXPOSE 8003

@@ -88,6 +88,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from common.metrics import instrument_fastapi
+instrument_fastapi(app, service="privacy_filter")
+
 
 # --- Static frontend (served from / ) ---
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
@@ -216,6 +219,8 @@ async def redact_file(
             text = handler.extract(upload_path)
         except Exception as e:
             logger.exception("Extraction failed")
+            from common.metrics import DOCUMENTS_FAILED_TOTAL
+            DOCUMENTS_FAILED_TOTAL.labels(service="privacy_filter").inc()
             raise HTTPException(status_code=500, detail=f"Extraction failed: {e}")
 
         # 2. Run privacy-filter
@@ -224,6 +229,8 @@ async def redact_file(
             entities_raw = pf.detect(text) if text else []
         except Exception as e:
             logger.exception("Model inference failed")
+            from common.metrics import DOCUMENTS_FAILED_TOTAL
+            DOCUMENTS_FAILED_TOTAL.labels(service="privacy_filter").inc()
             raise HTTPException(status_code=500, detail=f"Inference failed: {e}")
 
         entities = [Entity(**e) for e in entities_raw]
@@ -243,6 +250,8 @@ async def redact_file(
             handler.redact(upload_path, entities_raw, redacted_local)
         except Exception as e:
             logger.exception("Redaction failed")
+            from common.metrics import DOCUMENTS_FAILED_TOTAL
+            DOCUMENTS_FAILED_TOTAL.labels(service="privacy_filter").inc()
             raise HTTPException(status_code=500, detail=f"Redaction failed: {e}")
 
         # Upload to GCS (or local storage keeps the file in place).
@@ -279,6 +288,8 @@ async def redact_file(
             record_redaction()
         except Exception:
             pass
+        from common.metrics import DOCUMENTS_PROCESSED_TOTAL
+        DOCUMENTS_PROCESSED_TOTAL.labels(service="privacy_filter").inc()
         client_ip = request.headers.get("x-forwarded-for", "").split(",")[0].strip() \
                     or (request.client.host if request.client else "unknown")
         _fire_log({
