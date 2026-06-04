@@ -17,7 +17,8 @@ import warnings
 warnings.filterwarnings("ignore")
 
 import sys
-sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent.parent.parent))
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import pytest
 
@@ -299,3 +300,57 @@ class TestRedactors:
         assert result["validation"].risk_score < 50, (
             f"{redactor} risk={result['validation'].risk_score}"
         )
+
+
+# ── Safe Harbor PDF redaction (document text path) ────────────────────────────
+
+class TestPdfSafeHarbor:
+    """
+    Real-world lab/radiology PDFs: every Safe Harbor identifier must be removed
+    (patient name, physician names, registration/bill/request numbers, staff
+    codes, ages, category, dates, times, IPs/URLs, QR codes, barcodes) while ALL
+    clinical content is preserved.
+    """
+
+    DATA = Path(__file__).parent
+
+    LAB_PHI = ["RAJA", "SHETTY", "MADHU", "AKILA", "ARPITHA", "PALLAVI",
+               "3035530", "4243169", "10072660", "59460", "GENERAL"]
+    LAB_CLINICAL = ["PROSTATE", "CREATININE", "SODIUM", "11100", "REFERENCE"]
+
+    REPORT_PHI = ["RAJA", "SHETTY", "AMRUTHRAJ", "GOWDA", "3035530",
+                  "1742225", "10330115", "10.10.14.19"]
+    REPORT_CLINICAL = ["KIDNEY", "BLADDER", "prostatomegaly",
+                       "Prevoid urine", "able to hold urine"]
+
+    def _run(self, name, tmp_path):
+        import fitz
+        src = self.DATA / name
+        if not src.exists():
+            pytest.skip(f"{name} not present")
+        out = tmp_path / "redacted.pdf"
+        result = _engine().process(src, out)
+        text = "\n".join(p.get_text() for p in fitz.open(str(out)))
+        return result, text
+
+    def test_lab_phi_removed(self, tmp_path):
+        result, text = self._run("rajashetty lab.pdf", tmp_path)
+        leaked = [p for p in self.LAB_PHI if p.lower() in text.lower()]
+        assert leaked == [], f"PHI leaked: {leaked}"
+        assert result["validation"].passed
+
+    def test_lab_clinical_preserved(self, tmp_path):
+        _result, text = self._run("rajashetty lab.pdf", tmp_path)
+        missing = [c for c in self.LAB_CLINICAL if c.lower() not in text.lower()]
+        assert missing == [], f"clinical content lost: {missing}"
+
+    def test_report_phi_removed(self, tmp_path):
+        result, text = self._run("rajashetty report.pdf", tmp_path)
+        leaked = [p for p in self.REPORT_PHI if p.lower() in text.lower()]
+        assert leaked == [], f"PHI leaked: {leaked}"
+        assert result["validation"].passed
+
+    def test_report_clinical_preserved(self, tmp_path):
+        _result, text = self._run("rajashetty report.pdf", tmp_path)
+        missing = [c for c in self.REPORT_CLINICAL if c.lower() not in text.lower()]
+        assert missing == [], f"clinical content lost: {missing}"

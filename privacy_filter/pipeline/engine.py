@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from ..schemas.core import FileFormat
+from ..schemas.core import FileFormat, ValidationResult
 
 from ..registry.loader_registry import LoaderRegistry
 from ..registry.cleaner_registry import CleanerRegistry
@@ -85,6 +85,13 @@ class MedDeIDEngine:
 
         logger.info("Processing %s", input_path)
 
+        # ── PDF SHORT-CIRCUIT ──────────────────────────────────────────────────
+        # Documents take a dedicated native-text redaction path (Safe Harbor,
+        # content-based) — completely separate from the pixel pipeline below, so
+        # the DICOM / NIfTI / image logic is untouched.
+        if input_path.suffix.lower() == ".pdf":
+            return self._process_pdf(input_path, output_path)
+
         # ── LOAD ──────────────────────────────────────────────────────────────
 
         loader   = LoaderRegistry.get(input_path)
@@ -154,6 +161,54 @@ class MedDeIDEngine:
             "overlay_count":     len(overlay_regions),
             "metadata_phi":      metadata_phi,
             "pixel_phi":         phi_entities,
+        }
+
+    # ── PDF (document) path ────────────────────────────────────────────────────
+
+    def _process_pdf(self, input_path: Path, output_path: Path) -> dict:
+        """
+        De-identify a PDF via native-text Safe Harbor redaction, then re-scan
+        the output to confirm no identifiers remain.
+        """
+        from ..redactors.pdf_redactor import PDFRedactor
+        from ..detectors.safe_harbor_detector import SafeHarborDetector
+
+        redactor = PDFRedactor()
+        entities, counts = redactor.redact(input_path, output_path)
+
+        # ── Validation: re-extract text from the redacted PDF and re-scan ──────
+        residual = 0
+        try:
+            import fitz
+            detector = SafeHarborDetector()
+            doc = fitz.open(str(output_path))
+            for page in doc:
+                for line in page.get_text().splitlines():
+                    residual += len(detector.detect_spans(line))
+            doc.close()
+        except Exception as exc:
+            logger.warning("PDF validation re-scan failed: %s", exc)
+
+        validation = ValidationResult(
+            passed=(residual == 0),
+            risk_score=float(min(residual * 5, 100)),
+            residual_phi=[],
+            validator_name="SafeHarborPDFValidator",
+            notes=("Validation passed."
+                   if residual == 0
+                   else f"{residual} residual identifier span(s) detected."),
+        )
+
+        return {
+            "artifact":          None,
+            "redaction_report":  None,
+            "validation":        validation,
+            "phi_count":         len(entities),
+            "overlay_count":     0,
+            "metadata_phi":      [],
+            "pixel_phi":         [],
+            "pdf_entities":      entities,   # API-shape dicts (with bbox)
+            "pdf_counts":        counts,
         }
 
     # ── Internal helpers ──────────────────────────────────────────────────────

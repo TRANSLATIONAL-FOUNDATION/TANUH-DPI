@@ -236,8 +236,12 @@
 
         <!-- Grid dot textured canvas area -->
         <div id="pfe_area" style="flex:1;overflow:hidden;position:relative;background-color:#0b0f19;background-image:radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);background-size:20px 20px;">
+          <!-- overflow:auto + layout-scaled pages → scrollbars span the full
+               zoomed extent so high-res images can be panned to every edge.
+               width:max-content lets the row grow with zoom; min-width:100% +
+               margin auto keeps content centred when smaller than the viewport. -->
           <div id="pfe_scroll" style="width:100%;height:100%;overflow:auto;cursor:crosshair;">
-            <div id="pfe_pages" style="display:flex;flex-direction:column;align-items:center;gap:24px;padding:40px;transform-origin:center top;min-height:100%;"></div>
+            <div id="pfe_pages" style="display:flex;flex-direction:column;align-items:center;gap:24px;padding:40px;width:max-content;min-width:100%;margin:0 auto;box-sizing:border-box;"></div>
           </div>
         </div>
 
@@ -304,8 +308,13 @@
     pfQ("pfe_scroll").onwheel = (e) => {
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault();
-        _zoom_(Math.max(0.1, Math.min(5, _zoom * (e.deltaY > 0 ? 0.9 : 1.1))));
+        const s = pfQ("pfe_scroll");
+        const r = s.getBoundingClientRect();
+        // Zoom toward the cursor so the point under the pointer stays put.
+        _zoom_(_zoom * (e.deltaY > 0 ? 0.9 : 1.1),
+               { x: e.clientX - r.left, y: e.clientY - r.top });
       }
+      // Plain scroll (no modifier) falls through → normal pan via scrollbars.
     };
   }
 
@@ -332,19 +341,61 @@
   }
   window.PF_editorClose = _close;
 
-  // ── Zoom Controls ──────────────────────────────────────────────────────
-  function _zoom_(z) {
+  // ── Zoom Controls (layout-based — scrollbars track the zoomed size) ──────
+  // We resize the actual page/box elements instead of using CSS transform, so
+  // the scroll container's scrollable area equals the zoomed content. That lets
+  // the user scroll/pan to every edge of a high-resolution image at any zoom.
+  function _zoom_(z, anchor) {
+    z = Math.max(0.1, Math.min(6, z));
+    const s = pfQ("pfe_scroll");
+
+    // Capture the content point currently under the anchor (viewport centre by
+    // default) so we can keep it stable across the zoom change.
+    let ax = 0.5, ay = 0.5, beforeX = 0, beforeY = 0;
+    if (s) {
+      ax = anchor ? anchor.x : s.clientWidth / 2;
+      ay = anchor ? anchor.y : s.clientHeight / 2;
+      beforeX = (s.scrollLeft + ax) / _zoom;   // content coord under anchor
+      beforeY = (s.scrollTop + ay) / _zoom;
+    }
+
     _zoom = z;
-    const p = pfQ("pfe_pages");
-    if (p) { p.style.transform = `scale(${_zoom})`; p.style.transformOrigin = "center top"; }
+    _applyZoomLayout();
+
     const l = pfQ("pfe_zlbl");
     if (l) l.textContent = `${Math.round(_zoom * 100)}%`;
+
+    // Re-anchor the same content point under the cursor/centre after rescale.
+    if (s) {
+      s.scrollLeft = beforeX * _zoom - ax;
+      s.scrollTop = beforeY * _zoom - ay;
+    }
+  }
+
+  // Resize existing page wrappers, images and box overlays to the current zoom
+  // WITHOUT recreating <img> elements (no network re-fetch on every zoom tick).
+  function _applyZoomLayout() {
+    const c = pfQ("pfe_pages");
+    if (!c) return;
+    Array.from(c.children).forEach((wrap, idx) => {
+      const pg = _origPages && _origPages[idx];
+      if (!pg) return;
+      const sw = Math.round(pg.width * _zoom);
+      const sh = Math.round(pg.height * _zoom);
+      wrap.style.width = sw + "px";
+      wrap.style.height = sh + "px";
+      const img = wrap.querySelector("img");
+      if (img) { img.width = sw; img.height = sh; img.style.width = sw + "px"; img.style.height = sh + "px"; }
+    });
+    _renderBoxes();
   }
 
   function _fitZ() {
     const a = pfQ("pfe_area");
     if (!a || !_origPages || !_origPages.length) { _zoom_(1); return; }
-    _zoom_(Math.min(1, (a.clientWidth - 64) / _origPages[0].width));
+    // Fit the widest page to the available width (minus padding/scrollbar).
+    const maxW = Math.max(..._origPages.map(p => p.width));
+    _zoom_(Math.min(2, (a.clientWidth - 96) / maxW));
   }
 
   // ── Toggle Tool ────────────────────────────────────────────────────────
@@ -383,15 +434,17 @@
     c.innerHTML = "";
 
     _origPages.forEach((pg, idx) => {
+      const sw = Math.round(pg.width * _zoom);
+      const sh = Math.round(pg.height * _zoom);
       const wrap = document.createElement("div");
       wrap.dataset.page = idx;
-      wrap.style.cssText = `position:relative;width:${pg.width}px;height:${pg.height}px;background:#ffffff;box-shadow:0 12px 40px rgba(0,0,0,0.6);border-radius:8px;overflow:hidden;line-height:0;margin-bottom:16px;`;
+      wrap.style.cssText = `position:relative;width:${sw}px;height:${sh}px;background:#ffffff;box-shadow:0 12px 40px rgba(0,0,0,0.6);border-radius:8px;overflow:hidden;line-height:0;flex-shrink:0;`;
 
       const img = document.createElement("img");
       img.src = `${BASE()}${pg.url}`;
-      img.width = pg.width; img.height = pg.height;
+      img.width = sw; img.height = sh;
       img.draggable = false;
-      img.style.cssText = "display:block;max-width:none;user-select:none;";
+      img.style.cssText = `display:block;max-width:none;user-select:none;width:${sw}px;height:${sh}px;`;
       wrap.appendChild(img);
 
       const ov = document.createElement("div");
@@ -430,12 +483,13 @@
         return;
       }
 
-      // Draw box start
+      // Draw box start. Coords (x,y) are in natural px; the live rectangle is
+      // drawn inside the scaled page wrapper, so multiply by _zoom for display.
       _drawing = true;
       _drawStart = { page: pgIdx, x, y };
       const d = document.createElement("div");
       d.id = "pfe_dr";
-      d.style.cssText = `position:absolute;z-index:10;pointer-events:none;border:2.5px dashed ${CLR.purple};background:${CLR.purpleBg};border-radius:3px;left:${x}px;top:${y}px;width:0;height:0;box-shadow:0 0 12px rgba(139,92,246,0.3);`;
+      d.style.cssText = `position:absolute;z-index:10;pointer-events:none;border:2.5px dashed ${CLR.purple};background:${CLR.purpleBg};border-radius:3px;left:${x * _zoom}px;top:${y * _zoom}px;width:0;height:0;box-shadow:0 0 12px rgba(139,92,246,0.3);`;
       ov.parentElement.appendChild(d);
       _drawRect = d;
     };
@@ -444,10 +498,11 @@
       if (_panState) { _panState.el.scrollLeft = _panState.sl - (e.clientX - _panState.sx); _panState.el.scrollTop = _panState.st - (e.clientY - _panState.sy); return; }
       if (!_drawing || !_drawRect) return;
       const { x: cx, y: cy } = xy(e);
-      _drawRect.style.left = Math.min(_drawStart.x, cx) + "px";
-      _drawRect.style.top = Math.min(_drawStart.y, cy) + "px";
-      _drawRect.style.width = Math.abs(cx - _drawStart.x) + "px";
-      _drawRect.style.height = Math.abs(cy - _drawStart.y) + "px";
+      const z = _zoom;
+      _drawRect.style.left = Math.min(_drawStart.x, cx) * z + "px";
+      _drawRect.style.top = Math.min(_drawStart.y, cy) * z + "px";
+      _drawRect.style.width = Math.abs(cx - _drawStart.x) * z + "px";
+      _drawRect.style.height = Math.abs(cy - _drawStart.y) * z + "px";
     };
 
     const done = (e) => {
@@ -492,11 +547,13 @@
 
       const el = document.createElement("div");
       el.setAttribute("data-pfebox", box.id);
+      // Box coords are stored in NATURAL image pixels; scale to the current zoom.
+      const z = _zoom;
       el.style.cssText = `
         position:absolute; z-index:2; cursor:pointer;
-        left:${box.x}px; top:${box.y}px; width:${box.w}px; height:${box.h}px;
+        left:${box.x * z}px; top:${box.y * z}px; width:${box.w * z}px; height:${box.h * z}px;
         background:rgba(15, 23, 42, 0.92); border:1.5px solid #000;
-        border-radius:2px; transition:all 0.15s ease-in-out;
+        border-radius:2px; transition:background 0.15s ease-in-out, border-color 0.15s ease-in-out;
         box-shadow: 0 1px 3px rgba(0,0,0,0.2);
       `;
       el.title = "Click to remove redaction";

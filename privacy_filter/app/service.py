@@ -133,25 +133,36 @@ def run_deidentification(
     engine = _EngineHolder.get(ocr_backend, redaction_method)
     result = engine.process(input_path, output_path)
 
-    # Combine metadata-tag PHI (DICOM/EXIF/NIfTI) with burned-in pixel PHI.
-    metadata_phi = result.get("metadata_phi", []) or []
-    pixel_phi = result.get("pixel_phi", []) or []
-
     entities: List[Dict[str, Any]] = []
     seen = set()
-    for phi in list(metadata_phi) + list(pixel_phi):
-        ent = _phi_to_entity(phi)
-        # De-duplicate identical (label, word, bbox) rows for a clean report.
-        bbox = getattr(phi, "bbox", None)
-        key = (
-            ent["entity_group"],
-            ent["word"],
-            (bbox.x1, bbox.y1, bbox.x2, bbox.y2) if bbox is not None else None,
-        )
-        if key in seen:
-            continue
-        seen.add(key)
-        entities.append(ent)
+
+    # PDF path returns API-shape entity dicts directly (already include bbox).
+    pdf_entities = result.get("pdf_entities")
+    if pdf_entities is not None:
+        for ent in pdf_entities:
+            bb = ent.get("bbox") or {}
+            key = (ent["entity_group"], ent.get("word"),
+                   (bb.get("x1"), bb.get("y1"), bb.get("x2"), bb.get("y2"), bb.get("page")))
+            if key in seen:
+                continue
+            seen.add(key)
+            entities.append(ent)
+    else:
+        # Image / DICOM / NIfTI path: map PHIEntity objects → API entities.
+        metadata_phi = result.get("metadata_phi", []) or []
+        pixel_phi = result.get("pixel_phi", []) or []
+        for phi in list(metadata_phi) + list(pixel_phi):
+            ent = _phi_to_entity(phi)
+            bbox = getattr(phi, "bbox", None)
+            key = (
+                ent["entity_group"],
+                ent["word"],
+                (bbox.x1, bbox.y1, bbox.x2, bbox.y2) if bbox is not None else None,
+            )
+            if key in seen:
+                continue
+            seen.add(key)
+            entities.append(ent)
 
     counts: Dict[str, int] = {}
     for e in entities:
