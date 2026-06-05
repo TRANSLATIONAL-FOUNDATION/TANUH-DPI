@@ -75,6 +75,8 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS=/app/gcp-service-account.json
       - REDIS_URL=redis://redis:6379/0
       - PYTHONPATH=/app
+      - WORKER_METRICS_PORT=9200
+      - PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus_multiproc
     volumes:
       - ./pdf_uploads:/app/pdf_uploads
       - ./fhir_results:/app/fhir_results
@@ -99,6 +101,8 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS=/app/gcp-service-account.json
       - REDIS_URL=redis://redis:6379/0
       - PYTHONPATH=/app
+      - WORKER_METRICS_PORT=9200
+      - PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus_multiproc
     volumes:
       - ./pdf_uploads:/app/pdf_uploads
       - ./fhir_results:/app/fhir_results
@@ -227,6 +231,8 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - JOB_TTL_SECONDS=3600
       - FORGENSIC_SECRET_KEY=${FORGENSIC_SECRET_KEY}
+      - WORKER_METRICS_PORT=9200
+      - PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus_multiproc
     volumes:
       - ./forgensic_data:/app/forgensic_data
     depends_on:

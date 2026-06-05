@@ -18,6 +18,7 @@ services:
       - "host.docker.internal:host-gateway"
     networks:
       - monitoring_internal
+      - app_network
 
   alertmanager:
     image: prom/alertmanager:v0.27.0

@@ -66,3 +66,35 @@ scrape_configs:
       - targets:
           - host.docker.internal:8004
     metrics_path: /metrics
+
+  # ── Celery worker metrics (Phase 5.8) ─────────────────────────────────────
+  # Each worker container starts a prometheus_client HTTP server on port 9200.
+  # Prometheus reaches them directly via the shared app_network (tanuh-dpi_default).
+  # Container names are stable: docker-compose names replicas <project>-<service>-<n>.
+
+  - job_name: celery_abdm_workers
+    static_configs:
+      - targets:
+          - tanuh-dpi-celery-abdm-worker-1:9200
+          - tanuh-dpi-celery-abdm-worker-2:9200
+          - tanuh-dpi-celery-abdm-worker-3:9200
+          - tanuh-dpi-celery-abdm-worker-4:9200
+    metrics_path: /metrics
+
+  - job_name: celery_nhcx_workers
+    static_configs:
+      - targets:
+          - tanuh-dpi-celery-nhcx-worker-1:9200
+          - tanuh-dpi-celery-nhcx-worker-2:9200
+          - tanuh-dpi-celery-nhcx-worker-3:9200
+          - tanuh-dpi-celery-nhcx-worker-4:9200
+    metrics_path: /metrics
+
+  - job_name: celery_forgensic_workers
+    static_configs:
+      - targets:
+          - tanuh-dpi-celery-forgensic-worker-1:9200
+          - tanuh-dpi-celery-forgensic-worker-2:9200
+          - tanuh-dpi-celery-forgensic-worker-3:9200
+          - tanuh-dpi-celery-forgensic-worker-4:9200
+    metrics_path: /metrics
