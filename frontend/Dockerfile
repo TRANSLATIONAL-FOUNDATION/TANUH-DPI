@@ -26,12 +26,5 @@ COPY frontend/httpd.conf /usr/local/apache2/conf/extra/proxy-rules.conf
 RUN echo "Include conf/extra/proxy-rules.conf" >> /usr/local/apache2/conf/httpd.conf
 
 COPY frontend/ /usr/local/apache2/htdocs/
-COPY README_ProblemStatement_2.md /usr/local/apache2/htdocs/assets/
-COPY README_ProblemStatement_3.md /usr/local/apache2/htdocs/assets/
-COPY ABDM_problem_2_Architecture.png /usr/local/apache2/htdocs/assets/
-COPY NHCX_problem_3_Architecture.png /usr/local/apache2/htdocs/assets/
-COPY test_files/abdm_diagnostic_report.pdf /usr/local/apache2/htdocs/assets/
-COPY test_files/abdm_discharge_summary.pdf /usr/local/apache2/htdocs/assets/
-COPY test_files/nhcx_demo_doc.pdf /usr/local/apache2/htdocs/assets/
 
 EXPOSE 8080
