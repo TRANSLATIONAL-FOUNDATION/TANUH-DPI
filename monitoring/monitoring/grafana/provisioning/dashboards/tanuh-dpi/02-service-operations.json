@@ -37,14 +37,14 @@
         "name": "service",
         "type": "custom",
         "label": "Service",
-        "query": "pdf2abdm,pdf2nhcx,privacy_filter,forgensic,session_logger",
+        "query": "pdf2abdm,pdf2nhcx,privacy.filter,forgensic,session.logger",
         "current": { "selected": true, "text": "pdf2abdm", "value": "pdf2abdm" },
         "options": [
           { "selected": true,  "text": "pdf2abdm",       "value": "pdf2abdm" },
           { "selected": false, "text": "pdf2nhcx",       "value": "pdf2nhcx" },
-          { "selected": false, "text": "privacy_filter", "value": "privacy_filter" },
+          { "selected": false, "text": "privacy_filter", "value": "privacy.filter" },
           { "selected": false, "text": "forgensic",      "value": "forgensic" },
-          { "selected": false, "text": "session_logger", "value": "session_logger" }
+          { "selected": false, "text": "session_logger", "value": "session.logger" }
         ],
         "hide": 0,
         "includeAll": false,
@@ -334,7 +334,7 @@
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [
         {
-          "expr": "{job=\"$service\"}",
+          "expr": "{service=~\"$service\"}",
           "legendFormat": "",
           "refId": "A"
         }

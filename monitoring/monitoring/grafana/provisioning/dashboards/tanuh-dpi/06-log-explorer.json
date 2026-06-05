@@ -24,17 +24,17 @@
         "name": "service",
         "type": "custom",
         "label": "Service",
-        "query": "pdf2abdm,pdf2nhcx,privacy_filter,forgensic,session_logger",
+        "query": "pdf2abdm,pdf2nhcx,privacy.filter,forgensic,session.logger",
         "current": { "selected": false, "text": "All", "value": "$__all" },
         "includeAll": true,
-        "allValue": "pdf2abdm|pdf2nhcx|privacy_filter|forgensic|session_logger",
+        "allValue": "pdf2abdm|pdf2nhcx|privacy.filter|forgensic|session.logger",
         "options": [
           { "selected": true,  "text": "All",           "value": "$__all" },
           { "selected": false, "text": "pdf2abdm",       "value": "pdf2abdm" },
           { "selected": false, "text": "pdf2nhcx",       "value": "pdf2nhcx" },
-          { "selected": false, "text": "privacy_filter", "value": "privacy_filter" },
+          { "selected": false, "text": "privacy_filter", "value": "privacy.filter" },
           { "selected": false, "text": "forgensic",      "value": "forgensic" },
-          { "selected": false, "text": "session_logger", "value": "session_logger" }
+          { "selected": false, "text": "session_logger", "value": "session.logger" }
         ],
         "hide": 0,
         "multi": false
@@ -91,7 +91,7 @@
       "gridPos": { "x": 0, "y": 1, "w": 6, "h": 4 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [{
-        "expr": "sum(count_over_time({job=~\"$service\"} |= \"\" | level =~ \"error|ERROR\" [$__range]))",
+        "expr": "sum(count_over_time({service=~\"$service\"} |= \"\" | level =~ \"error|ERROR\" [$__range]))",
         "legendFormat": "",
         "refId": "A"
       }],
@@ -118,7 +118,7 @@
       "gridPos": { "x": 6, "y": 1, "w": 6, "h": 4 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [{
-        "expr": "sum(count_over_time({job=~\"$service\"} |= \"\" | level =~ \"warn|WARN|WARNING\" [$__range]))",
+        "expr": "sum(count_over_time({service=~\"$service\"} |= \"\" | level =~ \"warn|WARN|WARNING\" [$__range]))",
         "legendFormat": "",
         "refId": "A"
       }],
@@ -145,7 +145,7 @@
       "gridPos": { "x": 12, "y": 1, "w": 6, "h": 4 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [{
-        "expr": "sum(count_over_time({job=~\"$service\"} [$__range]))",
+        "expr": "sum(count_over_time({service=~\"$service\"} [$__range]))",
         "legendFormat": "",
         "refId": "A"
       }],
@@ -166,7 +166,7 @@
       "gridPos": { "x": 18, "y": 1, "w": 6, "h": 4 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [{
-        "expr": "count(sum by (job) (count_over_time({job=~\"pdf2abdm|pdf2nhcx|privacy_filter|forgensic|session_logger\"} [$__range])))",
+        "expr": "count(sum by (service) (count_over_time({service=~\"pdf2abdm|pdf2nhcx|privacy.filter|forgensic|session.logger\"} [$__range])))",
         "legendFormat": "",
         "refId": "A"
       }],
@@ -195,9 +195,9 @@
       "gridPos": { "x": 0, "y": 6, "w": 24, "h": 6 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [
-        { "expr": "sum(count_over_time({job=~\"$service\"} |= \"\" | level =~ \"error|ERROR\" [$interval]))", "legendFormat": "Error", "refId": "A" },
-        { "expr": "sum(count_over_time({job=~\"$service\"} |= \"\" | level =~ \"warn|WARN|WARNING\" [$interval]))", "legendFormat": "Warning", "refId": "B" },
-        { "expr": "sum(count_over_time({job=~\"$service\"} |= \"\" | level =~ \"info|INFO\" [$interval]))", "legendFormat": "Info", "refId": "C" }
+        { "expr": "sum(count_over_time({service=~\"$service\"} |= \"\" | level =~ \"error|ERROR\" [$interval]))", "legendFormat": "Error", "refId": "A" },
+        { "expr": "sum(count_over_time({service=~\"$service\"} |= \"\" | level =~ \"warn|WARN|WARNING\" [$interval]))", "legendFormat": "Warning", "refId": "B" },
+        { "expr": "sum(count_over_time({service=~\"$service\"} |= \"\" | level =~ \"info|INFO\" [$interval]))", "legendFormat": "Info", "refId": "C" }
       ],
       "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "list", "placement": "bottom" } },
       "fieldConfig": {
@@ -226,7 +226,7 @@
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [
         {
-          "expr": "{job=~\"$service\"} |= \"$search\" | level =~ \"$level\"",
+          "expr": "{service=~\"$service\"} |= \"$search\" | level =~ \"$level\"",
           "legendFormat": "",
           "refId": "A"
         }
