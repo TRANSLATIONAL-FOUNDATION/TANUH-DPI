@@ -191,7 +191,8 @@ jobs:
           cd pf-build
           chmod +x pf-redact-1.0.0-x86_64.AppImage
           ./pf-redact-1.0.0-x86_64.AppImage --help
-          echo "AppImage --help verification passed"
+          ./pf-redact-1.0.0-x86_64.AppImage check
+          echo "AppImage verification passed"
 
       - name: Smoke test AppImage (end-to-end)
         run: |
@@ -343,7 +344,8 @@ jobs:
         run: |
           chmod +x dist/pf-redact
           ./dist/pf-redact --help
-          echo "ARM64 --help verification passed"
+          ./dist/pf-redact check
+          echo "ARM64 verification passed"
 
       - name: Smoke test binary (end-to-end)
         run: |
@@ -389,6 +391,7 @@ jobs:
       - name: Install Tesseract OCR
         run: |
           choco install tesseract -y
+          echo "C:\Program Files\Tesseract-OCR" | Out-File -FilePath $env:GITHUB_PATH -Append
 
       - name: Install Python dependencies
         run: |
@@ -488,7 +491,8 @@ jobs:
       - name: Verify exe
         run: |
           .\dist\pf-redact.exe --help
-          echo "Windows --help verification passed"
+          .\dist\pf-redact.exe check
+          echo "Windows verification passed"
 
       - name: Smoke test exe (end-to-end)
         shell: bash
@@ -634,7 +638,8 @@ jobs:
         run: |
           chmod +x dist/pf-redact
           ./dist/pf-redact --help
-          echo "macOS --help verification passed"
+          ./dist/pf-redact check
+          echo "macOS verification passed"
 
       - name: Smoke test binary (end-to-end)
         run: |

@@ -101,7 +101,49 @@ def build_parser():
     return parser
 
 
+def run_check():
+    import sys
+    checks = []
+    checks.append(("Python", True, f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"))
+    for mod, label in [("cv2", "OpenCV"), ("numpy", "NumPy"), ("PIL", "Pillow"),
+                       ("pydicom", "pydicom"), ("nibabel", "NIfTI/nibabel"), ("fitz", "PyMuPDF")]:
+        try:
+            m = __import__(mod)
+            ver = getattr(m, "__version__", getattr(m, "version", "ok"))
+            checks.append((label, True, str(ver)))
+        except ImportError:
+            checks.append((label, False, "NOT FOUND"))
+    tess_ok = False
+    try:
+        import shutil
+        if shutil.which("tesseract"):
+            import subprocess
+            ver = subprocess.check_output(["tesseract", "--version"], stderr=subprocess.STDOUT).decode().split("\n")[0]
+            checks.append(("Tesseract", True, ver))
+            tess_ok = True
+        else:
+            checks.append(("Tesseract", False, "NOT FOUND — install tesseract-ocr"))
+    except Exception:
+        checks.append(("Tesseract", False, "NOT FOUND — install tesseract-ocr"))
+    print("===== pf-redact system check =====")
+    all_ok = True
+    for name, ok, info in checks:
+        status = "OK" if ok else "MISSING"
+        print(f"  {name:.<20s} {status:>7s}  ({info})")
+        if not ok:
+            all_ok = False
+    print()
+    if all_ok:
+        print("All checks passed. Ready to process files.")
+    else:
+        print("Some checks failed. Install missing dependencies before processing.")
+    sys.exit(0 if all_ok else 1)
+
+
 def main():
+
+    if len(__import__("sys").argv) == 2 and __import__("sys").argv[1] == "check":
+        run_check()
 
     parser = build_parser()
 
