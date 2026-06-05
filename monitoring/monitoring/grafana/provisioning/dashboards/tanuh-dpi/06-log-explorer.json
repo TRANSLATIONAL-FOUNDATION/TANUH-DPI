@@ -91,7 +91,7 @@
       "gridPos": { "x": 0, "y": 1, "w": 6, "h": 4 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [{
-        "expr": "sum(count_over_time({service=~\"$service\"} |= \"\" | level =~ \"error|ERROR\" [$__range]))",
+        "expr": "sum(count_over_time({service=~\"$service\"} | detected_level =~ \"error\" [$__range]))",
         "legendFormat": "",
         "refId": "A"
       }],
@@ -118,7 +118,7 @@
       "gridPos": { "x": 6, "y": 1, "w": 6, "h": 4 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [{
-        "expr": "sum(count_over_time({service=~\"$service\"} |= \"\" | level =~ \"warn|WARN|WARNING\" [$__range]))",
+        "expr": "sum(count_over_time({service=~\"$service\"} | detected_level =~ \"warn\" [$__range]))",
         "legendFormat": "",
         "refId": "A"
       }],
@@ -195,9 +195,9 @@
       "gridPos": { "x": 0, "y": 6, "w": 24, "h": 6 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [
-        { "expr": "sum(count_over_time({service=~\"$service\"} |= \"\" | level =~ \"error|ERROR\" [$interval]))", "legendFormat": "Error", "refId": "A" },
-        { "expr": "sum(count_over_time({service=~\"$service\"} |= \"\" | level =~ \"warn|WARN|WARNING\" [$interval]))", "legendFormat": "Warning", "refId": "B" },
-        { "expr": "sum(count_over_time({service=~\"$service\"} |= \"\" | level =~ \"info|INFO\" [$interval]))", "legendFormat": "Info", "refId": "C" }
+        { "expr": "sum(count_over_time({service=~\"$service\"} | detected_level =~ \"error\" [$interval]))", "legendFormat": "Error", "refId": "A" },
+        { "expr": "sum(count_over_time({service=~\"$service\"} | detected_level =~ \"warn\" [$interval]))", "legendFormat": "Warning", "refId": "B" },
+        { "expr": "sum(count_over_time({service=~\"$service\"} | detected_level =~ \"info\" [$interval]))", "legendFormat": "Info", "refId": "C" }
       ],
       "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "list", "placement": "bottom" } },
       "fieldConfig": {
@@ -226,7 +226,7 @@
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [
         {
-          "expr": "{service=~\"$service\"} |= \"$search\" | level =~ \"$level\"",
+          "expr": "{service=~\"$service\"} |= \"$search\" | detected_level =~ \"$level\"",
           "legendFormat": "",
           "refId": "A"
         }

@@ -323,7 +323,7 @@
       "gridPos": { "x": 16, "y": 11, "w": 8, "h": 8 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [{
-        "expr": "{service=~\"pdf2abdm|pdf2nhcx|privacy.filter|forgensic|session.logger\"} |= \"\" | level =~ \"error|ERROR\"",
+        "expr": "{service=~\"pdf2abdm|pdf2nhcx|privacy.filter|forgensic|session.logger\"} | detected_level =~ \"error\"",
         "legendFormat": "",
         "refId": "A"
       }],
