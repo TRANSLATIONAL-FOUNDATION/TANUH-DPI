@@ -91,7 +91,7 @@
       "gridPos": { "x": 0, "y": 1, "w": 6, "h": 4 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [{
-        "expr": "sum(count_over_time({service=~\"$service\"} | detected_level =~ \"error\" [$__range]))",
+        "expr": "sum(count_over_time({service=~\"$service\"} | detected_level =~ \"error\" [$__range])) or vector(0)",
         "legendFormat": "",
         "refId": "A"
       }],
@@ -118,7 +118,7 @@
       "gridPos": { "x": 6, "y": 1, "w": 6, "h": 4 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [{
-        "expr": "sum(count_over_time({service=~\"$service\"} | detected_level =~ \"warn\" [$__range]))",
+        "expr": "sum(count_over_time({service=~\"$service\"} | detected_level =~ \"warn\" [$__range])) or vector(0)",
         "legendFormat": "",
         "refId": "A"
       }],
@@ -145,7 +145,7 @@
       "gridPos": { "x": 12, "y": 1, "w": 6, "h": 4 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [{
-        "expr": "sum(count_over_time({service=~\"$service\"} [$__range]))",
+        "expr": "sum(count_over_time({service=~\"$service\"} [$__range])) or vector(0)",
         "legendFormat": "",
         "refId": "A"
       }],
@@ -166,7 +166,7 @@
       "gridPos": { "x": 18, "y": 1, "w": 6, "h": 4 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [{
-        "expr": "count(sum by (service) (count_over_time({service=~\"pdf2abdm|pdf2nhcx|privacy.filter|forgensic|session.logger\"} [$__range])))",
+        "expr": "count(sum by (service) (count_over_time({service=~\"pdf2abdm|pdf2nhcx|privacy.filter|forgensic|session.logger\"} [$__range]))) or vector(0)",
         "legendFormat": "",
         "refId": "A"
       }],
