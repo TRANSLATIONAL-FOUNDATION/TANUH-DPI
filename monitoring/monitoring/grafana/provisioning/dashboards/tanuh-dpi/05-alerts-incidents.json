@@ -78,8 +78,8 @@
     {
       "id": 4,
       "type": "stat",
-      "title": "All Clear",
-      "description": "Total alerts currently firing. 0 means no active incidents.",
+      "title": "Active Alerts",
+      "description": "Total alert rules currently in firing state, any severity. 0 = no active incidents.",
       "gridPos": { "x": 12, "y": 1, "w": 6, "h": 4 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [{ "expr": "count(ALERTS{alertstate=\"firing\"}) or vector(0)", "legendFormat": "", "refId": "A" }],
@@ -95,7 +95,7 @@
           "unit": "short",
           "thresholds": { "mode": "absolute", "steps": [{ "value": null, "color": "#3CB371" }, { "value": 1, "color": "#E53E3E" }] },
           "color": { "mode": "thresholds" },
-          "mappings": [{ "type": "value", "options": { "0": { "text": "✓ All Clear" } } }]
+          "mappings": [{ "type": "value", "options": { "0": { "text": "✓ No Active Incidents" } } }]
         }
       }
     },
@@ -194,7 +194,7 @@
     },
     {
       "id": 21,
-      "type": "statushistory",
+      "type": "status-history",
       "title": "Alert Firing History — Last 24 Hours",
       "description": "One row per alert rule. Red = firing, amber = pending, green = inactive. Color change marks exact firing time. Scan horizontally for patterns.",
       "gridPos": { "x": 0, "y": 15, "w": 24, "h": 10 },
@@ -272,7 +272,7 @@
       "targets": [
         { "expr": "dpi_queue_depth{queue=\"abdm\"}", "legendFormat": "ABDM", "refId": "A" },
         { "expr": "dpi_queue_depth{queue=\"nhcx\"}", "legendFormat": "NHCX", "refId": "B" },
-        { "expr": "dpi_queue_depth{queue=\"forgensic\"}", "legendFormat": "Forgensic", "refId": "C" }
+        { "expr": "dpi_queue_depth{queue=\"forgensic\"}", "legendFormat": "Forensic", "refId": "C" }
       ],
       "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "list", "placement": "bottom" } },
       "fieldConfig": {
@@ -280,7 +280,7 @@
         "overrides": [
           { "matcher": { "id": "byName", "options": "ABDM" }, "properties": [{ "id": "color", "value": { "fixedColor": "#4299E1", "mode": "fixed" } }] },
           { "matcher": { "id": "byName", "options": "NHCX" }, "properties": [{ "id": "color", "value": { "fixedColor": "#805AD5", "mode": "fixed" } }] },
-          { "matcher": { "id": "byName", "options": "Forgensic" }, "properties": [{ "id": "color", "value": { "fixedColor": "#DD6B20", "mode": "fixed" } }] }
+          { "matcher": { "id": "byName", "options": "Forensic" }, "properties": [{ "id": "color", "value": { "fixedColor": "#DD6B20", "mode": "fixed" } }] }
         ]
       }
     }

@@ -25,7 +25,7 @@
       "gridPos": { "x": 0, "y": 0, "w": 14, "h": 3 },
       "options": {
         "mode": "html",
-        "content": "<div style=\"display:flex;align-items:center;height:100%;padding:8px 20px;background:#1a1a2e;border-radius:4px\"><div style=\"font-size:28px;font-weight:800;color:#ffffff;letter-spacing:2px\">TANUH-DPI</div><div style=\"font-size:14px;color:#a0aec0;margin-left:20px\">Healthcare Document Processing Platform &nbsp;·&nbsp; Production Operations</div></div>"
+        "content": "<div style=\"display:flex;align-items:center;height:100%;padding:8px 24px;background:#1a1a2e;border-left:4px solid #4299E1;border-radius:4px\"><div><div style=\"font-size:28px;font-weight:800;color:#ffffff;letter-spacing:2px;line-height:1.15\">TANUH-DPI</div><div style=\"font-size:11px;color:#4299E1;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-top:2px\">Operations Command Center</div></div><div style=\"font-size:14px;color:#a0aec0;margin-left:28px;padding-left:28px;border-left:1px solid #2d3748;line-height:1.5\">Healthcare Document Processing Platform<br/><span style=\"color:#718096\">Production &nbsp;Â·&nbsp; Real-Time Monitoring</span></div></div>"
       }
     },
     {
@@ -41,7 +41,8 @@
         "textMode": "value_and_name",
         "colorMode": "background",
         "graphMode": "none",
-        "justifyMode": "center"
+        "justifyMode": "center",
+        "text": { "titleSize": 13, "valueSize": 30 }
       },
       "fieldConfig": {
         "defaults": {
@@ -66,7 +67,8 @@
         "textMode": "value_and_name",
         "colorMode": "background",
         "graphMode": "none",
-        "justifyMode": "center"
+        "justifyMode": "center",
+        "text": { "titleSize": 13, "valueSize": 22 }
       },
       "fieldConfig": {
         "defaults": {
@@ -84,7 +86,7 @@
       "description": "ABDM records processed in selected time range.",
       "gridPos": { "x": 0, "y": 3, "w": 4, "h": 4 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "expr": "sum(increase(dpi_documents_processed_total{service=\"pdf2abdm\"}[$__range]))", "legendFormat": "", "refId": "A" }],
+      "targets": [{ "expr": "sum(increase(dpi_documents_processed_total{service=\"pdf2abdm\"}[$__range])) or vector(0)", "legendFormat": "", "refId": "A" }],
       "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value_and_name", "colorMode": "none", "graphMode": "none", "justifyMode": "center" },
       "fieldConfig": { "defaults": { "unit": "short", "color": { "fixedColor": "#4299E1", "mode": "fixed" } } }
     },
@@ -95,7 +97,7 @@
       "description": "NHCX claims processed in selected time range.",
       "gridPos": { "x": 4, "y": 3, "w": 4, "h": 4 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "expr": "sum(increase(dpi_documents_processed_total{service=\"pdf2nhcx\"}[$__range]))", "legendFormat": "", "refId": "A" }],
+      "targets": [{ "expr": "sum(increase(dpi_documents_processed_total{service=\"pdf2nhcx\"}[$__range])) or vector(0)", "legendFormat": "", "refId": "A" }],
       "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value_and_name", "colorMode": "none", "graphMode": "none", "justifyMode": "center" },
       "fieldConfig": { "defaults": { "unit": "short", "color": { "fixedColor": "#805AD5", "mode": "fixed" } } }
     },
@@ -106,7 +108,7 @@
       "description": "Documents privacy-filtered in selected time range.",
       "gridPos": { "x": 8, "y": 3, "w": 4, "h": 4 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "expr": "sum(increase(dpi_documents_processed_total{service=\"privacy_filter\"}[$__range]))", "legendFormat": "", "refId": "A" }],
+      "targets": [{ "expr": "sum(increase(dpi_documents_processed_total{service=\"privacy_filter\"}[$__range])) or vector(0)", "legendFormat": "", "refId": "A" }],
       "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value_and_name", "colorMode": "none", "graphMode": "none", "justifyMode": "center" },
       "fieldConfig": { "defaults": { "unit": "short", "color": { "fixedColor": "#38A169", "mode": "fixed" } } }
     },
@@ -117,7 +119,7 @@
       "description": "Forgery analyses completed in selected time range.",
       "gridPos": { "x": 12, "y": 3, "w": 4, "h": 4 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "expr": "sum(increase(dpi_documents_processed_total{service=\"forgensic\"}[$__range]))", "legendFormat": "", "refId": "A" }],
+      "targets": [{ "expr": "sum(increase(dpi_documents_processed_total{service=\"forgensic\"}[$__range])) or vector(0)", "legendFormat": "", "refId": "A" }],
       "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value_and_name", "colorMode": "none", "graphMode": "none", "justifyMode": "center" },
       "fieldConfig": { "defaults": { "unit": "short", "color": { "fixedColor": "#DD6B20", "mode": "fixed" } } }
     },
@@ -142,7 +144,7 @@
       "id": 15,
       "type": "stat",
       "title": "Active Alerts",
-      "description": "Total alert rules currently firing.",
+      "description": "Total alert rules currently firing. 0 = no active incidents.",
       "gridPos": { "x": 20, "y": 3, "w": 4, "h": 4 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [{ "expr": "count(ALERTS{alertstate=\"firing\"}) or vector(0)", "legendFormat": "", "refId": "A" }],
@@ -152,7 +154,7 @@
           "unit": "short",
           "thresholds": { "mode": "absolute", "steps": [{ "value": null, "color": "#3CB371" }, { "value": 1, "color": "#FFA500" }, { "value": 3, "color": "#E53E3E" }] },
           "color": { "mode": "thresholds" },
-          "mappings": [{ "type": "value", "options": { "0": { "text": "✓ Clear" } } }]
+          "mappings": [{ "type": "value", "options": { "0": { "text": "✓ No Active Incidents" } } }]
         }
       }
     },
@@ -160,9 +162,8 @@
     {
       "id": 20,
       "type": "stat",
-      "title": "pdf2abdm",
-      "description": "ABDM service status.",
-      "gridPos": { "x": 0, "y": 7, "w": 4, "h": 4 },
+      "title": "Clinical Records",
+      "description": "ABDM Clinical Record Extraction service status (internal id: pdf2abdm).",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [{ "expr": "up{job=\"pdf2abdm\"}", "legendFormat": "", "refId": "A" }],
       "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value_and_name", "colorMode": "background", "graphMode": "none", "justifyMode": "center" },
@@ -177,9 +178,8 @@
     {
       "id": 21,
       "type": "stat",
-      "title": "pdf2nhcx",
-      "description": "NHCX service status.",
-      "gridPos": { "x": 4, "y": 7, "w": 4, "h": 4 },
+      "title": "Insurance Claims",
+      "description": "NHCX Insurance Policy Extraction service status (internal id: pdf2nhcx).",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [{ "expr": "up{job=\"pdf2nhcx\"}", "legendFormat": "", "refId": "A" }],
       "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value_and_name", "colorMode": "background", "graphMode": "none", "justifyMode": "center" },
@@ -194,9 +194,8 @@
     {
       "id": 22,
       "type": "stat",
-      "title": "privacy_filter",
-      "description": "Privacy filter service status.",
-      "gridPos": { "x": 8, "y": 7, "w": 4, "h": 4 },
+      "title": "Privacy Filter",
+      "description": "MedDeID PII Redaction service status (internal id: privacy_filter).",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [{ "expr": "up{job=\"privacy_filter\"}", "legendFormat": "", "refId": "A" }],
       "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value_and_name", "colorMode": "background", "graphMode": "none", "justifyMode": "center" },
@@ -211,9 +210,8 @@
     {
       "id": 23,
       "type": "stat",
-      "title": "forgensic",
-      "description": "Forgensic service status.",
-      "gridPos": { "x": 12, "y": 7, "w": 4, "h": 4 },
+      "title": "Forensic Analysis",
+      "description": "Forgery Detection Analysis service status (internal id: forgensic).",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [{ "expr": "up{job=\"forgensic\"}", "legendFormat": "", "refId": "A" }],
       "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value_and_name", "colorMode": "background", "graphMode": "none", "justifyMode": "center" },
@@ -228,9 +226,8 @@
     {
       "id": 24,
       "type": "stat",
-      "title": "session_logger",
-      "description": "Session logger service status.",
-      "gridPos": { "x": 16, "y": 7, "w": 4, "h": 4 },
+      "title": "Session Logger",
+      "description": "Session Logging and Analytics service status (internal id: session_logger).",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [{ "expr": "up{job=\"session_logger\"}", "legendFormat": "", "refId": "A" }],
       "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value_and_name", "colorMode": "background", "graphMode": "none", "justifyMode": "center" },
@@ -245,14 +242,14 @@
     {
       "id": 25,
       "type": "bargauge",
-      "title": "Queue Depths",
+      "title": "Queue Backlog",
       "description": "Current queue depths for all three pipelines.",
       "gridPos": { "x": 20, "y": 7, "w": 4, "h": 4 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         { "expr": "dpi_queue_depth{queue=\"abdm\"}", "legendFormat": "ABDM", "refId": "A" },
         { "expr": "dpi_queue_depth{queue=\"nhcx\"}", "legendFormat": "NHCX", "refId": "B" },
-        { "expr": "dpi_queue_depth{queue=\"forgensic\"}", "legendFormat": "Forgensic", "refId": "C" }
+        { "expr": "dpi_queue_depth{queue=\"forgensic\"}", "legendFormat": "Forensic", "refId": "C" }
       ],
       "options": {
         "reduceOptions": { "calcs": ["lastNotNull"] },

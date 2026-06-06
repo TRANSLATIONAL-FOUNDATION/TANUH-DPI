@@ -245,7 +245,7 @@
     },
     {
       "id": 31,
-      "type": "statushistory",
+      "type": "status-history",
       "title": "Container Restart History",
       "description": "One row per container. Color change = restart event. Scan for flashing rows — they identify crash-looping containers. Perfect green = no restarts.",
       "gridPos": { "x": 0, "y": 25, "w": 24, "h": 8 },
