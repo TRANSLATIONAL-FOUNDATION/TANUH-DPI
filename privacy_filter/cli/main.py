@@ -115,10 +115,11 @@ def run_check():
             checks.append((label, False, "NOT FOUND"))
     tess_ok = False
     try:
-        import shutil
-        if shutil.which("tesseract"):
-            import subprocess
-            ver = subprocess.check_output(["tesseract", "--version"], stderr=subprocess.STDOUT).decode().split("\n")[0]
+        import shutil, subprocess
+        from ..detectors.ocr_detector import _find_bundled_tesseract
+        tess_cmd = _find_bundled_tesseract() or shutil.which("tesseract")
+        if tess_cmd:
+            ver = subprocess.check_output([tess_cmd, "--version"], stderr=subprocess.STDOUT).decode().split("\n")[0]
             checks.append(("Tesseract", True, ver))
             tess_ok = True
         else:

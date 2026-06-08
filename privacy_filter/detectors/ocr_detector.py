@@ -22,8 +22,11 @@ Backends:
 from __future__ import annotations
 
 import logging
+import os
 import shutil
+import sys
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -44,6 +47,45 @@ from ..utils.image import (
 )
 
 logger = logging.getLogger(__name__)
+
+_TESS_EXE = (
+    "tesseract.exe"
+    if sys.platform == "win32"
+    else "tesseract"
+)
+
+
+def _find_bundled_tesseract() -> str | None:
+    candidates = []
+    meipass = getattr(sys, "_MEIPASS", None)
+    if meipass:
+        candidates.append(
+            Path(meipass) / "tesseract" / _TESS_EXE
+        )
+        candidates.append(
+            Path(meipass) / _TESS_EXE
+        )
+    exe_dir = Path(sys.executable).resolve().parent
+    candidates.append(exe_dir / "tesseract" / _TESS_EXE)
+    candidates.append(exe_dir / _TESS_EXE)
+    appdir = os.environ.get("APPDIR")
+    if appdir:
+        candidates.append(
+            Path(appdir) / "usr" / "bin" / _TESS_EXE
+        )
+    for p in candidates:
+        if p.is_file():
+            tessdata = p.parent / "tessdata"
+            if tessdata.is_dir():
+                os.environ.setdefault(
+                    "TESSDATA_PREFIX",
+                    str(tessdata.parent),
+                )
+            logger.debug(
+                "Using bundled tesseract: %s", p
+            )
+            return str(p)
+    return None
 
 
 # ============================================================
@@ -69,8 +111,9 @@ class TesseractBackend(OCRBackend):
 
     def __init__(self):
 
-        tesseract_path = shutil.which(
-            "tesseract"
+        tesseract_path = (
+            _find_bundled_tesseract()
+            or shutil.which("tesseract")
         )
 
         if tesseract_path is None:

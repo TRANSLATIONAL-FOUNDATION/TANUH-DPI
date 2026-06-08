@@ -71,10 +71,20 @@ jobs:
           mkdir -p "${APPDIR}/usr/lib/python3/site-packages"
           mkdir -p "${APPDIR}/usr/share/applications"
           mkdir -p "${APPDIR}/usr/share/icons/hicolor/scalable/apps"
+          mkdir -p "${APPDIR}/usr/share/tessdata"
 
           # Copy Python interpreter
           PYTHON_REAL="$(readlink -f "$(which python3)")"
           cp "${PYTHON_REAL}" "${APPDIR}/usr/bin/python3"
+
+          # Copy Tesseract binary and data into the AppDir
+          cp "$(which tesseract)" "${APPDIR}/usr/bin/tesseract"
+          # tessdata files (language models)
+          for d in /usr/share/tesseract-ocr/*/tessdata /usr/share/tessdata; do
+            if [ -d "$d" ]; then
+              cp "$d"/*.traineddata "${APPDIR}/usr/share/tessdata/" 2>/dev/null || true
+            fi
+          done
 
           # Copy Python stdlib
           PYVER="$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
@@ -109,11 +119,9 @@ jobs:
             --exclude='tests/' --exclude='app/' \
             "privacy_filter/" "${APPDIR}/usr/lib/python3/site-packages/privacy_filter/"
 
-          # Copy shared libraries that Python interpreter and extensions need
+          # Copy shared libraries that Python interpreter, extensions, AND tesseract need
           mkdir -p "${APPDIR}/usr/lib/x86_64-linux-gnu"
-          # Scan the Python binary AND all .so files — the python3 binary
-          # links against libpython3.11.so.1.0 which must be bundled
-          for elf_file in "${APPDIR}/usr/bin/python3" $(find "${APPDIR}" -name "*.so" -type f 2>/dev/null); do
+          for elf_file in "${APPDIR}/usr/bin/python3" "${APPDIR}/usr/bin/tesseract" $(find "${APPDIR}" -name "*.so" -type f 2>/dev/null); do
             ldd "${elf_file}" 2>/dev/null | grep "=> /" | awk '{print $3}' | while read dep; do
               dep_name="$(basename "${dep}")"
               case "${dep_name}" in
@@ -146,6 +154,7 @@ jobs:
           export PYTHONHOME="${APPDIR}/usr"
           export PYTHONPATH="${APPDIR}/usr/lib/python3/site-packages:${APPDIR}/usr/lib/${PYVER}"
           export LD_LIBRARY_PATH="${APPDIR}/usr/lib:${APPDIR}/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}"
+          export TESSDATA_PREFIX="${APPDIR}/usr/share"
           export SSL_CERT_FILE="/etc/ssl/certs/ca-certificates.crt"
           export REQUESTS_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt"
           exec "${APPDIR}/usr/bin/python3" -m privacy_filter.cli.main "$@"
@@ -241,7 +250,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y tesseract-ocr \
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-eng \
             libgl1 libglib2.0-0 libsm6 libxext6 libxrender1
 
       - name: Install Python dependencies
@@ -257,6 +266,25 @@ jobs:
             pymupdf==1.24.13
           pip install pyinstaller
 
+      - name: Prepare Tesseract bundle
+        run: |
+          mkdir -p tesseract_bundle/tesseract/tessdata
+          cp "$(which tesseract)" tesseract_bundle/tesseract/
+          # Copy tessdata language files
+          TESSDATA=$(dpkg -L tesseract-ocr-eng | grep tessdata | head -1 | xargs dirname)
+          cp "${TESSDATA}"/*.traineddata tesseract_bundle/tesseract/tessdata/ 2>/dev/null || true
+          cp /usr/share/tesseract-ocr/*/tessdata/*.traineddata tesseract_bundle/tesseract/tessdata/ 2>/dev/null || true
+          # Bundle shared libraries tesseract needs
+          for lib in $(ldd "$(which tesseract)" | grep "=> /" | awk '{print $3}'); do
+            libname=$(basename "$lib")
+            case "$libname" in
+              libc.so*|libm.so*|libpthread.so*|libdl.so*|librt.so*|ld-linux*|libgcc_s*) continue ;;
+            esac
+            cp -L "$lib" tesseract_bundle/tesseract/ 2>/dev/null || true
+          done
+          echo "Tesseract bundle contents:"
+          ls -la tesseract_bundle/tesseract/
+
       - name: Create PyInstaller entry point and spec
         run: |
           cat > pf_entry.py << 'ENTRY_EOF'
@@ -268,10 +296,9 @@ jobs:
 
           cat > pf-redact.spec << 'SPEC_EOF'
           # -*- mode: python ; coding: utf-8 -*-
+          import os, glob
           from PyInstaller.utils.hooks import collect_submodules
 
-          # Collect only CLI-relevant subpackages — NOT privacy_filter.app
-          # (the FastAPI web layer imports fastapi/httpx/jose which are not installed)
           hidden_imports = (
               collect_submodules('privacy_filter.cli') +
               collect_submodules('privacy_filter.pipeline') +
@@ -294,11 +321,22 @@ jobs:
               ]
           )
 
+          tess_bundle = 'tesseract_bundle/tesseract'
+          tess_binaries = [
+              (os.path.join(tess_bundle, 'tesseract'), 'tesseract'),
+          ]
+          for f in glob.glob(os.path.join(tess_bundle, '*.so*')):
+              tess_binaries.append((f, 'tesseract'))
+
+          tess_datas = [
+              (os.path.join(tess_bundle, 'tessdata'), 'tesseract/tessdata'),
+          ]
+
           a = Analysis(
               ['pf_entry.py'],
               pathex=['.'],
-              binaries=[],
-              datas=[],
+              binaries=tess_binaries,
+              datas=tess_datas,
               hiddenimports=hidden_imports,
               hookspath=[],
               hooksconfig={},
@@ -324,8 +362,7 @@ jobs:
               debug=False,
               bootloader_ignore_signals=False,
               strip=False,
-              upx=True,
-              upx_exclude=[],
+              upx=False,
               runtime_tmpdir=None,
               console=True,
               disable_windowed_traceback=False,
@@ -340,15 +377,20 @@ jobs:
         run: |
           pyinstaller --clean --noconfirm pf-redact.spec
 
-      - name: Verify binary
+      - name: Verify binary (bundled Tesseract, no system install needed)
         run: |
           chmod +x dist/pf-redact
+          # Remove system tesseract from PATH to prove bundled version works
+          export PATH=$(echo "$PATH" | tr ':' '\n' | grep -v tesseract | tr '\n' ':')
+          hash -r
           ./dist/pf-redact --help
           ./dist/pf-redact check
-          echo "ARM64 verification passed"
+          echo "ARM64 verification passed (bundled Tesseract)"
 
       - name: Smoke test binary (end-to-end)
         run: |
+          export PATH=$(echo "$PATH" | tr ':' '\n' | grep -v tesseract | tr '\n' ':')
+          hash -r
           python3 -c "
           from PIL import Image, ImageDraw
           img = Image.new('RGB', (400, 200), 'white')
@@ -416,8 +458,15 @@ jobs:
           main()
           ENTRY_EOF
 
+          # Locate Tesseract installation for bundling
+          TESS_DIR="/c/Program Files/Tesseract-OCR"
+          echo "Tesseract directory contents:"
+          ls -la "${TESS_DIR}/" || true
+          ls -la "${TESS_DIR}/tessdata/" || true
+
           cat > pf-redact.spec << 'SPEC_EOF'
           # -*- mode: python ; coding: utf-8 -*-
+          import os
           from PyInstaller.utils.hooks import collect_submodules
 
           hidden_imports = (
@@ -442,11 +491,25 @@ jobs:
               ]
           )
 
+          tess_dir = r'C:\Program Files\Tesseract-OCR'
+          tess_binaries = [
+              (os.path.join(tess_dir, 'tesseract.exe'), 'tesseract'),
+          ]
+          for f in os.listdir(tess_dir):
+              if f.endswith('.dll'):
+                  tess_binaries.append(
+                      (os.path.join(tess_dir, f), 'tesseract')
+                  )
+
+          tess_datas = [
+              (os.path.join(tess_dir, 'tessdata'), 'tesseract/tessdata'),
+          ]
+
           a = Analysis(
               ['pf_entry.py'],
               pathex=['.'],
-              binaries=[],
-              datas=[],
+              binaries=tess_binaries,
+              datas=tess_datas,
               hiddenimports=hidden_imports,
               hookspath=[],
               hooksconfig={},
@@ -472,8 +535,7 @@ jobs:
               debug=False,
               bootloader_ignore_signals=False,
               strip=False,
-              upx=True,
-              upx_exclude=[],
+              upx=False,
               runtime_tmpdir=None,
               console=True,
               disable_windowed_traceback=False,
@@ -488,15 +550,19 @@ jobs:
         run: |
           pyinstaller --clean --noconfirm pf-redact.spec
 
-      - name: Verify exe
+      - name: Verify exe (bundled Tesseract, no system install needed)
         run: |
+          # Remove Tesseract from PATH to prove bundled version works
+          $env:PATH = ($env:PATH -split ';' | Where-Object { $_ -notmatch 'Tesseract' }) -join ';'
           .\dist\pf-redact.exe --help
           .\dist\pf-redact.exe check
-          echo "Windows verification passed"
+          echo "Windows verification passed (bundled Tesseract)"
 
       - name: Smoke test exe (end-to-end)
         shell: bash
         run: |
+          # Remove Tesseract from PATH to prove bundled version works
+          export PATH=$(echo "$PATH" | tr ':' '\n' | grep -iv tesseract | tr '\n' ':')
           python -c "
           from PIL import Image, ImageDraw
           img = Image.new('RGB', (400, 200), 'white')
@@ -553,6 +619,19 @@ jobs:
             pymupdf==1.24.13
           pip install pyinstaller
 
+      - name: Prepare Tesseract bundle
+        run: |
+          mkdir -p tesseract_bundle/tesseract
+          TESS_BIN="$(brew --prefix tesseract)/bin/tesseract"
+          cp "${TESS_BIN}" tesseract_bundle/tesseract/
+          cp -r "$(brew --prefix tesseract)/share/tessdata" tesseract_bundle/tesseract/
+          # Bundle dylibs that tesseract links against
+          for lib in $(otool -L "${TESS_BIN}" | awk '/homebrew/{print $1}'); do
+            cp -L "${lib}" tesseract_bundle/tesseract/ 2>/dev/null || true
+          done
+          echo "Tesseract bundle contents:"
+          ls -la tesseract_bundle/tesseract/
+
       - name: Create PyInstaller entry point and spec
         run: |
           cat > pf_entry.py << 'ENTRY_EOF'
@@ -564,6 +643,7 @@ jobs:
 
           cat > pf-redact.spec << 'SPEC_EOF'
           # -*- mode: python ; coding: utf-8 -*-
+          import os, glob
           from PyInstaller.utils.hooks import collect_submodules
 
           hidden_imports = (
@@ -588,11 +668,22 @@ jobs:
               ]
           )
 
+          tess_bundle = 'tesseract_bundle/tesseract'
+          tess_binaries = [
+              (os.path.join(tess_bundle, 'tesseract'), 'tesseract'),
+          ]
+          for f in glob.glob(os.path.join(tess_bundle, '*.dylib')):
+              tess_binaries.append((f, 'tesseract'))
+
+          tess_datas = [
+              (os.path.join(tess_bundle, 'tessdata'), 'tesseract/tessdata'),
+          ]
+
           a = Analysis(
               ['pf_entry.py'],
               pathex=['.'],
-              binaries=[],
-              datas=[],
+              binaries=tess_binaries,
+              datas=tess_datas,
               hiddenimports=hidden_imports,
               hookspath=[],
               hooksconfig={},
@@ -618,8 +709,7 @@ jobs:
               debug=False,
               bootloader_ignore_signals=False,
               strip=False,
-              upx=True,
-              upx_exclude=[],
+              upx=False,
               runtime_tmpdir=None,
               console=True,
               disable_windowed_traceback=False,
@@ -634,15 +724,18 @@ jobs:
         run: |
           pyinstaller --clean --noconfirm pf-redact.spec
 
-      - name: Verify binary
+      - name: Verify binary (bundled Tesseract, no system install needed)
         run: |
           chmod +x dist/pf-redact
+          # Remove brew tesseract from PATH to prove bundled version works
+          export PATH=$(echo "$PATH" | tr ':' '\n' | grep -v "$(brew --prefix tesseract)" | tr '\n' ':')
           ./dist/pf-redact --help
           ./dist/pf-redact check
-          echo "macOS verification passed"
+          echo "macOS verification passed (bundled Tesseract)"
 
       - name: Smoke test binary (end-to-end)
         run: |
+          export PATH=$(echo "$PATH" | tr ':' '\n' | grep -v "$(brew --prefix tesseract)" | tr '\n' ':')
           python3 -c "
           from PIL import Image, ImageDraw
           img = Image.new('RGB', (400, 200), 'white')
@@ -712,10 +805,7 @@ jobs:
             | macOS (Apple Silicon) | `pf-redact-macos` |
 
             ### Prerequisites
-            - **Tesseract OCR** must be installed on your system
-              - Linux: `sudo apt install tesseract-ocr`
-              - macOS: `brew install tesseract`
-              - Windows: Download from https://github.com/UB-Mannheim/tesseract/wiki
+            No external dependencies needed — Tesseract OCR is bundled.
 
             ### Usage
             ```bash
