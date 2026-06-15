@@ -51,6 +51,8 @@ log "writing secrets-free .env"
 cat > .env <<EOF
 # ── Config (non-secret) ──────────────────────────────────────────────────────
 PROJECT_ID=${PROJECT_ID}
+# Pinned image version pulled from Artifact Registry (override for rollbacks).
+IMAGE_TAG=v1.0.1
 MYSQL_USER=dpi_logger
 MYSQL_HOST=cloud-sql-proxy
 MYSQL_DB=dpi_session_logger
