@@ -25,6 +25,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     && pip install -r requirements.txt
 
 COPY common/ ./common/
+COPY scripts/fetch_validator_jar.py ./scripts/fetch_validator_jar.py
+COPY scripts/entrypoint-abdm.sh ./scripts/entrypoint-abdm.sh
+RUN chmod +x ./scripts/entrypoint-abdm.sh
 COPY pdf2abdm/__init__.py ./pdf2abdm/__init__.py
 COPY pdf2abdm/app/ ./pdf2abdm/app/
 # Copy utils to both locations:
@@ -40,4 +43,5 @@ ENV PYTHONPATH=/app
 
 EXPOSE 8000
 
+ENTRYPOINT ["./scripts/entrypoint-abdm.sh"]
 CMD ["uvicorn", "pdf2abdm.app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2", "--timeout-keep-alive", "1500"]

@@ -27,7 +27,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, EmailStr
 
-# Resolve secrets (FORGENSIC_SECRET_KEY etc.) from Secret Manager before config reads them.
 from common.secrets import load_secrets
 load_secrets()
 
@@ -322,7 +321,7 @@ async def get_job_file(
     file_name: str,
     _claims: Dict[str, Any] = Depends(require_bearer),
 ):
-    """Serve a pipeline output file directly from the shared volume."""
+    """Serve a pipeline output file from GCS or the local volume."""
     state = _read_job_state(job_id)
     if not state:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -332,8 +331,6 @@ async def get_job_file(
     if not location:
         raise HTTPException(status_code=404, detail="File not found")
 
-    # New (MIG) path: artefacts live in GCS — stream them back so the request can
-    # be served by any VM, not just the one whose worker produced the file.
     if location.startswith("gs://"):
         from forgensic.app.gcs_storage import download_bytes  # noqa: PLC0415
         try:
@@ -348,7 +345,6 @@ async def get_job_file(
             headers={"Content-Disposition": f'inline; filename="{file_name}"'},
         )
 
-    # Legacy/local fallback: serve straight from disk.
     disk_path = Path(location)
     if not disk_path.exists():
         raise HTTPException(status_code=404, detail="File no longer available")

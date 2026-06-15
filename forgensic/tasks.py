@@ -38,6 +38,9 @@ from common.metrics import (
 logger = logging.getLogger(__name__)
 
 SESSION_LOGGER_URL = os.getenv("SESSION_LOGGER_URL", "http://session-logger:8002")
+STORAGE_BACKEND = os.getenv("STORAGE_BACKEND", "local").lower()
+GCS_BUCKET = os.getenv("GCS_BUCKET", "dpi-transient-processing")
+GCS_PREFIX = os.getenv("GCS_PREFIX", "forgensic")
 
 
 def _fire_log(payload: dict):
@@ -75,6 +78,48 @@ def _write_job_state(job_id: str, payload: Dict[str, Any]) -> None:
     state: Dict[str, Any] = json.loads(existing_raw) if existing_raw else {}
     state.update(payload)
     r.set(key, json.dumps(state, default=str), ex=ttl)
+
+
+# ── GCS helpers ───────────────────────────────────────────────────────────────
+
+def _upload_job_to_gcs(job_id: str, file_map: Dict[str, str]) -> Dict[str, str]:
+    """Upload all job output files to GCS. Returns updated file_map with GCS blob paths."""
+    try:
+        from google.cloud import storage as gcs
+        client = gcs.Client()
+        bucket = client.bucket(GCS_BUCKET)
+        gcs_file_map: Dict[str, str] = {}
+        for name, local_path in file_map.items():
+            p = Path(local_path)
+            if not p.exists():
+                continue
+            blob_name = f"{GCS_PREFIX}/{job_id}/{name}"
+            blob = bucket.blob(blob_name)
+            blob.upload_from_filename(str(p))
+            gcs_file_map[name] = blob_name
+        logger.info("Uploaded %d files to gs://%s/%s/%s/", len(gcs_file_map), GCS_BUCKET, GCS_PREFIX, job_id)
+        return gcs_file_map
+    except Exception as exc:
+        logger.warning("GCS upload failed, falling back to local: %s", exc)
+        return file_map
+
+
+def _stream_from_gcs(blob_name: str) -> tuple:
+    """Download a GCS blob into memory. Returns (BytesIO, content_type) or (None, None)."""
+    try:
+        import io
+        import mimetypes
+        from google.cloud import storage as gcs
+        client = gcs.Client()
+        bucket = client.bucket(GCS_BUCKET)
+        blob = bucket.blob(blob_name)
+        if not blob.exists():
+            return None, None
+        data = io.BytesIO(blob.download_as_bytes())
+        ct, _ = mimetypes.guess_type(blob_name)
+        return data, ct or "application/octet-stream"
+    except Exception:
+        return None, None
 
 
 # ── The Task ───────────────────────────────────────────────────────────────────
@@ -171,10 +216,8 @@ def process_forgensic_job(
             inference_seconds / max(len(pages), 1) if pages else None
         )
 
-        # ── 4. Build URL + disk-path maps ─────────────────────────────────────
-        # Files live on the shared volume — the API reads them back from disk.
-        # We store a file_map in Redis so the API can resolve name → disk path.
-        file_map: Dict[str, str] = {}     # name → absolute disk path
+        # ── 4. Build URL + file maps ─────────────────────────────────────────
+        file_map: Dict[str, str] = {}     # name → local disk path or GCS blob
         file_url_map: Dict[str, str] = {} # name → /jobs/{id}/files/{name}
         preview_url_map: Dict[str, str] = {}
 
@@ -190,7 +233,6 @@ def process_forgensic_job(
                 file_map[pname] = page.preview_path
                 preview_url_map[page.page_file_name] = f"/jobs/{job_id}/files/{pname}"
 
-        # Export artefacts (JSON, Excel, YAML annotations)
         for fname in ["submission.json", "submission_preview.xlsx"]:
             p = output_dir / fname
             if p.exists():
@@ -203,11 +245,6 @@ def process_forgensic_job(
                 file_map[yp.name] = str(yp)
                 file_url_map[yp.name] = f"/jobs/{job_id}/files/{yp.name}"
 
-        # ── 4b. Upload artefacts to GCS, rewrite file_map to gs:// URIs ────────
-        # The API serves files by downloading them from GCS, so a /files/ request
-        # can be handled by any VM — not just the one whose worker produced them.
-        # file_url_map / preview_url_map (the public /jobs/.../files/ URLs) are
-        # unchanged; only the disk-path resolution map moves to GCS.
         gcs_file_map: Dict[str, str] = {}
         for name, local_path in file_map.items():
             uri = upload_file(local_path, f"forgensic/{job_id}/output/{name}")

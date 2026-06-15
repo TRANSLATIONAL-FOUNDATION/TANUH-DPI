@@ -16,3 +16,8 @@ PIPELINE_VERSION = os.getenv("PIPELINE_VERSION", "ps3-cv-1.0.0")
 
 # ── Redis / Celery ─────────────────────────────────────────────────────────────
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+
+# ── Storage ───────────────────────────────────────────────────────────────────
+STORAGE_BACKEND = os.getenv("STORAGE_BACKEND", "local").lower()
+GCS_BUCKET = os.getenv("GCS_BUCKET", "dpi-transient-processing")
+GCS_PREFIX = os.getenv("GCS_PREFIX", "forgensic")
