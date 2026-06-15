@@ -113,10 +113,26 @@ def process_forgensic_job(
     )
     from forgensic.app.pipeline import build_findings_summary, run_pipeline
     from forgensic.app.utils import build_results_payload
+    from forgensic.app.gcs_storage import (
+        download_to_path,
+        upload_file,
+        delete_gcs_object,
+    )
 
-    file_path = Path(file_path_str)
     job_dir = DATA_DIR / job_id
     output_dir = job_dir / "output"
+
+    # The API passes a gs:// URI (input lives in GCS for MIG horizontal scaling).
+    # Download it into the local scratch dir so the pipeline — which detects the
+    # document type from the file suffix — runs completely unchanged. A plain
+    # local path is still honoured for backward compatibility.
+    input_gcs_uri: Optional[str] = None
+    if file_path_str.startswith("gs://"):
+        input_gcs_uri = file_path_str
+        in_name = file_path_str.rsplit("/", 1)[-1]
+        file_path = Path(download_to_path(input_gcs_uri, str(job_dir / "input" / in_name)))
+    else:
+        file_path = Path(file_path_str)
 
     # ── 1. Mark as processing ─────────────────────────────────────────────────
     _write_job_state(
@@ -187,6 +203,18 @@ def process_forgensic_job(
                 file_map[yp.name] = str(yp)
                 file_url_map[yp.name] = f"/jobs/{job_id}/files/{yp.name}"
 
+        # ── 4b. Upload artefacts to GCS, rewrite file_map to gs:// URIs ────────
+        # The API serves files by downloading them from GCS, so a /files/ request
+        # can be handled by any VM — not just the one whose worker produced them.
+        # file_url_map / preview_url_map (the public /jobs/.../files/ URLs) are
+        # unchanged; only the disk-path resolution map moves to GCS.
+        gcs_file_map: Dict[str, str] = {}
+        for name, local_path in file_map.items():
+            uri = upload_file(local_path, f"forgensic/{job_id}/output/{name}")
+            if uri:
+                gcs_file_map[name] = uri
+        file_map = gcs_file_map
+
         # ── 5. Build the complete result payload ──────────────────────────────
         # Read created_at from the existing Redis record so we preserve it
         r = _redis_client()
@@ -236,10 +264,13 @@ def process_forgensic_job(
             "pdf_location": file_path.name,
         })
 
-        # ── 7. Clean up the raw input file (output stays for serving) ─────────
-        # Note: We no longer eagerly delete the input directory here.
-        # Single-image uploads use the original file as the `image_path` for the frontend.
-        # The entire job directory will be cleaned up by the API's _cleanup_jobs TTL check.
+        # ── 7. Clean up: delete the transient input object + local scratch ────
+        # Output now lives in GCS (uploaded above), so nothing on local disk needs
+        # to survive for serving. Delete the input GCS object and the local job
+        # directory; the bucket lifecycle rule is the final safety net for output.
+        if input_gcs_uri:
+            delete_gcs_object(input_gcs_uri)
+        shutil.rmtree(job_dir, ignore_errors=True)
 
         _task_elapsed = perf_counter() - _task_start
         TASKS_COMPLETED_TOTAL.labels(service="forgensic").inc()
@@ -264,4 +295,7 @@ def process_forgensic_job(
             job_id,
             {"status": "error", "updated_at": _now_iso(), "message": str(exc)},
         )
+        # Best-effort: drop the transient input object even on failure.
+        if input_gcs_uri:
+            delete_gcs_object(input_gcs_uri)
         return {"status": "error", "job_id": job_id, "message": str(exc)}
