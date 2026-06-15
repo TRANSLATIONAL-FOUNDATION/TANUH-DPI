@@ -16,7 +16,6 @@ from fastapi import FastAPI, Request, HTTPException
 from pydantic import BaseModel, EmailStr
 from typing import Any, Dict
 
-# Resolve secrets (ABDM_SECRET_KEY etc.) from Secret Manager before config reads them.
 from common.secrets import load_secrets
 load_secrets()
 
@@ -676,6 +675,40 @@ async def validate_fhir(request: Request):
         # 6. Delete the temporary file
         if os.path.exists(temp_file):
             os.remove(temp_file)
+
+# ── Desktop executable downloads via GCS ─────────────────────────────────────
+
+@app.get("/downloads/{filename}", tags=["Downloads"],
+         summary="Download a desktop executable from GCS")
+async def download_executable(filename: str):
+    """Redirect to a signed GCS URL for the requested executable."""
+    from common.downloads import get_download_url, stream_download, ALLOWED_FILES
+    from fastapi.responses import RedirectResponse, StreamingResponse
+
+    if filename not in ALLOWED_FILES:
+        return JSONResponse(status_code=404, content={"detail": "File not found"})
+
+    url = get_download_url(filename)
+    if url:
+        return RedirectResponse(url=url, status_code=302)
+
+    data, content_type = stream_download(filename)
+    if data is None:
+        return JSONResponse(status_code=404, content={"detail": "File not available in GCS"})
+
+    return StreamingResponse(
+        data,
+        media_type=content_type,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@app.get("/downloads", tags=["Downloads"],
+         summary="List available desktop executables")
+async def list_downloads():
+    from common.downloads import list_available_downloads
+    return {"downloads": list_available_downloads()}
+
 
 def main():
     parser = argparse.ArgumentParser(description="OCR PDF to ABDM FHIR Converter (Local)")

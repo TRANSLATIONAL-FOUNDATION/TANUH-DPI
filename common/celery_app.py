@@ -6,8 +6,6 @@ from celery.signals import task_retry, task_failure, worker_ready
 
 logger = logging.getLogger(__name__)
 
-# Resolve secrets from Secret Manager before reading any secret-bearing config
-# (REDIS_URL may carry Redis AUTH credentials injected by the loader).
 from common.secrets import load_secrets
 load_secrets()
 

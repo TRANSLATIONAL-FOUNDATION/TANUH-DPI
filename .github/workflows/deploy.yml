@@ -1,135 +1,42 @@
-name: Deploy to VM
+# Deployment is handled internally within GCP — no external authentication.
+#
+# All services (VMs, Cloud SQL, GCS, Secret Manager, Redis) communicate via
+# the VPC using the attached service account (sa-dpi-app-prod) and ADC.
+#
+# To deploy after pushing to main:
+#
+#   Option A — MIG rolling replace (recommended):
+#     gcloud compute instance-groups managed rolling-action replace \
+#       dpi-mig --region=asia-south1 --project=proj-dpi-shared \
+#       --max-surge=1 --max-unavailable=0
+#
+#   Option B — Update the standalone VM (tanuh-dpi):
+#     gcloud compute ssh tanuh-dpi --zone=asia-south1-c \
+#       --project=proj-dpi-shared --tunnel-through-iap \
+#       --command="cd /home/miglab/TANUH-DPI && git fetch --depth 1 origin main && git checkout -f FETCH_HEAD && cp docker-compose.prod.yml docker-compose.yml && cp .env.prod .env && docker compose build --parallel && docker compose up -d --remove-orphans"
+#
+#   Option C — Cloud Build trigger (set up once in GCP Console):
+#     Connect this GitHub repo to Cloud Build, create a trigger on push to main,
+#     and have it run the MIG rolling replace command above.
+#
+# MIG instances run deploy/bootstrap-vm.sh as their startup script, which
+# pulls the latest code from main and starts the stack automatically.
+
+name: "[Disabled] Deploy docs"
 
 on:
   workflow_dispatch:
 
-concurrency:
-  group: deploy-production
-  cancel-in-progress: false
-
 jobs:
-  deploy:
-    name: Deploy → Production VM
+  info:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-
     steps:
-      - name: Pull latest code on VM
-        uses: appleboy/ssh-action@v1.2.1
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          password: ${{ secrets.VM_PASSWORD }}
-          command_timeout: 5m
-          script: |
-            set -e
-            cd ~/TANUH-DPI
-            git stash
-            git pull origin main
-            git stash pop || echo "Stash pop had conflicts — local overrides preserved"
-            echo "Code updated to: $(git rev-parse --short HEAD)"
-
-      - name: Write .env from secrets
-        uses: appleboy/ssh-action@v1.2.1
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          password: ${{ secrets.VM_PASSWORD }}
-          envs: ABDM_KEY,NHCX_KEY,FORGENSIC_KEY,DB_USER,DB_PASS
-          script: |
-            cd ~/TANUH-DPI
-            cat > .env <<EOF
-            ABDM_AUTH_ENABLED=false
-            NHCX_AUTH_ENABLED=false
-            ABDM_SECRET_KEY=${ABDM_KEY}
-            NHCX_SECRET_KEY=${NHCX_KEY}
-            ABDM_TOKEN_EXPIRY_DAYS=1
-            NHCX_TOKEN_EXPIRY_DAYS=1
-            FORGENSIC_SECRET_KEY=${FORGENSIC_KEY}
-            FORGENSIC_AUTH_ENABLED=false
-            FORGENSIC_TOKEN_EXPIRY_DAYS=1
-            MYSQL_USER=${DB_USER}
-            MYSQL_PASSWORD=${DB_PASS}
-            EOF
-            sed -i 's/^[[:space:]]*//' .env
-            chmod 600 .env
-            echo ".env written"
-        env:
-          ABDM_KEY: ${{ secrets.ABDM_SECRET_KEY }}
-          NHCX_KEY: ${{ secrets.NHCX_SECRET_KEY }}
-          FORGENSIC_KEY: ${{ secrets.FORGENSIC_SECRET_KEY }}
-          DB_USER: ${{ secrets.MYSQL_USER }}
-          DB_PASS: ${{ secrets.MYSQL_PASSWORD }}
-
-      - name: Write GCP service account from secret
-        uses: appleboy/ssh-action@v1.2.1
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          password: ${{ secrets.VM_PASSWORD }}
-          envs: GCP_SA_B64
-          script: |
-            cd ~/TANUH-DPI
-            echo "${GCP_SA_B64}" | base64 -d > gcp-service-account.json
-            chmod 644 gcp-service-account.json
-            echo "gcp-service-account.json written"
-        env:
-          GCP_SA_B64: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON_B64 }}
-
-      - name: Rebuild & restart containers
-        uses: appleboy/ssh-action@v1.2.1
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          password: ${{ secrets.VM_PASSWORD }}
-          command_timeout: 20m
-          script: |
-            set -e
-            cd ~/TANUH-DPI
-            docker compose build --parallel
-            docker compose up -d --remove-orphans
-            docker image prune -f
-            echo "Deployment complete!"
-            docker compose ps
-
-      - name: Restart monitoring stack
-        uses: appleboy/ssh-action@v1.2.1
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          password: ${{ secrets.VM_PASSWORD }}
-          command_timeout: 5m
-          script: |
-            set -e
-            cd ~/TANUH-DPI
-            docker compose -f monitoring/monitoring/docker-compose.monitoring.yml up -d
-            echo "Monitoring stack running:"
-            docker compose -f monitoring/monitoring/docker-compose.monitoring.yml ps
-
-      - name: Health check
-        uses: appleboy/ssh-action@v1.2.1
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          password: ${{ secrets.VM_PASSWORD }}
-          command_timeout: 5m
-          script: |
-            echo "Waiting 60s for containers to initialize (Privacy Filter NER model needs ~40s)..."
-            sleep 60
-            PASS=true
-            for svc in "ABDM API|http://localhost:8000/health" \
-                       "NHCX API|http://localhost:8001/health" \
-                       "Frontend|http://localhost:8080" \
-                       "Session Logger|http://localhost:8002/health" \
-                       "Privacy Filter|http://localhost:8003/api/health" \
-                       "Forgensic|http://localhost:8004/health"; do
-              NAME="${svc%%|*}"
-              URL="${svc##*|}"
-              if curl -sf --max-time 10 "$URL" > /dev/null; then
-                echo "  $NAME healthy"
-              else
-                echo "  $NAME FAILED at $URL"
-                PASS=false
-              fi
-            done
-            $PASS || exit 1
+      - name: Deployment info
+        run: |
+          echo "Deployment is managed internally within GCP."
+          echo "See the comments at the top of this file for instructions."
+          echo ""
+          echo "To deploy:"
+          echo "  gcloud compute instance-groups managed rolling-action replace \\"
+          echo "    dpi-mig --region=asia-south1 --project=proj-dpi-shared \\"
+          echo "    --max-surge=1 --max-unavailable=0"

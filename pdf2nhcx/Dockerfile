@@ -25,6 +25,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     && pip install -r requirements.txt
 
 COPY common/ ./common/
+COPY scripts/fetch_validator_jar.py ./scripts/fetch_validator_jar.py
+COPY scripts/entrypoint-abdm.sh ./scripts/entrypoint-abdm.sh
+RUN chmod +x ./scripts/entrypoint-abdm.sh
 COPY pdf2nhcx/__init__.py ./pdf2nhcx/__init__.py
 COPY pdf2nhcx/app/ ./pdf2nhcx/app/
 # Copy utils to both locations:
@@ -40,4 +43,5 @@ ENV PYTHONPATH=/app
 
 EXPOSE 8001
 
+ENTRYPOINT ["./scripts/entrypoint-abdm.sh"]
 CMD ["uvicorn", "pdf2nhcx.app.main:app", "--host", "0.0.0.0", "--port", "8001", "--workers", "2", "--timeout-keep-alive", "1500"]

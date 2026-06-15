@@ -245,13 +245,7 @@ def get_storage() -> Storage:
     """
     backend = os.getenv("STORAGE_BACKEND", "local").lower()
     if backend == "gcs":
-        # Privacy Filter uses its OWN bucket (dpi-privacy-temp) so its 30-minute
-        # edit-window retention is isolated from the immediately-deleted transient
-        # bucket shared by ABDM/NHCX/Forgensic. PRIVACY_GCS_BUCKET takes priority.
-        bucket = (
-            os.getenv("PRIVACY_GCS_BUCKET")
-            or os.getenv("GCS_BUCKET", "dpi-privacy-temp")
-        )
+        bucket = os.getenv("GCS_BUCKET") or os.getenv("PRIVACY_GCS_BUCKET", "dpi-privacy-temp")
         prefix = os.getenv("GCS_PREFIX", "privacy-app")
         logger.info(
             f"Storage backend: GCS  bucket={bucket}  prefix={prefix}"

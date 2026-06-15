@@ -15,7 +15,6 @@ from celery.signals import task_retry, task_failure, worker_ready
 
 logger = logging.getLogger(__name__)
 
-# Resolve secrets from Secret Manager before reading any secret-bearing config.
 from common.secrets import load_secrets
 load_secrets()
 

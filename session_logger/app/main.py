@@ -32,7 +32,6 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import func, text
 
-# Resolve secrets (MYSQL_PASSWORD etc.) from Secret Manager before config reads them.
 from common.secrets import load_secrets
 load_secrets()
 

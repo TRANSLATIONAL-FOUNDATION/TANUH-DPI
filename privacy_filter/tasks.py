@@ -99,7 +99,8 @@ def process_redaction_task(
 
         update("De-identifying", 30)
         out_ext = service.out_extension(filename)
-        redacted_key = f"{job_id}__redacted{out_ext}"
+        stem = Path(filename).stem
+        redacted_key = f"{job_id}__{stem}_redacted{out_ext}"
         tmp_redact_dir = Path(tempfile.gettempdir()) / "pf_redacted"
         tmp_redact_dir.mkdir(parents=True, exist_ok=True)
         redacted_local = tmp_redact_dir / redacted_key
