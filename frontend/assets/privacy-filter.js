@@ -2,16 +2,17 @@
  * Privacy Filter — namespaced JS for the NHCX inline tab.
  * All symbols prefixed with PF_ to avoid collisions with NHCX script.js.
  *
- * Backend: https://privacy-filter-147901050545.asia-south1.run.app
- * Routed via Apache reverse proxy: /privacy-filter/* → Cloud Run
+ * Backend: privacy-filter container (port 8003)
+ * Routed via Apache reverse proxy: /privacy-filter/* → http://privacy-filter:8003/
  *
  * API surface:
  *   GET  /api/health          — { status, model, device, model_loaded }
  *   GET  /api/supported-types — { extensions: [...] }
  *   POST /api/demo-token      — { access_token, token_type, expires_in_days, name, email }
- *   POST /api/redact          — multipart file → { job_id, entities, entity_counts,
- *                                                   original_url, redacted_url,
- *                                                   text_preview_original, text_preview_redacted }
+ *   POST /api/submit           — multipart file → 202 { task_id, poll_url, result_url }
+ *   GET  /api/task-status/{id}  — poll progress → { status, step, progress }
+ *   GET  /api/task-result/{id}  — fetch completed result → { entities, entity_counts, ... }
+ *   POST /api/redact            — (legacy sync) multipart file → RedactionResult
  *   GET  /api/files/{kind}/{key} — download original or redacted file
  */
 
@@ -19,9 +20,7 @@
   "use strict";
 
   // ── Config ───────────────────────────────────────────────────────────────
-  // Primary: Apache proxy path (maps /privacy-filter/* → Cloud Run)
-  // Fallback: direct Cloud Run URL (used when proxy is unavailable)
-  const PF_CLOUD_RUN = "https://privacy-filter-147901050545.asia-south1.run.app";
+  // Apache proxy path: /privacy-filter/* → http://privacy-filter:8003/
   const PF_LOCAL     = "http://localhost:8003";
   const PF_BASE      = window.location.hostname === "localhost"
     ? PF_LOCAL        // dev: hit local privacy-filter service
@@ -167,7 +166,7 @@
   }
 
   // ── Render result ─────────────────────────────────────────────────────────
-  // POST /api/redact response:
+  // GET /api/task-result/{id} response (or legacy POST /api/redact):
   // { job_id, filename, content_type, entities, entity_counts, notes,
   //   original_url, redacted_url, text_preview_original, text_preview_redacted }
   function PF_renderResult(res) {
@@ -371,16 +370,61 @@
     }
   };
 
-  // ── File upload ──────────────────────────────────────────────────────────
-  // POST /api/redact with multipart form-data field "file"
-  async function PF_postRedact(file) {
+  // ── File upload (async submit + poll) ─────────────────────────────────────
+  // POST /api/submit → 202 { task_id } → poll /api/task-status/{id} → /api/task-result/{id}
+
+  async function PF_submitFile(file) {
     const fd = new FormData();
     fd.append("file", file);
-    return PF_authFetch(`${PF_BASE}/api/redact`, {
+    return PF_authFetch(`${PF_BASE}/api/submit`, {
       method: "POST",
       body:   fd,
-      signal: AbortSignal.timeout(120000), // 2 min — large PDFs can take time
+      signal: AbortSignal.timeout(30000),
     });
+  }
+
+  function PF_pollTaskStatus(taskId) {
+    return new Promise((resolve, reject) => {
+      const poll = setInterval(async () => {
+        try {
+          const r = await PF_authFetch(`${PF_BASE}/api/task-status/${taskId}`);
+          if (r.status === 401) {
+            clearInterval(poll);
+            sessionStorage.removeItem(PF_TOKEN_KEY);
+            reject(new Error("Authentication expired. Please reload and try again."));
+            return;
+          }
+          if (!r.ok) return;
+          const data = await r.json();
+
+          if (data.status === "PROGRESS") {
+            const step = data.step || "Processing";
+            const pct = data.progress || 0;
+            PF_setStatus(`${step}… (${pct}%)`);
+          }
+
+          if (data.status === "completed") {
+            clearInterval(poll);
+            resolve(taskId);
+          }
+          if (data.status === "failed") {
+            clearInterval(poll);
+            reject(new Error(data.error || "Redaction failed"));
+          }
+        } catch (_) {}
+      }, 2000);
+
+      setTimeout(() => {
+        clearInterval(poll);
+        reject(new Error("Redaction timed out after 10 minutes. Please retry."));
+      }, 600000);
+    });
+  }
+
+  async function PF_fetchTaskResult(taskId) {
+    const r = await PF_authFetch(`${PF_BASE}/api/task-result/${taskId}`);
+    if (!r.ok) throw new Error(`Failed to fetch result: HTTP ${r.status}`);
+    return r.json();
   }
 
   async function PF_uploadFile(file) {
@@ -394,72 +438,64 @@
     if (loader)    loader.style.display = "block";
     if (btnText)   btnText.textContent  = "Redacting…";
 
-    PF_setStatus(`Processing ${file.name}…`);
+    PF_setStatus(`Uploading ${file.name}…`);
 
-    const MAX_ATTEMPTS = 2;
-    let lastErr = null;
+    try {
+      const r = await PF_submitFile(file);
 
-    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-      try {
-        const r = await PF_postRedact(file);
-
-        if (r.ok) {
-          const j = await r.json();
-          const n = j.entities?.length ?? 0;
-          PF_setStatus(`✓ Done — ${n} PII ${n === 1 ? "entity" : "entities"} detected.`);
-          PF_renderResult(j);
-          lastErr = null;
-          break;
-        }
-
-        if (r.status === 401) {
-          // Token expired or missing — clear cache and retry once
-          sessionStorage.removeItem(PF_TOKEN_KEY);
-          if (attempt < MAX_ATTEMPTS) {
-            PF_setStatus("Refreshing authentication…");
-            continue;
-          }
+      if (r.status === 401) {
+        sessionStorage.removeItem(PF_TOKEN_KEY);
+        const retry = await PF_submitFile(file);
+        if (retry.status === 401) {
           PF_setStatus("Authentication failed. Please reload and try again.", true);
-          break;
+          return;
         }
-
-        if ([502, 503, 504].includes(r.status) && attempt < MAX_ATTEMPTS) {
-          PF_setStatus("Service warming up (Privacy Filter) — model loading, retrying in 3 s…");
-          await new Promise(res => setTimeout(res, 3000));
-          continue;
+        if (!retry.ok && retry.status !== 202) {
+          const err = await retry.json().catch(() => ({ detail: retry.statusText }));
+          throw new Error(err.detail || `HTTP ${retry.status}`);
         }
-
+        var submitData = await retry.json();
+      } else if (!r.ok && r.status !== 202) {
         if (r.status === 500) {
-          const body = await r.text().catch(() => "");
-          console.error("[PF] 500 from redact:", body);
           PF_setStatus(
             "The Privacy Filter service encountered an internal error. " +
             "The document may be too large, or the service is still initializing. Please try again.",
             true
           );
-          break;
+          return;
         }
-
         const err = await r.json().catch(() => ({ detail: r.statusText }));
         throw new Error(err.detail || `HTTP ${r.status}`);
-
-      } catch (e) {
-        lastErr = e;
-        if (e.name === "AbortError") {
-          PF_setStatus("Request timed out — large documents may take up to 2 minutes. Please retry.", true);
-          break;
-        }
-        if (attempt < MAX_ATTEMPTS && /Failed to fetch|NetworkError/i.test(e.message)) {
-          await new Promise(res => setTimeout(res, 2000));
-          continue;
-        }
-        break;
+      } else {
+        var submitData = await r.json();
       }
-    }
 
-    if (loader)  loader.style.display = "none";
-    if (btnText) btnText.textContent  = "Redact Document";
-    if (lastErr) PF_setStatus(`Error: ${lastErr.message}`, true);
+      PF_setStatus("Queued — waiting for worker…");
+      const taskId = submitData.task_id;
+
+      await PF_pollTaskStatus(taskId);
+
+      PF_setStatus("Fetching results…");
+      const result = await PF_fetchTaskResult(taskId);
+
+      if (result.status === "failed") {
+        throw new Error(result.error || "Redaction failed");
+      }
+
+      const n = result.entities?.length ?? 0;
+      PF_setStatus(`✓ Done — ${n} PII ${n === 1 ? "entity" : "entities"} detected.`);
+      PF_renderResult(result);
+
+    } catch (e) {
+      if (e.name === "AbortError") {
+        PF_setStatus("Upload timed out. Please retry.", true);
+      } else {
+        PF_setStatus(`Error: ${e.message}`, true);
+      }
+    } finally {
+      if (loader)  loader.style.display = "none";
+      if (btnText) btnText.textContent  = "Redact Document";
+    }
   }
 
   window.PF_updateFileName = function () {

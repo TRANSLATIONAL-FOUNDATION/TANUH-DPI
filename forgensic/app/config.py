@@ -11,7 +11,7 @@ CORS_ORIGINS = [origin.strip() for origin in os.getenv("CORS_ORIGINS", "*").spli
 
 OCR_ENABLED = os.getenv("OCR_ENABLED", "true").lower() == "true"
 
-PIPELINE_PRESET = os.getenv("PIPELINE_PRESET", "npv_focus")
+PIPELINE_PRESET = "npv_focus"
 PIPELINE_VERSION = os.getenv("PIPELINE_VERSION", "ps3-cv-1.0.0")
 
 # ── Redis / Celery ─────────────────────────────────────────────────────────────

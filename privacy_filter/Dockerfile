@@ -31,6 +31,8 @@ COPY common/ ./common/
 # Copy the MedDeID engine + FastAPI service as the `privacy_filter` package.
 # Build context is the repo root (see docker-compose: context: .).
 COPY privacy_filter/__init__.py   ./privacy_filter/__init__.py
+COPY privacy_filter/celery_app.py ./privacy_filter/celery_app.py
+COPY privacy_filter/tasks.py      ./privacy_filter/tasks.py
 COPY privacy_filter/app/          ./privacy_filter/app/
 COPY privacy_filter/cli/          ./privacy_filter/cli/
 COPY privacy_filter/detectors/    ./privacy_filter/detectors/

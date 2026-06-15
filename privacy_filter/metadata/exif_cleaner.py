@@ -188,7 +188,18 @@ class EXIFCleaner:
                 {},
             )
 
+            # Ignore standard technical image attributes that do not contain PHI.
+            # "exif" in info is a raw bytes blob; actual tags are parsed via getexif().
+            IGNORE_KEYS = {
+                "jfif", "jfif_version", "jfif_unit", "jfif_density",
+                "dpi", "icc_profile", "quality", "progressive",
+                "progression", "adobe", "adobe_transform", "bits",
+                "chromaticity", "aspect", "exif", "transparency"
+            }
+
             for key, value in info.items():
+                if str(key).lower() in IGNORE_KEYS:
+                    continue
 
                 entities.append(
 

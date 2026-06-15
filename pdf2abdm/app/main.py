@@ -16,6 +16,10 @@ from fastapi import FastAPI, Request, HTTPException
 from pydantic import BaseModel, EmailStr
 from typing import Any, Dict
 
+# Resolve secrets (ABDM_SECRET_KEY etc.) from Secret Manager before config reads them.
+from common.secrets import load_secrets
+load_secrets()
+
 from pdf2abdm.app.auth import require_bearer, issue_demo_token, log_token_to_session_logger
 
 # ── Session Logger integration ────────────────────────────────────────────────
@@ -54,6 +58,40 @@ def validate_pdf_upload(file_path: str):
     try:
         import pypdf
         reader = pypdf.PdfReader(file_path)
+        page_count = len(reader.pages)
+        if page_count > MAX_PAGE_COUNT:
+            raise HTTPException(
+                status_code=413,
+                detail={
+                    "title": "Too Many Pages",
+                    "message": f"The uploaded PDF has {page_count} pages. Maximum allowed is {MAX_PAGE_COUNT} pages."
+                }
+            )
+    except HTTPException:
+        raise
+    except Exception:
+        pass  # If page counting fails, let the pipeline handle it
+
+
+def validate_pdf_bytes(file_bytes: bytes):
+    """In-memory equivalent of validate_pdf_upload (size / page limits).
+
+    Used by the async submit endpoint, which uploads straight to GCS and never
+    writes the PDF to a local/shared disk. Raises HTTPException 413 on violation.
+    """
+    size_mb = len(file_bytes) / (1024 * 1024)
+    if size_mb > MAX_FILE_SIZE_MB:
+        raise HTTPException(
+            status_code=413,
+            detail={
+                "title": "File Too Large",
+                "message": f"The uploaded PDF is {size_mb:.1f} MB. Maximum allowed size is {MAX_FILE_SIZE_MB} MB."
+            }
+        )
+    try:
+        import io
+        import pypdf
+        reader = pypdf.PdfReader(io.BytesIO(file_bytes))
         page_count = len(reader.pages)
         if page_count > MAX_PAGE_COUNT:
             raise HTTPException(
@@ -444,17 +482,25 @@ async def submit_abdm(
 
     file_bytes = await file.read()
 
-    # Write PDF to shared volume so the Celery worker (separate container) can read it.
-    # /tmp is local to this container; /app/pdf_uploads is mounted in both containers.
-    import uuid as _uuid
-    shared_tmp_dir = os.environ.get("PDF_UPLOAD_DIR", "/app/pdf_uploads/tmp")
-    os.makedirs(shared_tmp_dir, exist_ok=True)
-    tmp_path = os.path.join(shared_tmp_dir, f"{_uuid.uuid4().hex}_{filename}")
-    with open(tmp_path, "wb") as tmp:
-        tmp.write(file_bytes)
+    # Validate in-memory (size / page count) before touching GCS, so the 413
+    # guard still applies without writing to a shared volume.
+    validate_pdf_bytes(file_bytes)
 
-    validate_pdf_upload(tmp_path)
-    task = process_abdm_task.delay(tmp_path, model=model)
+    # Upload to GCS instead of a shared disk so a worker on any MIG VM can fetch
+    # it. The worker downloads it from the returned gs:// URI, then deletes it.
+    from utils.gcs_storage import upload_pdf_from_bytes
+    import uuid as _uuid
+
+    gcs_filename = f"{_uuid.uuid4().hex}_{filename}"
+    gcs_uri = upload_pdf_from_bytes(
+        file_bytes=file_bytes,
+        filename=gcs_filename,
+        gcs_folder="pdf_uploads/abdm",
+    )
+    if not gcs_uri:
+        raise HTTPException(status_code=500, detail="Failed to upload PDF to GCS")
+
+    task = process_abdm_task.delay(gcs_uri, model=model)
     logger.info(f"ABDM task queued: {task.id} for {filename}")
     return JSONResponse(status_code=202, content={
         "task_id": task.id,

@@ -14,6 +14,9 @@ GET  /api/supported-types       → list of accepted file extensions
 GET  /api/stats                 → live usage counters
 POST /api/demo-token            → self-service JWT (name + email → signed token)
 POST /api/redact                → multipart upload; returns RedactionResult  [auth required]
+POST /api/submit                → async multipart upload; returns task_id (202) [auth required]
+GET  /api/task-status/{task_id} → poll task progress
+GET  /api/task-result/{task_id} → fetch completed result
 GET  /api/files/{kind}/{key}    → download originals or redacted outputs      [auth required]
 GET  /api/render-pages/{kind}/{key} → render document pages as images for preview
 GET  /api/page-image/{key}/{page_num} → serve a rendered page image
@@ -38,9 +41,13 @@ import httpx
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, RedirectResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, StreamingResponse
 from jose import jwt
 from pydantic import BaseModel, EmailStr
+
+# Resolve secrets (SECRET_KEY etc.) from Secret Manager before .auth/config read them.
+from common.secrets import load_secrets
+load_secrets()
 
 from .auth import require_bearer
 from .schemas import Entity, HealthResponse, RedactionResult
@@ -81,7 +88,9 @@ _CLEANUP_DIRS = [
 
 
 def _cleanup_old_files():
-    """Background thread: delete files older than TTL from all temp/data dirs."""
+    """Background thread: delete files older than TTL from temp/data dirs and,
+    when the GCS backend is active, from the privacy bucket too (30-min window)."""
+    gcs_backend = os.getenv("STORAGE_BACKEND", "local").lower() == "gcs"
     while True:
         time.sleep(_CLEANUP_INTERVAL_SECONDS)
         cutoff = time.time() - _CLEANUP_TTL_SECONDS
@@ -97,6 +106,16 @@ def _cleanup_old_files():
                         shutil.rmtree(item, ignore_errors=True)
                 except Exception:
                     pass
+        # GCS sweep — enforce the 30-min edit window in the privacy bucket. A GCS
+        # lifecycle rule can't express sub-day TTLs, so we delete expired objects
+        # here. Best-effort: never let it crash the cleanup loop.
+        if gcs_backend:
+            try:
+                store = get_storage()
+                if hasattr(store, "cleanup_expired"):
+                    store.cleanup_expired(_CLEANUP_TTL_SECONDS)
+            except Exception:
+                logger.exception("GCS cleanup pass failed")
         logger.debug("File cleanup pass complete (TTL=%ds)", _CLEANUP_TTL_SECONDS)
 
 
@@ -313,6 +332,119 @@ async def redact_file(
     finally:
         raw_bytes = None
         gc.collect()
+
+
+# ---------------------------------------------------------------------------
+# Async submit + poll endpoints (Celery-backed)
+# ---------------------------------------------------------------------------
+
+@app.post("/api/submit", status_code=202)
+async def submit_redaction(
+    request: Request,
+    file: UploadFile = File(...),
+    _claims: Dict[str, Any] = Depends(require_bearer),
+):
+    """Submit a file for background redaction. Returns 202 with task_id immediately."""
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Missing filename")
+    if not service.is_supported(file.filename):
+        raise HTTPException(
+            status_code=415,
+            detail=f"Unsupported file type. Supported: {', '.join(service.supported_extensions())}",
+        )
+
+    storage = get_storage()
+    job_id = uuid.uuid4().hex[:12]
+    safe_name = Path(file.filename).name
+    upload_key = f"{job_id}__{safe_name}"
+
+    raw_bytes = await file.read()
+
+    tmp_upload_dir = Path(tempfile.gettempdir()) / "pf_uploads"
+    tmp_upload_dir.mkdir(parents=True, exist_ok=True)
+    upload_path = tmp_upload_dir / upload_key
+    upload_path.write_bytes(raw_bytes)
+
+    storage.save("uploads", upload_key, raw_bytes)
+    del raw_bytes
+
+    from privacy_filter.tasks import process_redaction_task
+    task = process_redaction_task.delay(
+        job_id, upload_key, safe_name, file.content_type or "application/octet-stream",
+    )
+    logger.info("[submit] Task queued: %s for %s", task.id, safe_name)
+
+    return JSONResponse(status_code=202, content={
+        "task_id": task.id,
+        "job_id": job_id,
+        "status": "queued",
+        "poll_url": f"/api/task-status/{task.id}",
+        "result_url": f"/api/task-result/{task.id}",
+        "message": "Processing started. Poll poll_url for updates.",
+    })
+
+
+@app.get("/api/task-status/{task_id}")
+async def get_task_status(task_id: str):
+    """Poll the progress of a submitted redaction task."""
+    from celery.result import AsyncResult
+    from privacy_filter.celery_app import celery_app as _celery
+
+    res = AsyncResult(task_id, app=_celery)
+    state = res.state
+
+    if state == "SUCCESS" or (res.ready() and not res.failed()):
+        return JSONResponse(content={
+            "task_id": task_id,
+            "status": "completed",
+            "result_url": f"/api/task-result/{task_id}",
+        })
+
+    if res.failed():
+        return JSONResponse(content={
+            "task_id": task_id,
+            "status": "failed",
+            "error": str(res.result),
+        })
+
+    info = res.info if isinstance(res.info, dict) else {}
+    return JSONResponse(content={
+        "task_id": task_id,
+        "status": state,
+        "step": info.get("step", "Pending"),
+        "progress": info.get("progress", 0),
+        "result_url": f"/api/task-result/{task_id}",
+    })
+
+
+@app.get("/api/task-result/{task_id}")
+async def get_task_result(task_id: str):
+    """Retrieve the result of a completed redaction task."""
+    import json as _json
+    import redis as _redis
+
+    r = _redis.from_url(os.getenv("REDIS_URL", "redis://localhost:6379/0"), decode_responses=True)
+    cached = r.get(f"pf:result:{task_id}")
+    if cached:
+        return JSONResponse(content=_json.loads(cached))
+
+    from celery.result import AsyncResult
+    from privacy_filter.celery_app import celery_app as _celery
+
+    res = AsyncResult(task_id, app=_celery)
+    if not res.ready():
+        return JSONResponse(status_code=202, content={
+            "task_id": task_id,
+            "status": "processing",
+            "message": "Task is still running.",
+        })
+    if res.failed():
+        return JSONResponse(status_code=500, content={
+            "task_id": task_id,
+            "status": "failed",
+            "error": str(res.result),
+        })
+    return JSONResponse(content=res.result)
 
 
 @app.get("/api/files/{kind}/{key}")
