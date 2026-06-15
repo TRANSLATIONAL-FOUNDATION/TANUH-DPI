@@ -676,30 +676,26 @@ async def validate_fhir(request: Request):
         if os.path.exists(temp_file):
             os.remove(temp_file)
 
-# ── Desktop executable downloads via GCS ─────────────────────────────────────
+# ── Desktop executable downloads (served from local disk) ────────────────────
 
 @app.get("/downloads/{filename}", tags=["Downloads"],
-         summary="Download a desktop executable from GCS")
+         summary="Download a desktop executable")
 async def download_executable(filename: str):
-    """Redirect to a signed GCS URL for the requested executable."""
-    from common.downloads import get_download_url, stream_download, ALLOWED_FILES
-    from fastapi.responses import RedirectResponse, StreamingResponse
+    """Serve executable from local disk (mounted from /opt/downloads on host)."""
+    from common.downloads import get_local_path, ALLOWED_FILES
+    from fastapi.responses import FileResponse
 
     if filename not in ALLOWED_FILES:
         return JSONResponse(status_code=404, content={"detail": "File not found"})
 
-    url = get_download_url(filename)
-    if url:
-        return RedirectResponse(url=url, status_code=302)
+    path = get_local_path(filename)
+    if path is None:
+        return JSONResponse(status_code=404, content={"detail": "File not available — VM may still be downloading executables"})
 
-    data, content_type = stream_download(filename)
-    if data is None:
-        return JSONResponse(status_code=404, content={"detail": "File not available in GCS"})
-
-    return StreamingResponse(
-        data,
-        media_type=content_type,
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    return FileResponse(
+        path=str(path),
+        media_type="application/zip",
+        filename=filename,
     )
 
 

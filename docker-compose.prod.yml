@@ -38,6 +38,9 @@ services:
       - VALIDATOR_GCS_BUCKET=dpi-transient-processing
       - ABDM_AUTH_ENABLED=${ABDM_AUTH_ENABLED:-true}
       - ABDM_TOKEN_EXPIRY_DAYS=${ABDM_TOKEN_EXPIRY_DAYS:-7}
+      - DOWNLOADS_LOCAL_DIR=/app/downloads
+    volumes:
+      - /opt/downloads:/app/downloads:ro
     depends_on:
       - session-logger
 
