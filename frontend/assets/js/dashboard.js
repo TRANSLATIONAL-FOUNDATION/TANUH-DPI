@@ -216,9 +216,9 @@
         const dList  = document.getElementById('districtList');
 
         if (sCount) sCount.textContent = states.length;
-        if (sList)  sList.innerHTML    = states.map(s => `<span class="dash-geo-tag">${s}</span>`).join('');
+        if (sList)  sList.innerHTML    = states.map(s => `<span class="geo-tag">${s}</span>`).join('');
         if (dCount) dCount.textContent = districts.length;
-        if (dList)  dList.innerHTML    = districts.map(d => `<span class="dash-geo-tag">${d}</span>`).join('');
+        if (dList)  dList.innerHTML    = districts.map(d => `<span class="geo-tag">${d}</span>`).join('');
     }
 
     // ── Public init ──────────────────────────────────────────────────────────

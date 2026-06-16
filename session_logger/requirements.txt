@@ -6,3 +6,5 @@ python-dotenv
 pytz
 google-cloud-storage
 prometheus_client>=0.20.0
+bcrypt
+python-jose[cryptography]

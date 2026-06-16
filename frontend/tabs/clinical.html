@@ -12,9 +12,7 @@
     <button class="sub-tab-btn" onclick="openSubTab('PDF2FHIR','clinical-docs',this)">
         <i class="fas fa-book"></i> User Guide
     </button>
-    <button class="sub-tab-btn" onclick="openSubTab('PDF2FHIR','clinical-team',this)">
-        <i class="fas fa-users"></i> Team
-    </button>
+
     <div class="ai-badge ai-badge-off" id="clinicalAiBadge" style="margin-left:auto;margin-bottom:0;"><span class="ai-badge-dot"></span> <span id="clinicalAiText">Checking...</span></div>
 </div>
 
@@ -956,35 +954,3 @@ docker compose logs -f pdf2abdm celery-worker</code></pre>
 
 </div><!-- /clinical-docs -->
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!-- SUB: Team -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<div id="clinical-team" class="sub-content" style="display:none">
-
-<div class="tab-header">
-    <div class="tab-header-text">
-        <h2><i class="fas fa-users" style="color:var(--primary)"></i> Clinical Document Team</h2>
-        <p>The team behind the Clinical document processing system.</p>
-    </div>
-</div>
-
-<div style="padding:20px;background:white;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);margin:20px 0;">
-    <div class="fg-team-grid">
-        <a href="https://www.linkedin.com/in/venkata-sai-manideep-nanepalli-42bab3261/" target="_blank" style="text-decoration:none;">
-            <div class="fg-team-card"><img src="assets/manideep.png" alt="Venkata Sai Manideep Nanepalli"><div class="team-name">Venkata Sai Manideep Nanepalli</div><div class="team-role">Technical Staff</div><div class="team-org">TANUH AI-CoE</div></div>
-        </a>
-        <a href="https://www.linkedin.com/in/bharath-kumar-tangella-628738213/" target="_blank" style="text-decoration:none;">
-            <div class="fg-team-card"><img src="assets/bharath.png" alt="Bharath Kumar Tangella"><div class="team-name">Bharath Kumar Tangella</div><div class="team-role">Technical Staff</div><div class="team-org">TANUH AI-CoE</div></div>
-        </a>
-        <a href="https://www.linkedin.com/in/ashwin-rajkumar/" target="_blank" style="text-decoration:none;">
-            <div class="fg-team-card"><img src="assets/ashwin.png" alt="Dr. Ashwin RajKumar"><div class="team-name">Dr. Ashwin RajKumar</div><div class="team-role">(Breast Cancer Detection)<br>Program Manager</div><div class="team-org">TANUH AI-CoE</div></div>
-        </a>
-        <a href="https://www.linkedin.com/in/s-hema-priyadarshini-ph-d-64246314/" target="_blank" style="text-decoration:none;">
-            <div class="fg-team-card"><img src="assets/hema.png" alt="Dr. Hema Priyadarshini"><div class="team-name">Dr. Hema Priyadarshini</div><div class="team-role">(Chronic Kidney Disease)<br>Program Manager</div><div class="team-org">TANUH AI-CoE</div></div>
-        </a>
-        <a href="https://cds.iisc.ac.in/faculty/yalavarthy/" target="_blank" style="text-decoration:none;">
-            <div class="fg-team-card"><img src="assets/Prof_PKY.png" alt="Dr. Phaneendra K. Yalavarthy"><div class="team-name">Dr. Phaneendra K. Yalavarthy</div><div class="team-role">Chief Project Manager</div><div class="team-org">TANUH AI-CoE</div></div>
-        </a>
-    </div>
-</div>
-</div><!-- /clinical-team -->
