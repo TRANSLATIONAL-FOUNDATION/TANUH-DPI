@@ -150,6 +150,7 @@ services:
       - MYSQL_HOST=cloud-sql-proxy
       - MYSQL_DB=dpi_session_logger
       - SQLITE_DATA_DIR=/app/data
+      - FIREBASE_SERVICE_ACCOUNT_KEY_SECRET=firebase-admin-sdk-key
     volumes:
       - ./session_logger_data:/app/data
     depends_on:

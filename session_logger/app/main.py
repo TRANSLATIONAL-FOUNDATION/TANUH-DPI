@@ -52,14 +52,19 @@ import os
 from datetime import datetime, timezone
 from typing import Optional, Literal, List
 
+import json as _json
 import firebase_admin
 from firebase_admin import credentials as fb_credentials, auth as fb_auth
 
-_fb_key_path = os.getenv("FIREBASE_SERVICE_ACCOUNT_KEY", "")
-if _fb_key_path and os.path.isfile(_fb_key_path):
-    _fb_cred = fb_credentials.Certificate(_fb_key_path)
+_fb_key_raw = os.getenv("FIREBASE_SERVICE_ACCOUNT_KEY", "")
+if _fb_key_raw and _fb_key_raw.strip().startswith("{"):
+    _fb_cred = fb_credentials.Certificate(_json.loads(_fb_key_raw))
     firebase_admin.initialize_app(_fb_cred)
-    logger.info("[firebase] Initialized with service account: %s", _fb_key_path)
+    logger.info("[firebase] Initialized with service account JSON from env/Secret Manager")
+elif _fb_key_raw and os.path.isfile(_fb_key_raw):
+    _fb_cred = fb_credentials.Certificate(_fb_key_raw)
+    firebase_admin.initialize_app(_fb_cred)
+    logger.info("[firebase] Initialized with service account file: %s", _fb_key_raw)
 else:
     firebase_admin.initialize_app()
     logger.info("[firebase] Initialized with Application Default Credentials")
