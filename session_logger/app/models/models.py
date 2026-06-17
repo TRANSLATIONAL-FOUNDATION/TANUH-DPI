@@ -1,7 +1,7 @@
 import uuid
 import hashlib
 from datetime import datetime
-from sqlalchemy import Column, String, Text, DateTime, Integer
+from sqlalchemy import Column, String, Text, DateTime, Integer, Boolean
 from sqlalchemy.sql import text
 from ..db.session import Base, USE_SQLITE
 
