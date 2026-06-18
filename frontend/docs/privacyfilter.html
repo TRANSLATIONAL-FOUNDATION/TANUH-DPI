@@ -42,7 +42,7 @@ Complete Technical & User Documentation</p>
 <h2>2.3 Technology Stack</h2>
 <div class="table-responsive"><table><thead><tr><th>Component</th><th>Technology</th></tr></thead><tbody><tr><td>Web Framework</td><td>FastAPI (Python 3.10+)</td></tr><tr><td>Task Queue</td><td>Celery 5.x with Redis</td></tr><tr><td>OCR</td><td>Tesseract / PaddleOCR</td></tr><tr><td>PDF Processing</td><td>PyMuPDF (fitz)</td></tr><tr><td>Medical Imaging</td><td>pydicom (DICOM), nibabel (NIfTI), OpenCV</td></tr><tr><td>Image Processing</td><td>OpenCV, Pillow</td></tr><tr><td>Authentication</td><td>PyJWT (HS256 + RS256 Keycloak)</td></tr><tr><td>Storage</td><td>Local filesystem or Google Cloud Storage</td></tr></tbody></table></div>
 <h1>3. Architecture</h1>
-<h2>3.1 Processing Pipeline - Images/DICOM/NIfTI</h2>
+<h2>3.1 Processing Pipeline — Images/DICOM/NIfTI</h2>
 <ol>
 <li>File Loading: LoaderRegistry routes to DicomLoader, NiftiLoader, or ImageLoader based on file extension. Returns a MedicalArtifact object with image data, metadata, and format information.</li>
 <li>Metadata Detection: MetadataDetector scans DICOM tags, EXIF data, or NIfTI headers for known PHI fields (PatientName, PatientID, PatientBirthDate, InstitutionName, etc.).</li>
@@ -55,11 +55,11 @@ Complete Technical & User Documentation</p>
 <li>Post-Redaction Validation: Re-scan redacted image via OCR + PHI classification. Risk score = min(residual_count x 5, 100). Passes if no residual PHI detected.</li>
 <li>Output: Save via SaverRegistry (DicomSaver, NiftiSaver, ImageSaver) preserving original format.</li>
 </ol>
-<h2>3.2 Processing Pipeline - PDFs</h2>
+<h2>3.2 Processing Pipeline — PDFs</h2>
 <ol>
 <li>PDF Loading: PyMuPDF (fitz.open) loads PDF, renders pages to 150 DPI images for OCR fallback.</li>
 <li>Native Text Extraction: Extract text with word-level coordinates from PDF structure.</li>
-<li>Safe Harbor Detection: 18 HIPAA Safe Harbor identifier categories - names (with honorifics), DOB, dates, times, ages, contacts (email/phone), identifiers (PIN, barcode, long numbers, alphanumeric codes).</li>
+<li>Safe Harbor Detection: 18 HIPAA Safe Harbor identifier categories — names (with honorifics), DOB, dates, times, ages, contacts (email/phone), identifiers (PIN, barcode, long numbers, alphanumeric codes).</li>
 <li>Character-to-Word Mapping: Map detected character spans to word-level rectangles for precise redaction.</li>
 <li>QR Code Detection: Aspect ratio 0.8-1.25, max side 160pt. Barcode detection: AR > 2.5, height < 70pt.</li>
 <li>Global Repeat Pass: Search known PHI tokens across all pages (names, IDs found on any page are searched globally).</li>
@@ -91,11 +91,11 @@ Complete Technical & User Documentation</p>
 <p>Background thread removes temporary files older than PF_FILE_TTL_SECONDS (default: 30 minutes) from upload and redacted directories. Cleanup runs every PF_CLEANUP_INTERVAL_SECONDS (default: 5 minutes).</p>
 <h1>7. Security</h1>
 <ul>
-<li>All processing occurs locally - no document data sent to external services</li>
+<li>All processing occurs locally — no document data sent to external services</li>
 <li>DICOM UID regeneration prevents cross-referencing with original studies</li>
 <li>Metadata stripping removes all identifying tags before output</li>
 <li>Post-redaction validation ensures no residual PHI remains</li>
-<li>Session logger stores only metadata - never the document content or detected PHI text</li>
+<li>Session logger stores only metadata — never the document content or detected PHI text</li>
 <li>Compliant with HIPAA Safe Harbor de-identification standard (18 identifier categories)</li>
 </ul>
 <h1>8. Configuration (Environment Variables)</h1>
@@ -124,7 +124,7 @@ Complete Technical & User Documentation</p>
 <h2>11.1 PHI Tags Stripped</h2>
 <p>PatientName, PatientID, OtherPatientIDs, PatientBirthDate, PatientAge, PatientAddress, AccessionNumber, StudyID, InstitutionName, ReferringPhysicianName, OperatorsName, PerformingPhysicianName, StationName, DeviceSerialNumber, ProtocolName.</p>
 <h2>11.2 UIDs Regenerated</h2>
-<p>StudyInstanceUID, SeriesInstanceUID, SOPInstanceUID - regenerated via pydicom.uid.generate_uid() to prevent cross-referencing with original studies.</p>
+<p>StudyInstanceUID, SeriesInstanceUID, SOPInstanceUID — regenerated via pydicom.uid.generate_uid() to prevent cross-referencing with original studies.</p>
 <h2>11.3 De-identification Flag</h2>
 <p>The DICOM dataset is marked as de-identified (PatientIdentityRemoved = YES) after processing.</p>
 <h1>12. Known Limitations & Future Enhancements</h1>

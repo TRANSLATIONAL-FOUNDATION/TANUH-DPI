@@ -1,7 +1,7 @@
 import uuid
 import hashlib
 from datetime import datetime
-from sqlalchemy import Column, String, Text, DateTime, Boolean, Integer
+from sqlalchemy import Column, String, Text, DateTime, Integer, Boolean
 from sqlalchemy.sql import text
 from ..db.session import Base, USE_SQLITE
 
@@ -65,21 +65,10 @@ class Feedback(Base):
 class User(Base):
     __tablename__ = "users"
 
-    id            = Column(Integer,      primary_key=True, autoincrement=True)
-    name          = Column(String(200),  nullable=False)
-    email         = Column(String(255),  nullable=False, unique=True)
-    password_hash = Column(String(255),  nullable=True)
-    provider      = Column(String(20),   nullable=False, default="email")
-    google_id     = Column(String(255),  nullable=True)
-    is_verified   = Column(Boolean,      nullable=False, default=False)
-    created_at    = Column(DateTime,     server_default=_CREATED_AT_DEFAULT)
-
-
-class OTPVerification(Base):
-    __tablename__ = "otp_verifications"
-
-    id         = Column(Integer,      primary_key=True, autoincrement=True)
-    email      = Column(String(255),  nullable=False)
-    otp_hash   = Column(String(255),  nullable=False)
-    expires_at = Column(DateTime,     nullable=False)
-    created_at = Column(DateTime,     server_default=_CREATED_AT_DEFAULT)
+    id           = Column(Integer,      primary_key=True, autoincrement=True)
+    firebase_uid = Column(String(128),  nullable=False, unique=True)
+    email        = Column(String(255),  nullable=False)
+    full_name    = Column(String(200),  nullable=True)
+    role         = Column(String(50),   nullable=False, default="user")
+    created_at   = Column(DateTime,     server_default=_CREATED_AT_DEFAULT)
+    updated_at   = Column(DateTime,     server_default=_CREATED_AT_DEFAULT, onupdate=datetime.now)

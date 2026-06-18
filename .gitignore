@@ -221,6 +221,7 @@ __marimo__/
 
 # GCP / Vertex AI service account key files
 *service-account*.json
+*firebase-adminsdk*
 gcp-*.json
 gcs-*.json
 reference/*.json

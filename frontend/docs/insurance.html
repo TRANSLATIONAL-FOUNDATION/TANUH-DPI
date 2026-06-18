@@ -27,7 +27,7 @@
             <div class="docs-content-inner">
             <span style="font-size:0.875rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--brand-primary);">Insurance Document Extraction Documentation</span>
             <h1 style="margin-top:0.25rem;">Insurance Document Extraction Service</h1>
-            <p style="font-size:1.1rem; color:var(--text-500); margin-bottom:2rem;">pdf2nhcx - NHCX InsurancePlanBundle FHIR Generator
+            <p style="font-size:1.1rem; color:var(--text-500); margin-bottom:2rem;">pdf2nhcx — NHCX InsurancePlanBundle FHIR Generator
 Complete Technical & User Documentation</p>
             
             <h1>1. Executive Summary</h1>
@@ -54,10 +54,10 @@ Complete Technical & User Documentation</p>
 <li>File Upload & Validation: Accept PDF (max 25 MB, max 100 pages)</li>
 <li>OCR Text Extraction: Same multi-engine waterfall as pdf2abdm (PyPDF > Docling > LightOn)</li>
 <li>Document Classification Gate: Two-tier keyword + LLM classification. Rejects CLINICAL and INVALID documents (only accepts INSURANCE).</li>
-<li>Text Distillation: Split raw OCR text into 4 chunks with 2000-character overlap. Run 4 parallel LLM calls via ThreadPoolExecutor. Each call condenses its chunk into an 'Insurance Fact Sheet' - removing narrative fluff, preserving financial data, limits, exclusions, benefit tables.</li>
+<li>Text Distillation: Split raw OCR text into 4 chunks with 2000-character overlap. Run 4 parallel LLM calls via ThreadPoolExecutor. Each call condenses its chunk into an 'Insurance Fact Sheet' — removing narrative fluff, preserving financial data, limits, exclusions, benefit tables.</li>
 <li>NHCX Resource Selection: LLM analyzes distilled text to determine the primary bundle type (1 of 6) and select mandatory + optional FHIR resources.</li>
 <li>LangGraph Dynamic Workflow: Build dependency-ordered graph. Each node extracts one resource using LLM with NHCX-specific rulebook and bundle-type-specific context prefix.</li>
-<li>Bundle Assembly: assemble_nhcx_collection_bundle() - flatten nested Bundles, strip ABDM/forbidden resources, sanitize hallucinated fields, deduplicate by ID, enforce NRCES profile URLs.</li>
+<li>Bundle Assembly: assemble_nhcx_collection_bundle() — flatten nested Bundles, strip ABDM/forbidden resources, sanitize hallucinated fields, deduplicate by ID, enforce NRCES profile URLs.</li>
 <li>Result Storage & Logging: Same as pdf2abdm (Redis 24h TTL, GCS upload, session-logger)</li>
 </ol>
 <h2>3.2 Text Distillation (Key Differentiator)</h2>
@@ -117,7 +117,7 @@ Complete Technical & User Documentation</p>
 <li>Forbidden resources stripped (e.g., Condition not allowed in InsurancePlanBundle)</li>
 </ul>
 <h1>12. Error Handling</h1>
-<div class="table-responsive"><table><thead><tr><th>Scenario</th><th>Response</th></tr></thead><tbody><tr><td>File too large (&gt; 25 MB)</td><td>HTTP 413</td></tr><tr><td>Too many pages (&gt; 100)</td><td>HTTP 413</td></tr><tr><td>Clinical document uploaded</td><td>HTTP 422 - 'use ABDM/Clinical tab instead'</td></tr><tr><td>Invalid/unrecognized document</td><td>HTTP 422 - 'invalid insurance document'</td></tr><tr><td>Task timeout (30 min)</td><td>FAILURE stored in Redis</td></tr><tr><td>Result expired (24h)</td><td>HTTP 404</td></tr></tbody></table></div>
+<div class="table-responsive"><table><thead><tr><th>Scenario</th><th>Response</th></tr></thead><tbody><tr><td>File too large (&gt; 25 MB)</td><td>HTTP 413</td></tr><tr><td>Too many pages (&gt; 100)</td><td>HTTP 413</td></tr><tr><td>Clinical document uploaded</td><td>HTTP 422 — 'use ABDM/Clinical tab instead'</td></tr><tr><td>Invalid/unrecognized document</td><td>HTTP 422 — 'invalid insurance document'</td></tr><tr><td>Task timeout (30 min)</td><td>FAILURE stored in Redis</td></tr><tr><td>Result expired (24h)</td><td>HTTP 404</td></tr></tbody></table></div>
 <h1>13. Known Limitations & Future Enhancements</h1>
 <ul>
 <li>High latency due to distillation + multi-step extraction</li>
