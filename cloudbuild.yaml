@@ -1,0 +1,152 @@
+# cloudbuild.yaml — Build all Docker images on push to main.
+#
+# Triggered by Cloud Build when code is pushed to the main branch.
+# Builds 7 service images in parallel, tags with SHORT_SHA + latest,
+# and pushes to Artifact Registry. No credentials leave GCP.
+#
+# One-time setup:
+#   1. gcloud services enable cloudbuild.googleapis.com --project=proj-dpi-shared
+#   2. Connect repo: Cloud Build > Triggers > Connect Repository > GitHub > TANUH-AI/TANUH-DPI
+#   3. Create trigger: push to ^main$, config file cloudbuild.yaml, region asia-south1
+#   4. Grant AR writer to Cloud Build SA:
+#      gcloud projects add-iam-policy-binding proj-dpi-shared \
+#        --member="serviceAccount:334982157374@cloudbuild.gserviceaccount.com" \
+#        --role="roles/artifactregistry.writer"
+
+substitutions:
+  _REGISTRY: asia-south1-docker.pkg.dev/proj-dpi-shared/dpi-containers
+
+steps:
+  # ── Build all 7 images in parallel ─────────────────────────────────────────
+  - id: build-pdf2abdm
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGISTRY}/pdf2abdm:${SHORT_SHA}
+      - -t
+      - ${_REGISTRY}/pdf2abdm:latest
+      - -f
+      - pdf2abdm/Dockerfile
+      - .
+    waitFor: ['-']
+
+  - id: build-pdf2nhcx
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGISTRY}/pdf2nhcx:${SHORT_SHA}
+      - -t
+      - ${_REGISTRY}/pdf2nhcx:latest
+      - -f
+      - pdf2nhcx/Dockerfile
+      - .
+    waitFor: ['-']
+
+  - id: build-worker
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGISTRY}/worker:${SHORT_SHA}
+      - -t
+      - ${_REGISTRY}/worker:latest
+      - -f
+      - worker/Dockerfile
+      - .
+    waitFor: ['-']
+
+  - id: build-frontend
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGISTRY}/frontend:${SHORT_SHA}
+      - -t
+      - ${_REGISTRY}/frontend:latest
+      - -f
+      - frontend/Dockerfile
+      - .
+    waitFor: ['-']
+
+  - id: build-session-logger
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGISTRY}/session-logger:${SHORT_SHA}
+      - -t
+      - ${_REGISTRY}/session-logger:latest
+      - -f
+      - session_logger/Dockerfile
+      - .
+    waitFor: ['-']
+
+  - id: build-privacy-filter
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGISTRY}/privacy-filter:${SHORT_SHA}
+      - -t
+      - ${_REGISTRY}/privacy-filter:latest
+      - -f
+      - privacy_filter/Dockerfile
+      - .
+    waitFor: ['-']
+
+  - id: build-forgensic
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGISTRY}/forgensic:${SHORT_SHA}
+      - -t
+      - ${_REGISTRY}/forgensic:latest
+      - -f
+      - forgensic/Dockerfile
+      - .
+    waitFor: ['-']
+
+  # ── Push all images after builds complete ──────────────────────────────────
+  - id: push-pdf2abdm
+    name: gcr.io/cloud-builders/docker
+    args: [push, --all-tags, '${_REGISTRY}/pdf2abdm']
+    waitFor: [build-pdf2abdm]
+
+  - id: push-pdf2nhcx
+    name: gcr.io/cloud-builders/docker
+    args: [push, --all-tags, '${_REGISTRY}/pdf2nhcx']
+    waitFor: [build-pdf2nhcx]
+
+  - id: push-worker
+    name: gcr.io/cloud-builders/docker
+    args: [push, --all-tags, '${_REGISTRY}/worker']
+    waitFor: [build-worker]
+
+  - id: push-frontend
+    name: gcr.io/cloud-builders/docker
+    args: [push, --all-tags, '${_REGISTRY}/frontend']
+    waitFor: [build-frontend]
+
+  - id: push-session-logger
+    name: gcr.io/cloud-builders/docker
+    args: [push, --all-tags, '${_REGISTRY}/session-logger']
+    waitFor: [build-session-logger]
+
+  - id: push-privacy-filter
+    name: gcr.io/cloud-builders/docker
+    args: [push, --all-tags, '${_REGISTRY}/privacy-filter']
+    waitFor: [build-privacy-filter]
+
+  - id: push-forgensic
+    name: gcr.io/cloud-builders/docker
+    args: [push, --all-tags, '${_REGISTRY}/forgensic']
+    waitFor: [build-forgensic]
+
+options:
+  machineType: E2_HIGHCPU_8
+  logging: CLOUD_LOGGING_ONLY
+
+timeout: 1800s
