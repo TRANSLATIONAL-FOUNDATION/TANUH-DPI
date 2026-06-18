@@ -306,7 +306,7 @@
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <div id="clinical-landing-view" class="cln-container">
     <!-- Hero / Intro -->
-    <div style="display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 32px; align-items: center; margin-bottom: 40px; padding: 20px 0;">
+    <div class="tab-hero-grid">
         <div>
             <span style="display: inline-block; background: rgba(20, 134, 140, 0.08); color: var(--primary); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 12px; border-radius: 20px; margin-bottom: 14px;">
                 State-of-the-Art Interoperability
@@ -455,7 +455,7 @@
     </div>
 
     <!-- ── On-Premises Security Banner ──────────────────────────────────────── -->
-    <div style="display: flex; align-items: center; gap: 20px; background: linear-gradient(135deg, rgba(20, 134, 140, 0.05) 0%, rgba(20, 134, 140, 0.01) 100%); border: 1.5px solid rgba(20, 134, 140, 0.15); border-radius: 12px; padding: 24px; margin-bottom: 20px; box-sizing: border-box;">
+    <div class="responsive-banner-card">
         <div style="font-size: 2rem; color: var(--primary); flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 48px; height: 48px;">
             <i class="fas fa-shield-alt"></i>
         </div>
@@ -464,6 +464,47 @@
             <p style="font-size: 0.85rem; line-height: 1.5; color: #475569; margin: 0;">
                 All extraction processes, OCR computation layers, and FHIR mappings compile in memory locally. No data bytes are logged or transmitted externally, maintaining compliance with national healthcare architecture guidelines and privacy protocols.
             </p>
+        </div>
+    </div>
+
+    <!-- ── Service Limitations ────────────────────────────────────────────── -->
+    <div style="margin-bottom: 40px; margin-top: 32px;">
+        <h3 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin-bottom: 24px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-exclamation-triangle" style="color: #f59e0b; font-size: 1.15rem;"></i> Service Limitations
+        </h3>
+        <div class="key-capabilities-grid" style="display: grid; gap: 20px;">
+            <!-- Limit 1: File Size -->
+            <div style="background: #ffffff; border: 1px solid rgba(245, 158, 11, 0.15); border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.01); transition: transform 0.2s; position: relative; overflow: hidden; box-sizing: border-box; border-left: 4px solid #f59e0b;">
+                <div style="width: 42px; height: 42px; border-radius: 8px; background: rgba(245, 158, 11, 0.08); color: #f59e0b; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 1.2rem;">
+                    <i class="fas fa-hdd"></i>
+                </div>
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0 0 8px;">25MB File Limit</h4>
+                <p style="font-size: 0.85rem; line-height: 1.5; color: #64748b; margin: 0;">
+                    Maximum single PDF file upload is capped at 25MB. Larger documents should be split into smaller sections before ingestion.
+                </p>
+            </div>
+            
+            <!-- Limit 2: Processing Duration -->
+            <div style="background: #ffffff; border: 1px solid rgba(245, 158, 11, 0.15); border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.01); transition: transform 0.2s; position: relative; overflow: hidden; box-sizing: border-box; border-left: 4px solid #f59e0b;">
+                <div style="width: 42px; height: 42px; border-radius: 8px; background: rgba(245, 158, 11, 0.08); color: #f59e0b; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 1.2rem;">
+                    <i class="fas fa-hourglass-half"></i>
+                </div>
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0 0 8px;">Long PDFs Processing Time</h4>
+                <p style="font-size: 0.85rem; line-height: 1.5; color: #64748b; margin: 0;">
+                    Processing large or multi-page clinical records may take 3 to 5 minutes due to OCR computation and deep hierarchical extraction logic.
+                </p>
+            </div>
+            
+            <!-- Limit 3: Accuracy and Validation -->
+            <div style="background: #ffffff; border: 1px solid rgba(245, 158, 11, 0.15); border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.01); transition: transform 0.2s; position: relative; overflow: hidden; box-sizing: border-box; border-left: 4px solid #f59e0b;">
+                <div style="width: 42px; height: 42px; border-radius: 8px; background: rgba(245, 158, 11, 0.08); color: #f59e0b; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 1.2rem;">
+                    <i class="fas fa-file-signature"></i>
+                </div>
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0 0 8px;">Not Fully Accurate</h4>
+                <p style="font-size: 0.85rem; line-height: 1.5; color: #64748b; margin: 0;">
+                    Text recognition accuracy is dependent on scan resolution and handwriting quality. Use the built-in FHIR R4 Validator to confirm schema compliance.
+                </p>
+            </div>
         </div>
     </div>
 </div>
@@ -483,6 +524,7 @@
         <button class="sub-tab-btn" onclick="openSubTab('PDF2FHIR','clinical-runlocally',this)">
             <i class="fas fa-download"></i> Run Locally
         </button>
+        <div class="ai-badge ai-badge-off" id="clinicalAiBadge" style="margin-left:auto;margin-bottom:0;"><span class="ai-badge-dot"></span> <span id="clinicalAiText">Checking...</span></div>
     </div>
 
     <!-- ── SUB: Clinical Document (main upload) ── -->
@@ -805,7 +847,7 @@ print(r.json())</pre>
         </div>
 
         <div style="margin-top:12px; text-align:center;">
-            <a href="https://github.com/TRANSLATIONAL-FOUNDATION/TANUH-DPI/blob/main/README_Terminal_Instructins.md" target="_blank" style="font-size:0.78rem; color:#64748b; text-decoration:none;">
+            <a href="https://github.com/TANUH-AI/TANUH-DPI/blob/main/README_Terminal_Instructins.md" target="_blank" rel="noopener noreferrer" style="font-size:0.78rem; color:#64748b; text-decoration:none;">
                 <i class="fas fa-terminal"></i> DPI Terminal Instructions (GitHub)
             </a>
         </div>

@@ -303,7 +303,7 @@
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <div id="fg-landing-view" class="fg-container">
     <!-- Hero / Intro -->
-    <div style="display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 32px; align-items: center; margin-bottom: 40px; padding: 20px 0;">
+    <div class="tab-hero-grid">
         <div>
             <span style="display: inline-block; background: rgba(20, 134, 140, 0.08); color: var(--primary); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 12px; border-radius: 20px; margin-bottom: 14px;">
                 Classical CV &amp; Explainable
@@ -440,7 +440,7 @@
     </div>
 
     <!-- ── On-Premises Security Banner ──────────────────────────────────────── -->
-    <div style="display: flex; align-items: center; gap: 20px; background: linear-gradient(135deg, rgba(20, 134, 140, 0.05) 0%, rgba(20, 134, 140, 0.01) 100%); border: 1.5px solid rgba(20, 134, 140, 0.15); border-radius: 12px; padding: 24px; margin-bottom: 20px; box-sizing: border-box;">
+    <div class="responsive-banner-card">
         <div style="font-size: 2rem; color: var(--primary); flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 48px; height: 48px;">
             <i class="fas fa-shield-alt"></i>
         </div>
@@ -449,6 +449,47 @@
             <p style="font-size: 0.85rem; line-height: 1.5; color: #475569; margin: 0;">
                 All file parsing, edge calculations, and pixel-level checks execute locally on your host environment. No document bytes are transmitted externally, no files are stored permanently, and all active memory buffers are purged immediately after job completion.
             </p>
+        </div>
+    </div>
+
+    <!-- ── Service Limitations ────────────────────────────────────────────── -->
+    <div style="margin-bottom: 40px; margin-top: 32px;">
+        <h3 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin-bottom: 24px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-exclamation-triangle" style="color: #f59e0b; font-size: 1.15rem;"></i> Service Limitations
+        </h3>
+        <div class="key-capabilities-grid" style="display: grid; gap: 20px;">
+            <!-- Limit 1: File Size -->
+            <div style="background: #ffffff; border: 1px solid rgba(245, 158, 11, 0.15); border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.01); transition: transform 0.2s; position: relative; overflow: hidden; box-sizing: border-box; border-left: 4px solid #f59e0b;">
+                <div style="width: 42px; height: 42px; border-radius: 8px; background: rgba(245, 158, 11, 0.08); color: #f59e0b; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 1.2rem;">
+                    <i class="fas fa-hdd"></i>
+                </div>
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0 0 8px;">25MB File Limit</h4>
+                <p style="font-size: 0.85rem; line-height: 1.5; color: #64748b; margin: 0;">
+                    Maximum single file upload size is capped at 25MB. Supported formats: PDF, JPG, PNG, BMP, TIFF, WebP.
+                </p>
+            </div>
+            
+            <!-- Limit 2: Digital Forgery Focus -->
+            <div style="background: #ffffff; border: 1px solid rgba(245, 158, 11, 0.15); border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.01); transition: transform 0.2s; position: relative; overflow: hidden; box-sizing: border-box; border-left: 4px solid #f59e0b;">
+                <div style="width: 42px; height: 42px; border-radius: 8px; background: rgba(245, 158, 11, 0.08); color: #f59e0b; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 1.2rem;">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0 0 8px;">Digital Alterations Only</h4>
+                <p style="font-size: 0.85rem; line-height: 1.5; color: #64748b; margin: 0;">
+                    Focuses on digital anomalies (copy-paste, erasures, metadata edits). Physical paper forgery (e.g., ink chemistry) is not detectable from scans.
+                </p>
+            </div>
+            
+            <!-- Limit 3: Accuracy Dependency -->
+            <div style="background: #ffffff; border: 1px solid rgba(245, 158, 11, 0.15); border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.01); transition: transform 0.2s; position: relative; overflow: hidden; box-sizing: border-box; border-left: 4px solid #f59e0b;">
+                <div style="width: 42px; height: 42px; border-radius: 8px; background: rgba(245, 158, 11, 0.08); color: #f59e0b; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 1.2rem;">
+                    <i class="fas fa-low-vision"></i>
+                </div>
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0 0 8px;">Not Fully Accurate</h4>
+                <p style="font-size: 0.85rem; line-height: 1.5; color: #64748b; margin: 0;">
+                    Very low resolution or heavily compressed documents can produce noise that might trigger false positives or miss minor digital edits.
+                </p>
+            </div>
         </div>
     </div>
 </div>
@@ -769,7 +810,7 @@
         <!-- Code Examples -->
         <h3 style="margin:24px 0 14px;font-size:1.05rem;color:#0e6a6f;"><i class="fas fa-terminal"></i> Usage Examples</h3>
 
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div class="responsive-half-grid">
             <div class="api-section-box">
                 <h4 style="margin:0 0 8px; font-size:0.9rem; color:var(--text-dark);">1. Request a token</h4>
                 <p style="font-size:0.82rem; color:#64748b; margin:0 0 8px;">Returns an <code>access_token</code> valid for 24 hours.</p>
@@ -913,7 +954,7 @@ if preview_url:
         </div>
 
         <div style="margin-top:16px; text-align:center;">
-            <a href="https://github.com/TRANSLATIONAL-FOUNDATION/TANUH-DPI/blob/main/README_Terminal_Instructins.md" target="_blank" style="font-size:0.82rem; color:#64748b; text-decoration:none;">
+            <a href="https://github.com/TANUH-AI/TANUH-DPI/blob/main/README_Terminal_Instructins.md" target="_blank" rel="noopener noreferrer" style="font-size:0.82rem; color:#64748b; text-decoration:none;">
                 <i class="fas fa-terminal"></i> DPI Terminal Instructions (GitHub)
             </a>
         </div>

@@ -77,9 +77,23 @@
         const token   = await ensureToken(isClinical, base);
         const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
+        const isLocal = base.includes('localhost') || base.includes('127.0.0.1');
+
         try {
-            if (!isClinical) {
-                // Async path for NHCX
+            if (isLocal) {
+                // Sync path for local dev — no GCS / Redis / Celery needed
+                const syncUrl = isClinical ? `${base}/pdf2abdm` : `${base}/pdf2nhcx`;
+                const r = await fetch(syncUrl, {
+                    method: 'POST',
+                    body:   formData,
+                    headers
+                });
+                if (r.status === 401) throw new Error("Token rejected by server. Please refresh and try again.");
+                if (!r.ok) throw new Error(await _extractErrorMessage(r, `${isClinical ? 'Clinical' : 'Insurance'} processing failed`));
+                const data = await r.json();
+                renderResult(data, taskType, outputEl, fileInput);
+            } else if (!isClinical) {
+                // Async path for NHCX (production — uses GCS + Celery)
                 const r = await fetch(`${base}/pdf2nhcx/submit`, {
                     method: 'POST',
                     body:   formData,
@@ -89,13 +103,12 @@
                 if (!r.ok) throw new Error(await _extractErrorMessage(r, 'Insurance Policy upload failed'));
                 const { task_id } = await r.json();
                 const data = await pollTask(task_id, base, headers);
-                // Task result may itself be a rejection (wrong doc type detected async)
                 if (data && (data.status === 'rejected' || data.status === 'failed')) {
                     throw new Error(data.error || 'Processing failed');
                 }
                 renderResult(data, taskType, outputEl, fileInput);
             } else {
-                // Async path for ABDM (matches NHCX pattern)
+                // Async path for ABDM (production — uses GCS + Celery)
                 const r = await fetch(`${base}/pdf2abdm/submit`, {
                     method: 'POST',
                     body:   formData,

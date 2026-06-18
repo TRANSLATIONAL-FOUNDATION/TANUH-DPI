@@ -17,7 +17,7 @@
             const trigger = dd.querySelector('.dropdown-trigger');
             if (!trigger) return;
             trigger.addEventListener('click', (e) => {
-                if (window.innerWidth > 768) {
+                if (window.innerWidth > 1150) {
                     e.preventDefault();
                     return;
                 }
@@ -44,7 +44,7 @@
         });
 
         // Close mobile menu on nav link click
-        document.querySelectorAll('.dropdown-item, .nav-link:not(.dropdown-trigger)').forEach(link => {
+        document.querySelectorAll('.dropdown-item, .nav-link:not(.dropdown-trigger), .nav-login, .nav-logout-btn, .nav-brand').forEach(link => {
             link.addEventListener('click', () => {
                 if (menu) menu.classList.remove('open');
                 document.querySelectorAll('.nav-dropdown').forEach(dd => dd.classList.remove('open'));
@@ -154,14 +154,11 @@
     function checkAllServiceBadges() {
         const abdm = window.DPI_API_CONFIG.abdm;
         const nhcx = window.DPI_API_CONFIG.nhcx;
-        const pf = window.DPI_API_CONFIG.pf;
         const isCloudAbdm = abdm.includes('dpi-dev.tanuh.ai');
         const isCloudNhcx = nhcx.includes('dpi-dev.tanuh.ai');
-        const isCloudPf = pf.includes('dpi-dev.tanuh.ai');
-        
+
         checkServiceHealth('clinicalAiBadge', 'clinicalAiText', `${abdm}/health`, isCloudAbdm ? 'AI CLOUD' : 'AI ON', 'AI OFF');
         checkServiceHealth('insuranceAiBadge', 'insuranceAiText', `${nhcx}/health`, isCloudNhcx ? 'AI CLOUD' : 'AI ON', 'AI OFF');
-        checkServiceHealth('pfAiBadge', 'pfAiText', `${pf}/api/health`, isCloudPf ? 'CLOUD READY' : 'CPU READY', 'OFFLINE');
     }
 
     // ── Tab Management ──────────────────────────────────────────────────────────
@@ -380,7 +377,7 @@
     window.showToast = function (title, message, type = 'error', duration = 6000) {
         const container = document.getElementById('toast-container');
         if (!container) return;
-        const icons = { error: 'fa-circle-xmark', warn: 'fa-triangle-exclamation', info: 'fa-circle-info' };
+        const icons = { error: 'fa-circle-xmark', warn: 'fa-triangle-exclamation', info: 'fa-circle-info', success: 'fa-circle-check' };
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
         toast.innerHTML = `

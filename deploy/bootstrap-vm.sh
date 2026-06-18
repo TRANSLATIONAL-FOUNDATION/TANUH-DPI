@@ -21,7 +21,7 @@ set -euo pipefail
 
 # ── Config (override via metadata/env if needed) ─────────────────────────────
 APP_DIR="${APP_DIR:-/opt/tanuh-dpi}"
-REPO_URL="${REPO_URL:-https://github.com/TRANSLATIONAL-FOUNDATION/TANUH-DPI.git}"
+REPO_URL="${REPO_URL:-https://github.com/TANUH-AI/TANUH-DPI.git}"
 REPO_REF="${REPO_REF:-main}"
 PROJECT_ID="${PROJECT_ID:-proj-dpi-shared}"
 MEMORYSTORE_HOST="${MEMORYSTORE_HOST:-10.250.123.43}"
