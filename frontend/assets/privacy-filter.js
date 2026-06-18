@@ -379,7 +379,7 @@
     return PF_authFetch(`${PF_BASE}/api/submit`, {
       method: "POST",
       body:   fd,
-      signal: AbortSignal.timeout(30000),
+      signal: AbortSignal.timeout(120000),
     });
   }
 
@@ -440,43 +440,70 @@
 
     PF_setStatus(`Uploading ${file.name}…`);
 
-    try {
-      const r = await PF_submitFile(file);
+    const pfBase = window._PF_BASE || PF_BASE;
+    const isLocalPF = pfBase.includes("localhost") || pfBase.includes("127.0.0.1");
 
-      if (r.status === 401) {
-        sessionStorage.removeItem(PF_TOKEN_KEY);
-        const retry = await PF_submitFile(file);
-        if (retry.status === 401) {
+    try {
+      let result;
+
+      if (isLocalPF) {
+        // Sync path — no Redis/Celery needed
+        const fd = new FormData();
+        fd.append("file", file);
+        PF_setStatus("Processing…");
+        const r = await PF_authFetch(`${pfBase}/api/redact`, {
+          method: "POST",
+          body:   fd,
+          signal: AbortSignal.timeout(300000),
+        });
+        if (r.status === 401) {
+          sessionStorage.removeItem(PF_TOKEN_KEY);
           PF_setStatus("Authentication failed. Please reload and try again.", true);
           return;
         }
-        if (!retry.ok && retry.status !== 202) {
-          const err = await retry.json().catch(() => ({ detail: retry.statusText }));
-          throw new Error(err.detail || `HTTP ${retry.status}`);
+        if (!r.ok) {
+          const err = await r.json().catch(() => ({ detail: r.statusText }));
+          throw new Error(err.detail || `HTTP ${r.status}`);
         }
-        var submitData = await retry.json();
-      } else if (!r.ok && r.status !== 202) {
-        if (r.status === 500) {
-          PF_setStatus(
-            "The Privacy Filter service encountered an internal error. " +
-            "The document may be too large, or the service is still initializing. Please try again.",
-            true
-          );
-          return;
-        }
-        const err = await r.json().catch(() => ({ detail: r.statusText }));
-        throw new Error(err.detail || `HTTP ${r.status}`);
+        result = await r.json();
       } else {
-        var submitData = await r.json();
+        // Async path — production with Redis/Celery workers
+        const r = await PF_submitFile(file);
+
+        if (r.status === 401) {
+          sessionStorage.removeItem(PF_TOKEN_KEY);
+          const retry = await PF_submitFile(file);
+          if (retry.status === 401) {
+            PF_setStatus("Authentication failed. Please reload and try again.", true);
+            return;
+          }
+          if (!retry.ok && retry.status !== 202) {
+            const err = await retry.json().catch(() => ({ detail: retry.statusText }));
+            throw new Error(err.detail || `HTTP ${retry.status}`);
+          }
+          var submitData = await retry.json();
+        } else if (!r.ok && r.status !== 202) {
+          if (r.status === 500) {
+            PF_setStatus(
+              "The Privacy Filter service encountered an internal error. " +
+              "The document may be too large, or the service is still initializing. Please try again.",
+              true
+            );
+            return;
+          }
+          const err = await r.json().catch(() => ({ detail: r.statusText }));
+          throw new Error(err.detail || `HTTP ${r.status}`);
+        } else {
+          var submitData = await r.json();
+        }
+
+        PF_setStatus("Queued — waiting for worker…");
+        const taskId = submitData.task_id;
+        await PF_pollTaskStatus(taskId);
+
+        PF_setStatus("Fetching results…");
+        result = await PF_fetchTaskResult(taskId);
       }
-
-      PF_setStatus("Queued — waiting for worker…");
-      const taskId = submitData.task_id;
-
-      await PF_pollTaskStatus(taskId);
-
-      PF_setStatus("Fetching results…");
-      const result = await PF_fetchTaskResult(taskId);
 
       if (result.status === "failed") {
         throw new Error(result.error || "Redaction failed");
@@ -487,8 +514,8 @@
       PF_renderResult(result);
 
     } catch (e) {
-      if (e.name === "AbortError") {
-        PF_setStatus("Upload timed out. Please retry.", true);
+      if (e.name === "AbortError" || e.name === "TimeoutError") {
+        PF_setStatus("Upload timed out. The file may be too large or the connection slow — please retry.", true);
       } else {
         PF_setStatus(`Error: ${e.message}`, true);
       }
@@ -504,6 +531,40 @@
     if (input && label && input.files.length) {
       label.textContent = input.files[0].name;
     }
+  };
+
+  window.PF_handleFileChange = function () {
+    if (window.PF_updateFileName) PF_updateFileName();
+    const input    = document.getElementById('pfFileInput');
+    const dropzone = document.getElementById('pfDropzone');
+    const card     = document.getElementById('pfFileCard');
+    const nameEl   = document.getElementById('pfCardFileName');
+    const sizeEl   = document.getElementById('pfCardFileSize');
+    const btn      = document.getElementById('pfProcessBtn');
+    if (input && input.files && input.files.length > 0) {
+      const file = input.files[0];
+      if (nameEl) nameEl.textContent = file.name;
+      if (sizeEl) sizeEl.textContent = (file.size / 1024).toFixed(1) + ' KB';
+      if (dropzone) dropzone.style.display = 'none';
+      if (card) card.style.display = 'flex';
+      if (btn) btn.removeAttribute('disabled');
+    }
+  };
+
+  window.PF_removeFile = function (e) {
+    if (e) e.stopPropagation();
+    const input    = document.getElementById('pfFileInput');
+    const dropzone = document.getElementById('pfDropzone');
+    const card     = document.getElementById('pfFileCard');
+    const btn      = document.getElementById('pfProcessBtn');
+    const label    = document.getElementById('pfFileName');
+    if (input) input.value = '';
+    if (label) label.textContent = 'Choose document to redact...';
+    if (dropzone) dropzone.style.display = 'flex';
+    if (card) card.style.display = 'none';
+    if (btn) btn.setAttribute('disabled', 'true');
+    const resultsSec = document.getElementById('pfResults');
+    if (resultsSec) resultsSec.classList.add('hidden');
   };
 
   window.PF_processRedaction = function () {

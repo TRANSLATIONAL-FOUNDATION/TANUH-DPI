@@ -413,7 +413,7 @@
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <div id="pf-landing-view" class="pf-container">
     <!-- Hero / Intro -->
-    <div style="display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 32px; align-items: center; margin-bottom: 40px; padding: 20px 0;">
+    <div class="tab-hero-grid">
         <div>
             <span style="display: inline-block; background: rgba(20, 134, 140, 0.08); color: var(--primary); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 12px; border-radius: 20px; margin-bottom: 14px;">
                 Secure &amp; CPU-Optimized
@@ -444,10 +444,10 @@
             </div>
             
             <div style="display: flex; flex-direction: column; gap: 10px; font-family: monospace; font-size: 0.72rem; color: #334155; line-height: 1.4;">
-                <div>PATIENT NAME: <span style="background: #000; color: #000; padding: 0 4px; border-radius: 2px; border-left: 2px solid #ef4444; position: relative;" title="Redacted">JOHN DOE [REDACTED]</span></div>
+                <div>PATIENT NAME: <span style="background: #000; color: #000; padding: 0 4px; border-radius: 2px; border-left: 2px solid #ef4444; position: relative;" title="Redacted">TANUH [REDACTED]</span></div>
                 <div>DATE OF BIRTH: <span style="background: #000; color: #000; padding: 0 4px; border-radius: 2px; border-left: 2px solid #f59e0b;" title="Redacted">12-08-1985 [REDACTED]</span></div>
                 <div>DIAGNOSIS REPORT NO: <span style="background: #000; color: #000; padding: 0 4px; border-radius: 2px; border-left: 2px solid #3b82f6;" title="Redacted">REF-984210 [REDACTED]</span></div>
-                <div>PATIENT EMAIL: <span style="background: #000; color: #000; padding: 0 4px; border-radius: 2px; border-left: 2px solid #10b981;" title="Redacted">john.doe@email.com [REDACTED]</span></div>
+                <div>PATIENT EMAIL: <span style="background: #000; color: #000; padding: 0 4px; border-radius: 2px; border-left: 2px solid #10b981;" title="Redacted">tanuh@email.com [REDACTED]</span></div>
             </div>
             
             <div style="position: absolute; bottom: 12px; right: 12px; font-size: 0.65rem; color: var(--primary); background: #e6f7f8; border-radius: 20px; padding: 3px 10px; font-weight: 700; letter-spacing: 0.05em; display: flex; align-items: center; gap: 4px;">
@@ -542,7 +542,7 @@
     </div>
 
     <!-- ── On-Premises Security Banner ──────────────────────────────────────── -->
-    <div style="display: flex; align-items: center; gap: 20px; background: linear-gradient(135deg, rgba(20, 134, 140, 0.05) 0%, rgba(20, 134, 140, 0.01) 100%); border: 1.5px solid rgba(20, 134, 140, 0.15); border-radius: 12px; padding: 24px; margin-bottom: 20px; box-sizing: border-box;">
+    <div class="responsive-banner-card">
         <div style="font-size: 2rem; color: var(--primary); flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 48px; height: 48px;">
             <i class="fas fa-shield-alt"></i>
         </div>
@@ -551,6 +551,47 @@
             <p style="font-size: 0.85rem; line-height: 1.5; color: #475569; margin: 0;">
                 All document files are parsed and de-identified directly on your server host CPU. No external API calls are made, no files are written to cloud storage, and zero patient data is retained post-process. Fully conforms to Indian healthcare DPDP Act requirements.
             </p>
+        </div>
+    </div>
+
+    <!-- ── Service Limitations ────────────────────────────────────────────── -->
+    <div style="margin-bottom: 40px; margin-top: 32px;">
+        <h3 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin-bottom: 24px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-exclamation-triangle" style="color: #f59e0b; font-size: 1.15rem;"></i> Service Limitations
+        </h3>
+        <div class="key-capabilities-grid" style="display: grid; gap: 20px;">
+            <!-- Limit 1: File Size -->
+            <div style="background: #ffffff; border: 1px solid rgba(245, 158, 11, 0.15); border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.01); transition: transform 0.2s; position: relative; overflow: hidden; box-sizing: border-box; border-left: 4px solid #f59e0b;">
+                <div style="width: 42px; height: 42px; border-radius: 8px; background: rgba(245, 158, 11, 0.08); color: #f59e0b; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 1.2rem;">
+                    <i class="fas fa-hdd"></i>
+                </div>
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0 0 8px;">25MB File Limit</h4>
+                <p style="font-size: 0.85rem; line-height: 1.5; color: #64748b; margin: 0;">
+                    Maximum single file upload size is capped at 25MB to ensure stable memory consumption during in-memory processing.
+                </p>
+            </div>
+            
+            <!-- Limit 2: Not Fully Accurate -->
+            <div style="background: #ffffff; border: 1px solid rgba(245, 158, 11, 0.15); border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.01); transition: transform 0.2s; position: relative; overflow: hidden; box-sizing: border-box; border-left: 4px solid #f59e0b;">
+                <div style="width: 42px; height: 42px; border-radius: 8px; background: rgba(245, 158, 11, 0.08); color: #f59e0b; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 1.2rem;">
+                    <i class="fas fa-bullseye"></i>
+                </div>
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0 0 8px;">Not Fully Accurate</h4>
+                <p style="font-size: 0.85rem; line-height: 1.5; color: #64748b; margin: 0;">
+                    OCR and heuristic matching may fail on low-contrast scans or non-standard fonts. Use the built-in manual correction editor to review and finalize redactions.
+                </p>
+            </div>
+            
+            <!-- Limit 3: Processing Time -->
+            <div style="background: #ffffff; border: 1px solid rgba(245, 158, 11, 0.15); border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.01); transition: transform 0.2s; position: relative; overflow: hidden; box-sizing: border-box; border-left: 4px solid #f59e0b;">
+                <div style="width: 42px; height: 42px; border-radius: 8px; background: rgba(245, 158, 11, 0.08); color: #f59e0b; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 1.2rem;">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0 0 8px;">Long PDF Processing Time</h4>
+                <p style="font-size: 0.85rem; line-height: 1.5; color: #64748b; margin: 0;">
+                    Multi-page PDFs requiring deep OCR text extraction may take longer (up to 30 seconds) to render completely on CPU resources.
+                </p>
+            </div>
         </div>
     </div>
 </div>
@@ -562,7 +603,7 @@
     <!-- Sub Navigation inside tool page -->
     <div class="sub-nav-bar">
         <button class="sub-tab-btn active" id="btn-pf-launch" onclick="openSubTab('PrivacyFilter','pf-sub-main',this)">
-            <i class="fas fa-play-circle"></i> Interactive Redaction
+            <i class="fas fa-user-shield"></i> Privacy Filter
         </button>
         <button class="sub-tab-btn" onclick="openSubTab('PrivacyFilter','pf-sub-api',this)">
             <i class="fas fa-code"></i> API Access
@@ -577,7 +618,7 @@
         <div class="tab-header" style="margin-bottom: 16px;">
             <div class="tab-header-text">
                 <h2 style="font-size: 1.25rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                    <i class="fas fa-play-circle" style="color:var(--primary)"></i> Interactive Redaction Tool
+                    <i class="fas fa-user-shield" style="color:var(--primary)"></i> Privacy Filter Tool
                 </h2>
                 <p style="font-size: 0.82rem; color: #64748b; margin-top: 2px;">
                     Upload clinical scans, medical reports, or claim forms to de-identify and sanitize patient PII/PHI.
@@ -737,7 +778,7 @@
                     <div class="pf-panel-header" style="margin: 0; padding-bottom: 8px;">
                         <h4 class="pf-panel-title"><i class="fas fa-file-signature"></i> Text Content Redaction Summary</h4>
                     </div>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                    <div class="responsive-half-grid">
                         <div>
                             <h5 style="font-size:0.75rem; color:var(--text-light); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.05em;"><i class="fas fa-file-alt" style="margin-right:5px;"></i>Original Text</h5>
                             <pre id="pfPrevOriginal" class="json-output" style="height:220px; background:#f8fafc !important; color:#334155; border:1px solid #e2e8f0; padding:8px 12px; border-radius:8px; overflow:auto; white-space:pre-wrap; font-size:0.76rem; line-height:1.55; margin:0;"></pre>
@@ -886,7 +927,7 @@ print(r.json()["entity_counts"])</pre>
         </div>
 
         <div style="margin-top:16px; text-align:center;">
-            <a href="https://github.com/TRANSLATIONAL-FOUNDATION/TANUH-DPI/blob/main/README_Terminal_Instructins.md" target="_blank" style="font-size:0.82rem; color:#64748b; text-decoration:none;">
+            <a href="https://github.com/TANUH-AI/TANUH-DPI/blob/main/README_Terminal_Instructins.md" target="_blank" rel="noopener noreferrer" style="font-size:0.82rem; color:#64748b; text-decoration:none;">
                 <i class="fas fa-terminal"></i> DPI Terminal Instructions (GitHub)
             </a>
         </div>
@@ -983,50 +1024,3 @@ print(r.json()["entity_counts"])</pre>
     </div><!-- /pf-sub-runlocally -->
 </div>
 
-<!-- Scripts for Custom Uploader UI Logic -->
-<script>
-    window.PF_handleFileChange = function() {
-        // Call backend update name handler for sync
-        if (window.PF_updateFileName) {
-            window.PF_updateFileName();
-        }
-        
-        const input = document.getElementById('pfFileInput');
-        const dropzone = document.getElementById('pfDropzone');
-        const card = document.getElementById('pfFileCard');
-        const nameEl = document.getElementById('pfCardFileName');
-        const sizeEl = document.getElementById('pfCardFileSize');
-        const btn = document.getElementById('pfProcessBtn');
-        
-        if (input && input.files && input.files.length > 0) {
-            const file = input.files[0];
-            if (nameEl) nameEl.textContent = file.name;
-            if (sizeEl) {
-                const sizeKB = (file.size / 1024).toFixed(1);
-                sizeEl.textContent = `${sizeKB} KB`;
-            }
-            if (dropzone) dropzone.style.display = 'none';
-            if (card) card.style.display = 'flex';
-            if (btn) btn.removeAttribute('disabled');
-        }
-    };
-    
-    window.PF_removeFile = function(e) {
-        if (e) e.stopPropagation();
-        const input = document.getElementById('pfFileInput');
-        const dropzone = document.getElementById('pfDropzone');
-        const card = document.getElementById('pfFileCard');
-        const btn = document.getElementById('pfProcessBtn');
-        const label = document.getElementById('pfFileName');
-        
-        if (input) input.value = '';
-        if (label) label.textContent = 'Choose document to redact...';
-        if (dropzone) dropzone.style.display = 'flex';
-        if (card) card.style.display = 'none';
-        if (btn) btn.setAttribute('disabled', 'true');
-        
-        // Hide results if they were visible
-        const resultsSec = document.getElementById('pfResults');
-        if (resultsSec) resultsSec.classList.add('hidden');
-    };
-</script>
