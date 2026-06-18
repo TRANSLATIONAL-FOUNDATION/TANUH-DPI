@@ -2080,6 +2080,18 @@ select:focus {
     color: #99f6e4;
 }
 
+.toast-success {
+    border-left: 4px solid #10b981;
+}
+
+.toast-success .toast-icon {
+    color: #6ee7b7;
+}
+
+.toast-success .toast-title {
+    color: #a7f3d0;
+}
+
 @keyframes toast-in {
     from {
         opacity: 0;

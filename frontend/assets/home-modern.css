@@ -1046,3 +1046,197 @@ body {
         background: transparent !important;
     }
 }
+
+/* ==========================================================================
+   MOBILE & TABLET RESPONSIVENESS REFINEMENTS (≤ 1150px)
+   ========================================================================== */
+@media (max-width: 1150px) {
+    /* Navbar Container spacing */
+    .nav-container {
+        padding: 0 1.5rem !important;
+    }
+
+    /* Hide MoE and IISc logos to prevent branding overflow in narrow headers */
+    .nav-logo-moe,
+    .nav-logo-iisc {
+        display: none !important;
+    }
+
+    /* Display the mobile hamburger toggler */
+    .nav-toggle {
+        display: block !important;
+        background: transparent !important;
+        border: none !important;
+        cursor: pointer !important;
+        padding: 8px !important;
+        color: #475569 !important; /* dark slate to match theme */
+    }
+
+    /* Set dropdown menu absolute location beneath custom light theme navbar */
+    .nav-menu {
+        display: none !important;
+        position: absolute !important;
+        top: 100% !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        background: rgba(255, 255, 255, 0.98) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border-top: 1px solid rgba(20, 134, 140, 0.08) !important;
+        border-bottom: 1px solid rgba(20, 134, 140, 0.08) !important;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08) !important;
+        padding: 1.25rem !important;
+        z-index: 9999 !important;
+    }
+
+    .nav-menu.open {
+        display: block !important;
+    }
+
+    /* Stack links vertically */
+    .nav-links {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 4px !important;
+        width: 100% !important;
+    }
+
+    .nav-links li {
+        width: 100% !important;
+    }
+
+    .nav-link,
+    .nav-github,
+    .nav-login {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        padding: 0 12px !important;
+    }
+
+    /* Accordion style inline dropdowns on mobile */
+    .nav-dropdown {
+        width: 100% !important;
+    }
+
+    .dropdown-menu {
+        position: static !important;
+        transform: none !important;
+        width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 4px 0 4px 12px !important;
+        background: rgba(20, 134, 140, 0.04) !important;
+        border-radius: var(--radius-md) !important;
+        margin-top: 4px !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        display: none !important;
+    }
+
+    .nav-dropdown.open .dropdown-menu {
+        display: block !important;
+    }
+
+    /* Premium mobile styling for logged-in user info card */
+    .nav-user-wrap {
+        width: 100% !important;
+        justify-content: space-between !important;
+        padding: 8px 12px !important;
+        background: rgba(20, 134, 140, 0.04) !important;
+        border-radius: var(--radius-md) !important;
+        margin-top: 8px !important;
+    }
+
+    /* Ensure dropdown triggers do not hover-rotate on mobile */
+    .nav-dropdown:hover .dropdown-menu {
+        transform: none !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+}
+
+/* ── Responsive Hero & Half-width Grids ── */
+.tab-hero-grid {
+    display: grid !important;
+    grid-template-columns: 1.25fr 0.75fr !important;
+    gap: 32px !important;
+    align-items: center !important;
+    margin-bottom: 40px !important;
+    padding: 20px 0 !important;
+}
+
+.responsive-half-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 16px !important;
+}
+
+@media (max-width: 768px) {
+    .tab-hero-grid {
+        grid-template-columns: 1fr !important;
+        gap: 24px !important;
+        text-align: center !important;
+    }
+    
+    .tab-hero-grid > div > div {
+        justify-content: center !important;
+    }
+
+    .responsive-half-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+.responsive-btn-group {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin-top: 28px !important;
+}
+
+@media (max-width: 600px) {
+    .responsive-btn-group {
+        flex-direction: column !important;
+    }
+    .responsive-btn-group > button,
+    .responsive-btn-group > a {
+        width: 100% !important;
+        flex: none !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .fg-team-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+.responsive-banner-card {
+    display: flex !important;
+    align-items: center !important;
+    gap: 20px !important;
+    background: linear-gradient(135deg, rgba(20, 134, 140, 0.05) 0%, rgba(20, 134, 140, 0.01) 100%) !important;
+    border: 1.5px solid rgba(20, 134, 140, 0.15) !important;
+    border-radius: 12px !important;
+    padding: 24px !important;
+    margin-bottom: 20px !important;
+    box-sizing: border-box !important;
+}
+
+@media (max-width: 600px) {
+    .responsive-banner-card {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        text-align: left !important;
+        gap: 12px !important;
+        padding: 20px !important;
+    }
+}
+
+
+
+
