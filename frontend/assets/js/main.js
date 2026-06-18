@@ -514,6 +514,14 @@
     // ── Intersection Observer Scroll Reveal ────────────────────────────────────
     function initScrollReveal() {
         const items = document.querySelectorAll('.feature-item, .eco-card, .geo-card, .reveal-on-scroll, .docs-content-inner h1, .docs-content-inner h2, .docs-content-inner h3, .docs-content-inner .table-responsive, .docs-content-inner pre, .fg-team-card');
+
+        // Fail-open: if the observer is unavailable, show everything immediately
+        // rather than leaving elements stuck at opacity:0.
+        if (!('IntersectionObserver' in window)) {
+            items.forEach(el => el.classList.add('reveal-on-scroll', 'revealed'));
+            return;
+        }
+
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -521,12 +529,25 @@
                     observer.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.05, rootMargin: '0px 0px -45px 0px' });
-        
+        }, { threshold: 0.01, rootMargin: '0px 0px -20px 0px' });
+
         items.forEach(el => {
             el.classList.add('reveal-on-scroll');
             observer.observe(el);
         });
+
+        // Safety net: guarantee every element becomes visible even if the
+        // observer never fires for it (tab content injected via innerHTML,
+        // fast scrolling, or staggered cards below the fold). This is what
+        // prevents the last eco-card(s) from getting stuck hidden.
+        setTimeout(() => {
+            items.forEach(el => {
+                if (!el.classList.contains('revealed')) {
+                    el.classList.add('revealed');
+                    observer.unobserve(el);
+                }
+            });
+        }, 1200);
     }
 
     // ── Connected Particles Hero Canvas (MONAI-inspired) ─────────────────────
