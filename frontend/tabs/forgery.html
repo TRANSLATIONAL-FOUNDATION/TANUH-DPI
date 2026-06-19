@@ -663,25 +663,25 @@
             <a href="/downloads/ForgensicApp-ubuntu-latest.zip" download class="fg-runlocally-card" onmouseover="this.style.borderColor='#14868C'; this.style.boxShadow='0 4px 12px rgba(20,134,140,0.15)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
                 <i class="fab fa-linux" style="color:#14868C;"></i>
                 <h3>Linux x86_64</h3>
-                <p>Binary (~143 MB)</p>
+                <p>Zip Archive (Binary)</p>
                 <p class="fg-meta">Ubuntu 20.04+, Fedora 33+</p>
             </a>
             <a href="/downloads/ForgensicApp-ubuntu-24.04-arm.zip" download class="fg-runlocally-card" onmouseover="this.style.borderColor='#14868C'; this.style.boxShadow='0 4px 12px rgba(20,134,140,0.15)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
                 <i class="fab fa-linux" style="color:#14868C;"></i>
                 <h3>Linux ARM64</h3>
-                <p>Binary (~114 MB)</p>
+                <p>Zip Archive (Binary)</p>
                 <p class="fg-meta">aarch64 / AWS Graviton</p>
             </a>
             <a href="/downloads/ForgensicApp-windows-latest.zip" download class="fg-runlocally-card" onmouseover="this.style.borderColor='#14868C'; this.style.boxShadow='0 4px 12px rgba(20,134,140,0.15)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
                 <i class="fab fa-windows" style="color:#14868C;"></i>
                 <h3>Windows</h3>
-                <p>Portable EXE (~95 MB)</p>
+                <p>Zip Archive (Portable Exe)</p>
                 <p class="fg-meta">Windows 10 / 11</p>
             </a>
             <a href="/downloads/ForgensicApp-macos-latest.zip" download class="fg-runlocally-card" onmouseover="this.style.borderColor='#14868C'; this.style.boxShadow='0 4px 12px rgba(20,134,140,0.15)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
                 <i class="fab fa-apple" style="color:#14868C;"></i>
                 <h3>macOS</h3>
-                <p>Binary (~189 MB)</p>
+                <p>Zip Archive (Binary)</p>
                 <p class="fg-meta">macOS 13+ (Apple Silicon / Intel)</p>
             </a>
         </div>
@@ -778,7 +778,7 @@
                 <h4 style="margin:0 0 8px; font-size:0.9rem; color:var(--text-dark);">1. Upload a document</h4>
                 <p style="font-size:0.82rem; color:#64748b; margin:0 0 8px;">Send as <code>multipart/form-data</code>. Returns a <code>job_id</code>.</p>
                 <div class="api-code-block">
-                    <pre style="margin:0; white-space:pre-wrap;">curl -X POST "https://dpi-dev.tanuh.ai/forgensic/jobs" \
+                    <pre style="margin:0; white-space:pre-wrap;">curl -X POST "https://dpi.tanuh.ai/forgensic/jobs" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -F "file=@/path/to/document.pdf" \
   -F "ocr_enabled=true"</pre>
@@ -790,7 +790,7 @@
                 <p style="font-size:0.82rem; color:#64748b; margin:0 0 8px;">Poll until <code>status</code> is <code>"complete"</code> or <code>"error"</code>.</p>
                 <div class="api-code-block">
                     <pre style="margin:0; white-space:pre-wrap;">curl -H "Authorization: Bearer YOUR_TOKEN" \
-  "https://dpi-dev.tanuh.ai/forgensic/jobs/JOB_ID"
+  "https://dpi.tanuh.ai/forgensic/jobs/JOB_ID"
 
 # Response:
 {
@@ -806,10 +806,10 @@
                 <p style="font-size:0.82rem; color:#64748b; margin:0 0 8px;">Results include preview URLs; fetch them with the same token.</p>
                 <div class="api-code-block">
                     <pre style="margin:0; white-space:pre-wrap;">curl -H "Authorization: Bearer YOUR_TOKEN" \
-  "https://dpi-dev.tanuh.ai/forgensic/jobs/JOB_ID/results"
+  "https://dpi.tanuh.ai/forgensic/jobs/JOB_ID/results"
 
 curl -L -H "Authorization: Bearer YOUR_TOKEN" \
-  "https://dpi-dev.tanuh.ai/forgensic/jobs/JOB_ID/files/preview_document_page_1.jpg" \
+  "https://dpi.tanuh.ai/forgensic/jobs/JOB_ID/files/preview_document_page_1.jpg" \
   -o preview.png</pre>
                     <button class="btn-copy" onclick="copyCodeBlock(this)">Copy</button>
                 </div>
@@ -822,7 +822,7 @@ curl -L -H "Authorization: Bearer YOUR_TOKEN" \
             <div class="api-code-block">
                 <pre style="margin:0; white-space:pre-wrap;">import time, requests
 
-BASE = "https://dpi-dev.tanuh.ai/forgensic"
+BASE = "https://dpi.tanuh.ai/forgensic"
 headers = {"Authorization": "Bearer YOUR_TOKEN"}
 
 with open("document.pdf", "rb") as f:

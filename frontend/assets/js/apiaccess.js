@@ -297,8 +297,5 @@
         }
     };
 
-    window.API_downloadPostman = function() {
-        window.location.href = 'assets/nhcx_postman_collection.json';
-    };
 
 })();
