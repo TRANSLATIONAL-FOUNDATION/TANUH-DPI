@@ -643,25 +643,25 @@
             <a href="/downloads/nhcx-extract-linux-x86_64.zip" download class="ins-runlocally-card" onmouseover="this.style.borderColor='#14868C'; this.style.boxShadow='0 4px 12px rgba(20,134,140,0.15)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
                 <i class="fab fa-linux" style="color:#14868C;"></i>
                 <h3>Linux x86_64</h3>
-                <p>AppImage (~400 MB)</p>
+                <p>Zip Archive (AppImage)</p>
                 <p class="ins-meta">Ubuntu 20.04+, Fedora 33+</p>
             </a>
             <a href="/downloads/nhcx-extract-linux-aarch64.zip" download class="ins-runlocally-card" onmouseover="this.style.borderColor='#14868C'; this.style.boxShadow='0 4px 12px rgba(20,134,140,0.15)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
                 <i class="fab fa-linux" style="color:#14868C;"></i>
                 <h3>Linux ARM64</h3>
-                <p>Binary (~400 MB)</p>
+                <p>Zip Archive (Binary)</p>
                 <p class="ins-meta">aarch64 / AWS Graviton</p>
             </a>
             <a href="/downloads/nhcx-extract-windows-x86_64.zip" download class="ins-runlocally-card" onmouseover="this.style.borderColor='#14868C'; this.style.boxShadow='0 4px 12px rgba(20,134,140,0.15)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
                 <i class="fab fa-windows" style="color:#14868C;"></i>
                 <h3>Windows</h3>
-                <p>Portable EXE (~400 MB)</p>
+                <p>Zip Archive (Portable Exe)</p>
                 <p class="ins-meta">Windows 10 / 11</p>
             </a>
             <a href="/downloads/nhcx-extract-macos.zip" download class="ins-runlocally-card" onmouseover="this.style.borderColor='#14868C'; this.style.boxShadow='0 4px 12px rgba(20,134,140,0.15)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
                 <i class="fab fa-apple" style="color:#14868C;"></i>
                 <h3>macOS</h3>
-                <p>Binary (~400 MB)</p>
+                <p>Zip Archive (Binary)</p>
                 <p class="ins-meta">macOS 13+ (Apple Silicon / Intel)</p>
             </a>
         </div>
@@ -705,7 +705,7 @@
 
             <div style="padding:10px 12px; background:#fef3c7; border-left:4px solid #f59e0b; border-radius:0 6px 6px 0;">
                 <p style="margin:0; color:#92400e; font-size:0.78rem; line-height:1.4;">
-                    <strong><i class="fas fa-shield-alt"></i> Privacy:</strong> All data stays on your machine. Zero cloud API calls. The output JSON contains a complete FHIR R4 Bundle.
+                    <strong><i class="fas fa-shield-alt"></i> Privacy:</strong> All data stays on your machine. Zero cloud API calls. The output JSON contains a FHIR R4 Bundle.
                 </p>
             </div>
         </div>
@@ -729,8 +729,35 @@
         <div style="background:#f0fafb; border-left:4px solid var(--primary); padding:16px 20px; border-radius:8px; margin-bottom:24px;">
             <p style="margin:0; font-size:0.85rem; color:#0e6a6f; line-height:1.5;">
                 <strong><i class="fas fa-info-circle"></i> Secure Authentication:</strong> All API requests require a Bearer token in the <code>Authorization</code> header.
-                <br><strong><i class="fas fa-key"></i> Get Your Developer Token:</strong> To generate or retrieve your secure token, please visit the centralized <a href="#" onclick="openTab(null, 'APIAccess'); return false;" style="font-weight:700; color:var(--primary); text-decoration:underline;">API Access</a> panel.
             </p>
+        </div>
+
+        <!-- Token Generation Card -->
+        <div class="pf-demo-token-card" style="margin-bottom:24px;">
+            <div class="pf-demo-token-header">
+                <i class="fas fa-shield-alt" style="color:#14868C;"></i>
+                <span>Insurance Policy API Token</span>
+                <span class="pf-demo-token-badge">1-DAY TOKEN</span>
+            </div>
+            <form id="apiNhcxTokenForm" class="pf-demo-token-form" autocomplete="off" novalidate>
+                <button type="submit" class="pf-btn pf-btn-primary" id="apiNhcxTokenSubmit">
+                    <i class="fas fa-bolt"></i> Generate Token
+                </button>
+            </form>
+            <div id="apiNhcxTokenResult" class="pf-demo-token-result hidden">
+                <div class="pf-demo-token-result-header">
+                    <span id="apiNhcxTokenGreeting"></span>
+                    <span id="apiNhcxTokenExpiry" class="pf-demo-token-expiry" style="font-weight:600; font-size:0.85rem; padding:4px 8px; border-radius:4px;"></span>
+                </div>
+                <div class="pf-demo-token-output-wrap" style="position:relative; margin-top:8px;">
+                    <pre class="pf-demo-token-output" id="apiNhcxTokenOutput" style="font-family:monospace; background:#f1f5f9; padding:12px; border-radius:6px; overflow:hidden; text-overflow:ellipsis; white-space:pre; margin:0; max-height:48px; line-height:24px; font-size:0.82rem;"></pre>
+                    <div style="display:flex; gap:8px; margin-top:10px;">
+                        <button class="pf-btn pf-btn-ghost btn-view-token" id="apiNhcxTokenView" style="height:32px; font-size:0.8rem; padding:0 12px; flex:1;"><i class="fas fa-eye"></i> View</button>
+                        <button class="pf-btn pf-btn-ghost btn-copy-token" id="apiNhcxTokenCopy" style="height:32px; font-size:0.8rem; padding:0 12px; flex:1;"><i class="fas fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+            </div>
+            <div id="apiNhcxTokenError" class="pf-demo-token-error hidden" style="color:#ef4444; background:#fef2f2; padding:10px; border-radius:6px; font-size:0.85rem; margin-top:10px; border:1px solid #fee2e2;"></div>
         </div>
 
         <!-- Endpoint Reference -->
@@ -754,13 +781,13 @@
             </table>
         </div>
 
-        <!-- Quick Start (curl) -->
+        <!-- Quick Start -->
         <h3 style="margin:20px 0 12px;font-size:0.92rem;color:#0e6a6f;font-weight:700;"><i class="fas fa-terminal"></i> Quick Start</h3>
 
         <div class="api-section-box">
             <h4 style="margin:0 0 6px; font-size:0.8rem; color:var(--text-dark); font-weight:700;">curl</h4>
             <div class="api-code-block">
-                <pre style="margin:0; white-space:pre-wrap;">curl -X POST https://dpi-dev.tanuh.ai/pdf2nhcx/submit \
+                <pre style="margin:0; white-space:pre-wrap;">curl -X POST https://dpi.tanuh.ai/pdf2nhcx/submit \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -F "file=@/path/to/insurance_policy.pdf"</pre>
                 <button class="btn-copy" onclick="copyCodeBlock(this)">Copy</button>
@@ -774,7 +801,7 @@
 
 with open("insurance_policy.pdf", "rb") as f:
     r = requests.post(
-        "https://dpi-dev.tanuh.ai/pdf2nhcx/submit",
+        "https://dpi.tanuh.ai/pdf2nhcx/submit",
         headers={"Authorization": "Bearer YOUR_TOKEN"},
         files={"file": ("policy.pdf", f, "application/pdf")},
         timeout=600,
@@ -785,13 +812,6 @@ print(r.json())</pre>
         </div>
 
         <div style="margin-top:16px;display:flex;gap:12px;justify-content:center;">
-            <button onclick="API_downloadPostman()" class="pf-btn-postman" style="flex:1;font-size:0.84rem;padding:0;height:42px;display:inline-flex;align-items:center;justify-content:center;gap:8px;margin:0;">
-                <svg width="18" height="18" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-                    <circle cx="16" cy="16" r="16" fill="#FF6C37"/>
-                    <path d="M22.3 9.7a8.5 8.5 0 1 0-1.1 12.1l-4.6-4.6 1.3-1.3 4.6 4.6A8.5 8.5 0 0 0 22.3 9.7z" fill="#fff"/>
-                </svg>
-                Download Postman Collection
-            </button>
             <a href="javascript:void(0)" onclick="openTab(null, 'InsuranceDocs'); return false;" class="pf-btn pf-btn-ghost" style="flex:1;font-size:0.84rem;padding:0;height:42px;display:inline-flex;align-items:center;justify-content:center;margin:0;text-decoration:none;">
                 <i class="fas fa-book-open"></i>&nbsp; Full API Documentation
             </a>

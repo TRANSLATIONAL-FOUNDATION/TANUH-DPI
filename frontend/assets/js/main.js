@@ -121,12 +121,12 @@
                 throw new Error("Local offline");
             }
         } catch (e) {
-            console.log("Local backend offline. Redirecting API requests to dpi-dev.tanuh.ai");
-            window.DPI_API_CONFIG.abdm = 'https://dpi-dev.tanuh.ai/pdf2abdm';
-            window.DPI_API_CONFIG.nhcx = 'https://dpi-dev.tanuh.ai/pdf2nhcx';
-            window.DPI_API_CONFIG.logger = 'https://dpi-dev.tanuh.ai/session-logger';
-            window.DPI_API_CONFIG.pf = 'https://dpi-dev.tanuh.ai/privacy-filter';
-            window.DPI_API_CONFIG.forgensic = 'https://dpi-dev.tanuh.ai/forgensic';
+            console.log("Local backend offline. Redirecting API requests to dpi.tanuh.ai");
+            window.DPI_API_CONFIG.abdm = 'https://dpi.tanuh.ai/pdf2abdm';
+            window.DPI_API_CONFIG.nhcx = 'https://dpi.tanuh.ai/pdf2nhcx';
+            window.DPI_API_CONFIG.logger = 'https://dpi.tanuh.ai/session-logger';
+            window.DPI_API_CONFIG.pf = 'https://dpi.tanuh.ai/privacy-filter';
+            window.DPI_API_CONFIG.forgensic = 'https://dpi.tanuh.ai/forgensic';
             
             if (window._PF_BASE !== undefined) window._PF_BASE = window.DPI_API_CONFIG.pf;
         }
@@ -154,8 +154,8 @@
     function checkAllServiceBadges() {
         const abdm = window.DPI_API_CONFIG.abdm;
         const nhcx = window.DPI_API_CONFIG.nhcx;
-        const isCloudAbdm = abdm.includes('dpi-dev.tanuh.ai');
-        const isCloudNhcx = nhcx.includes('dpi-dev.tanuh.ai');
+        const isCloudAbdm = abdm.includes('dpi.tanuh.ai');
+        const isCloudNhcx = nhcx.includes('dpi.tanuh.ai');
 
         checkServiceHealth('clinicalAiBadge', 'clinicalAiText', `${abdm}/health`, isCloudAbdm ? 'AI CLOUD' : 'AI ON', 'AI OFF');
         checkServiceHealth('insuranceAiBadge', 'insuranceAiText', `${nhcx}/health`, isCloudNhcx ? 'AI CLOUD' : 'AI ON', 'AI OFF');
@@ -167,13 +167,10 @@
     async function openTab(evt, tabName) {
         if (evt) evt.preventDefault();
 
-        // TEMPORARILY BYPASSED FOR LOCAL TESTING (MUST RESTORE FOR PRODUCTION)
-        /*
         if (window.DPI_Auth && DPI_Auth.isGatedTab(tabName) && !DPI_Auth.isLoggedIn()) {
             DPI_Auth.setPendingTab(tabName);
             tabName = 'Login';
         }
-        */
 
         document.querySelectorAll(".tabcontent").forEach(el => el.style.display = "none");
 
@@ -206,7 +203,7 @@
             if (tabName === 'ForgeryDetection' && window.FG_init) window.FG_init();
             if (tabName === 'PDF2NHCX' && window.INS_init) window.INS_init();
             if (tabName === 'PDF2FHIR' && window.CLN_init) window.CLN_init();
-            if ((tabName === 'PDF2FHIR' || tabName === 'PDF2NHCX' || tabName === 'ForgeryDetection') && window.initApiAccess) {
+            if ((tabName === 'PDF2FHIR' || tabName === 'PDF2NHCX' || tabName === 'ForgeryDetection' || tabName === 'PrivacyFilter' || tabName === 'APIAccess') && window.initApiAccess) {
                 window.initApiAccess();
             }
             checkAllServiceBadges();
@@ -233,6 +230,7 @@
             else if (fileName === 'privacyfilter') fileName = 'privacyfilter';
             else if (fileName === 'forgerydetection') fileName = 'forgery';
             else if (fileName === 'aboutus') fileName = 'about';
+            else if (fileName === 'apiaccess') fileName = 'apiaccess';
             else if (fileName === 'login') fileName = 'login';
             else if (fileName === 'clinicaldocs') { isDoc = true; docUrl = 'docs/clinical.html'; }
             else if (fileName === 'insurancedocs') { isDoc = true; docUrl = 'docs/insurance.html'; }
