@@ -237,7 +237,7 @@
             errorEl?.classList.add('hidden');
 
             try {
-                const firebaseToken = window.DPI_Auth ? DPI_Auth.getToken() : null;
+                const firebaseToken = window.DPI_Auth ? await DPI_Auth.getToken() : null;
                 if (!firebaseToken) {
                     throw new Error("No active Firebase session found. Please sign in again.");
                 }
