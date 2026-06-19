@@ -293,8 +293,7 @@
                 </div>
                 <span class="pf-conf-label">${pct}%</span>
               </div>
-            </td>
-            <td><span class="pf-pos-chip">${ent.start ?? ""}–${ent.end ?? ""}</span></td>`;
+            </td>`;
           tbody.appendChild(tr);
         });
       }

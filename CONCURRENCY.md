@@ -16,7 +16,7 @@ The DPI platform runs 4 independent microservices on a single VM, each handling 
 ## Test Configuration
 
 - **Date:** 2026-05-26
-- **Target:** `https://dpi-dev.tanuh.ai`
+- **Target:** `https://dpi.tanuh.ai`
 - **Concurrent requests per service:** 200
 - **Tests run sequentially** (one service at a time, no resource competition)
 - **Tool:** `concurrency_test.py` using Python `ThreadPoolExecutor`

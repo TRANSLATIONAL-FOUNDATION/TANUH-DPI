@@ -121,12 +121,12 @@
                 throw new Error("Local offline");
             }
         } catch (e) {
-            console.log("Local backend offline. Redirecting API requests to dpi-dev.tanuh.ai");
-            window.DPI_API_CONFIG.abdm = 'https://dpi-dev.tanuh.ai/pdf2abdm';
-            window.DPI_API_CONFIG.nhcx = 'https://dpi-dev.tanuh.ai/pdf2nhcx';
-            window.DPI_API_CONFIG.logger = 'https://dpi-dev.tanuh.ai/session-logger';
-            window.DPI_API_CONFIG.pf = 'https://dpi-dev.tanuh.ai/privacy-filter';
-            window.DPI_API_CONFIG.forgensic = 'https://dpi-dev.tanuh.ai/forgensic';
+            console.log("Local backend offline. Redirecting API requests to dpi.tanuh.ai");
+            window.DPI_API_CONFIG.abdm = 'https://dpi.tanuh.ai/pdf2abdm';
+            window.DPI_API_CONFIG.nhcx = 'https://dpi.tanuh.ai/pdf2nhcx';
+            window.DPI_API_CONFIG.logger = 'https://dpi.tanuh.ai/session-logger';
+            window.DPI_API_CONFIG.pf = 'https://dpi.tanuh.ai/privacy-filter';
+            window.DPI_API_CONFIG.forgensic = 'https://dpi.tanuh.ai/forgensic';
             
             if (window._PF_BASE !== undefined) window._PF_BASE = window.DPI_API_CONFIG.pf;
         }
@@ -154,8 +154,8 @@
     function checkAllServiceBadges() {
         const abdm = window.DPI_API_CONFIG.abdm;
         const nhcx = window.DPI_API_CONFIG.nhcx;
-        const isCloudAbdm = abdm.includes('dpi-dev.tanuh.ai');
-        const isCloudNhcx = nhcx.includes('dpi-dev.tanuh.ai');
+        const isCloudAbdm = abdm.includes('dpi.tanuh.ai');
+        const isCloudNhcx = nhcx.includes('dpi.tanuh.ai');
 
         checkServiceHealth('clinicalAiBadge', 'clinicalAiText', `${abdm}/health`, isCloudAbdm ? 'AI CLOUD' : 'AI ON', 'AI OFF');
         checkServiceHealth('insuranceAiBadge', 'insuranceAiText', `${nhcx}/health`, isCloudNhcx ? 'AI CLOUD' : 'AI ON', 'AI OFF');

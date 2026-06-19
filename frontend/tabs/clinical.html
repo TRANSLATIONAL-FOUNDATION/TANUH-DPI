@@ -643,25 +643,25 @@
             <a href="/downloads/nhcx-extract-linux-x86_64.zip" download class="cln-runlocally-card" onmouseover="this.style.borderColor='#14868C'; this.style.boxShadow='0 4px 12px rgba(20,134,140,0.15)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
                 <i class="fab fa-linux" style="color:#14868C;"></i>
                 <h3>Linux x86_64</h3>
-                <p>AppImage (~400 MB)</p>
+                <p>Zip Archive (AppImage)</p>
                 <p class="cln-meta">Ubuntu 20.04+, Fedora 33+</p>
             </a>
             <a href="/downloads/nhcx-extract-linux-aarch64.zip" download class="cln-runlocally-card" onmouseover="this.style.borderColor='#14868C'; this.style.boxShadow='0 4px 12px rgba(20,134,140,0.15)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
                 <i class="fab fa-linux" style="color:#14868C;"></i>
                 <h3>Linux ARM64</h3>
-                <p>Binary (~400 MB)</p>
+                <p>Zip Archive (Binary)</p>
                 <p class="cln-meta">aarch64 / AWS Graviton</p>
             </a>
             <a href="/downloads/nhcx-extract-windows-x86_64.zip" download class="cln-runlocally-card" onmouseover="this.style.borderColor='#14868C'; this.style.boxShadow='0 4px 12px rgba(20,134,140,0.15)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
                 <i class="fab fa-windows" style="color:#14868C;"></i>
                 <h3>Windows</h3>
-                <p>Portable EXE (~400 MB)</p>
+                <p>Zip Archive (Portable Exe)</p>
                 <p class="cln-meta">Windows 10 / 11</p>
             </a>
             <a href="/downloads/nhcx-extract-macos.zip" download class="cln-runlocally-card" onmouseover="this.style.borderColor='#14868C'; this.style.boxShadow='0 4px 12px rgba(20,134,140,0.15)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
                 <i class="fab fa-apple" style="color:#14868C;"></i>
                 <h3>macOS</h3>
-                <p>Binary (~400 MB)</p>
+                <p>Zip Archive (Binary)</p>
                 <p class="cln-meta">macOS 13+ (Apple Silicon / Intel)</p>
             </a>
         </div>
@@ -705,7 +705,7 @@
 
             <div style="padding:10px 12px; background:#fef3c7; border-left:4px solid #f59e0b; border-radius:0 6px 6px 0;">
                 <p style="margin:0; color:#92400e; font-size:0.78rem; line-height:1.4;">
-                    <strong><i class="fas fa-shield-alt"></i> Privacy:</strong> All data stays on your machine. Zero cloud API calls. The output JSON contains a complete FHIR R4 Bundle.
+                    <strong><i class="fas fa-shield-alt"></i> Privacy:</strong> All data stays on your machine. Zero cloud API calls. The output JSON contains a FHIR R4 Bundle.
                 </p>
             </div>
         </div>
@@ -798,12 +798,12 @@
         <div class="api-section-box">
             <h4 style="margin:0 0 6px; font-size:0.8rem; color:var(--text-dark); font-weight:700;">curl</h4>
             <div class="api-code-block">
-                <pre style="margin:0; white-space:pre-wrap;">TOKEN=$(curl -s -X POST https://dpi-dev.tanuh.ai/pdf2abdm/api/token \
+                <pre style="margin:0; white-space:pre-wrap;">TOKEN=$(curl -s -X POST https://dpi.tanuh.ai/pdf2abdm/api/token \
   -H "Content-Type: application/json" \
   -d '{"name":"Your Name","email":"you@example.com"}' \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
 
-curl -X POST https://dpi-dev.tanuh.ai/pdf2abdm \
+curl -X POST https://dpi.tanuh.ai/pdf2abdm \
   -H "Authorization: Bearer $TOKEN" \
   -F "file=@/path/to/clinical_report.pdf"</pre>
                 <button class="btn-copy" onclick="copyCodeBlock(this)">Copy</button>
@@ -816,14 +816,14 @@ curl -X POST https://dpi-dev.tanuh.ai/pdf2abdm \
                 <pre style="margin:0; white-space:pre-wrap;">import requests
 
 resp = requests.post(
-    "https://dpi-dev.tanuh.ai/pdf2abdm/api/token",
+    "https://dpi.tanuh.ai/pdf2abdm/api/token",
     json={"name": "Your Name", "email": "you@example.com"},
 )
 token = resp.json()["access_token"]
 
 with open("clinical_report.pdf", "rb") as f:
     r = requests.post(
-        "https://dpi-dev.tanuh.ai/pdf2abdm",
+        "https://dpi.tanuh.ai/pdf2abdm",
         headers={"Authorization": f"Bearer {token}"},
         files={"file": ("report.pdf", f, "application/pdf")},
         timeout=600,
@@ -834,13 +834,6 @@ print(r.json())</pre>
         </div>
 
         <div style="margin-top:16px;display:flex;gap:12px;justify-content:center;">
-            <button onclick="API_downloadPostman()" class="pf-btn-postman" style="flex:1;font-size:0.84rem;padding:0;height:42px;display:inline-flex;align-items:center;justify-content:center;gap:8px;margin:0;">
-                <svg width="18" height="18" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-                    <circle cx="16" cy="16" r="16" fill="#FF6C37"/>
-                    <path d="M22.3 9.7a8.5 8.5 0 1 0-1.1 12.1l-4.6-4.6 1.3-1.3 4.6 4.6A8.5 8.5 0 0 0 22.3 9.7z" fill="#fff"/>
-                </svg>
-                Download Postman Collection
-            </button>
             <a href="javascript:void(0)" onclick="openTab(null, 'ClinicalDocs'); return false;" class="pf-btn pf-btn-ghost" style="flex:1;font-size:0.84rem;padding:0;height:42px;display:inline-flex;align-items:center;justify-content:center;margin:0;text-decoration:none;">
                 <i class="fas fa-book-open"></i>&nbsp; Full API Documentation
             </a>

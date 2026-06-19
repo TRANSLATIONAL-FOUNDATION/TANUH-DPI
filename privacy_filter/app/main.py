@@ -56,6 +56,7 @@ from . import service
 
 load_dotenv()
 
+MAX_FILE_SIZE_MB = 25
 SESSION_LOGGER_URL = os.getenv("SESSION_LOGGER_URL", "http://session-logger:8002")
 
 logging.basicConfig(
@@ -271,6 +272,12 @@ async def redact_file(
     raw_bytes: bytes | None = None
     try:
         raw_bytes = await file.read()
+        size_mb = len(raw_bytes) / (1024 * 1024)
+        if size_mb > MAX_FILE_SIZE_MB:
+            raise HTTPException(
+                status_code=413,
+                detail=f"File is {size_mb:.1f} MB. Maximum allowed size is {MAX_FILE_SIZE_MB} MB.",
+            )
 
         # Write upload to a local temp path the engine can read directly.
         tmp_upload_dir = Path(tempfile.gettempdir()) / "pf_uploads"
@@ -381,6 +388,12 @@ async def submit_redaction(
     upload_key = f"{job_id}__{safe_name}"
 
     raw_bytes = await file.read()
+    size_mb = len(raw_bytes) / (1024 * 1024)
+    if size_mb > MAX_FILE_SIZE_MB:
+        raise HTTPException(
+            status_code=413,
+            detail=f"File is {size_mb:.1f} MB. Maximum allowed size is {MAX_FILE_SIZE_MB} MB.",
+        )
 
     tmp_upload_dir = Path(tempfile.gettempdir()) / "pf_uploads"
     tmp_upload_dir.mkdir(parents=True, exist_ok=True)

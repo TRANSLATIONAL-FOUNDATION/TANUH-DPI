@@ -17,7 +17,7 @@ Common setup (required):
 ```bash
 NAME="YOUR_NAME"
 EMAIL="you@example.com"
-BASE="https://dpi-dev.tanuh.ai"
+BASE="https://dpi.tanuh.ai"
 ```
 
 ------------------------------------------------------------

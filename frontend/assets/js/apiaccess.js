@@ -53,7 +53,7 @@
                 const base = _resolveBase(endpoint);
                 const isBaseLocal = base.includes('localhost') || base.includes('127.0.0.1');
                 const endpointPath = isBaseLocal
-                    ? endpoint.replace(/^\/forgensic(?=\/)/, '')
+                    ? endpoint.replace(/^\/(forgensic|privacy-filter|pdf2abdm|pdf2nhcx)(?=\/)/, '')
                     : endpoint;
                 const r = await fetch(`${base}${endpointPath}`, {
                     method: 'POST',
@@ -177,12 +177,19 @@
             copyId:     'apiForgeryTokenCopy',
         });
 
-        // Privacy Filter runs as a local Docker container (port 8003) with its own UI and token system.
-        // Token generation is handled at: /privacy-filter/api/demo-token
+        // Privacy Filter
+        handleTokenRequest({
+            formId:     'pfApiTokenForm',
+            endpoint:   '/privacy-filter/api/demo-token',
+            storageKey: 'pf_token',
+            resultId:   'pfApiTokenResult',
+            greetingId: 'pfApiTokenGreeting',
+            expiryId:   'pfApiTokenExpiry',
+            outputId:   'pfApiTokenOutput',
+            errorId:    'pfApiTokenError',
+            copyId:     'pfApiTokenCopy',
+        });
     };
 
-    window.API_downloadPostman = function() {
-        window.location.href = 'assets/nhcx_postman_collection.json';
-    };
 
 })();

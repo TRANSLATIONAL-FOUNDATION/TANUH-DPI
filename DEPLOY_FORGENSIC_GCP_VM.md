@@ -105,7 +105,7 @@ docker-compose logs -f forgensic-worker
 
 ## 7. Connect Your Domain (Nginx Reverse Proxy)
 
-To expose the services securely via `https://dpi-dev.tanuh.ai`, you should set up an Nginx reverse proxy on the host machine to route traffic to your Docker containers.
+To expose the services securely via `https://dpi.tanuh.ai`, you should set up an Nginx reverse proxy on the host machine to route traffic to your Docker containers.
 
 1. **Install Nginx:**
    ```bash
@@ -115,7 +115,7 @@ To expose the services securely via `https://dpi-dev.tanuh.ai`, you should set u
 3. **SSL Certificates:** Use **Certbot (Let's Encrypt)** to secure the domain.
    ```bash
    sudo apt-get install -y certbot python3-certbot-nginx
-   sudo certbot --nginx -d dpi-dev.tanuh.ai
+   sudo certbot --nginx -d dpi.tanuh.ai
    ```
 
 You are now fully deployed and ready to handle 500+ requests!

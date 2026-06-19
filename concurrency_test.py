@@ -5,10 +5,10 @@ Stress-tests concurrent request handling for all 4 DPI services.
 Writes a detailed timing report to a .txt file for analysis.
 
 Usage:
-    python3 concurrency_test.py --service clinical --concurrent 200 --base-url https://dpi-dev.tanuh.ai
-    python3 concurrency_test.py --service insurance --concurrent 200 --base-url https://dpi-dev.tanuh.ai
-    python3 concurrency_test.py --service privacy --concurrent 200 --base-url https://dpi-dev.tanuh.ai
-    python3 concurrency_test.py --service forgery --concurrent 200 --base-url https://dpi-dev.tanuh.ai
+    python3 concurrency_test.py --service clinical --concurrent 200 --base-url https://dpi.tanuh.ai
+    python3 concurrency_test.py --service insurance --concurrent 200 --base-url https://dpi.tanuh.ai
+    python3 concurrency_test.py --service privacy --concurrent 200 --base-url https://dpi.tanuh.ai
+    python3 concurrency_test.py --service forgery --concurrent 200 --base-url https://dpi.tanuh.ai
 
 Requirements:
     pip install requests
@@ -389,7 +389,7 @@ def main():
     parser = argparse.ArgumentParser(description="DPI Concurrency Tester")
     parser.add_argument("--service", required=True, choices=["clinical", "insurance", "privacy", "forgery"])
     parser.add_argument("--concurrent", type=int, default=3)
-    parser.add_argument("--base-url", default="https://dpi-dev.tanuh.ai")
+    parser.add_argument("--base-url", default="https://dpi.tanuh.ai")
     parser.add_argument("--pdf", default=None)
     parser.add_argument("--output", default=None, help="Output report file path")
     args = parser.parse_args()
