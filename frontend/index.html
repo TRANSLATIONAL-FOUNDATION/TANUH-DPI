@@ -70,14 +70,13 @@
                                 </svg>
                             </button>
                             <div class="dropdown-menu">
-                                <a class="dropdown-item" href="#" id="navPrivacyFilter"
-                                    onclick="openTab(event, 'PrivacyFilter')">
+                                <a class="dropdown-item" href="#" id="navClinical" onclick="openTab(event, 'PDF2FHIR')">
                                     <span class="dropdown-icon"
-                                        style="background:rgba(245,158,11,0.1);color:#f59e0b;"><i
-                                            class="fas fa-user-shield"></i></span>
+                                        style="background:rgba(14,165,233,0.1);color:#0ea5e9;"><i
+                                            class="fas fa-file-medical"></i></span>
                                     <div>
-                                        <div class="dropdown-item-title">Privacy Filter</div>
-                                        <div class="dropdown-item-desc">Data/image anonymization engine</div>
+                                        <div class="dropdown-item-title">Clinical Document</div>
+                                        <div class="dropdown-item-desc">PDF to ABDM conversion</div>
                                     </div>
                                 </a>
                                 <a class="dropdown-item" href="#" id="navForgery"
@@ -100,13 +99,14 @@
                                         <div class="dropdown-item-desc">PDF to NHCX conversion</div>
                                     </div>
                                 </a>
-                                <a class="dropdown-item" href="#" id="navClinical" onclick="openTab(event, 'PDF2FHIR')">
+                                <a class="dropdown-item" href="#" id="navPrivacyFilter"
+                                    onclick="openTab(event, 'PrivacyFilter')">
                                     <span class="dropdown-icon"
-                                        style="background:rgba(14,165,233,0.1);color:#0ea5e9;"><i
-                                            class="fas fa-file-medical"></i></span>
+                                        style="background:rgba(245,158,11,0.1);color:#f59e0b;"><i
+                                            class="fas fa-user-shield"></i></span>
                                     <div>
-                                        <div class="dropdown-item-title">Clinical Document</div>
-                                        <div class="dropdown-item-desc">PDF to FHIR conversion</div>
+                                        <div class="dropdown-item-title">Privacy Filter (Anonymization)</div>
+                                        <div class="dropdown-item-desc">Data/image anonymization engine</div>
                                     </div>
                                 </a>
                             </div>
@@ -122,13 +122,13 @@
                                 </svg>
                             </button>
                             <div class="dropdown-menu">
-                                <a class="dropdown-item" href="#" onclick="openTab(event, 'PrivacyDocs')">
+                                <a class="dropdown-item" href="#" onclick="openTab(event, 'ClinicalDocs')">
                                     <span class="dropdown-icon"
-                                        style="background:rgba(245,158,11,0.1);color:#f59e0b;"><i
-                                            class="fas fa-user-shield"></i></span>
+                                        style="background:rgba(14,165,233,0.1);color:#0ea5e9;"><i
+                                            class="fas fa-file-medical"></i></span>
                                     <div>
-                                        <div class="dropdown-item-title">Privacy Filter Docs</div>
-                                        <div class="dropdown-item-desc">Redaction &amp; DPDP compliance</div>
+                                        <div class="dropdown-item-title">Clinical Document Docs</div>
+                                        <div class="dropdown-item-desc">FHIR parsing &amp; conversion</div>
                                     </div>
                                 </a>
                                 <a class="dropdown-item" href="#" onclick="openTab(event, 'ForgeryDocs')">
@@ -149,13 +149,13 @@
                                         <div class="dropdown-item-desc">NHCX schemas &amp; policy specs</div>
                                     </div>
                                 </a>
-                                <a class="dropdown-item" href="#" onclick="openTab(event, 'ClinicalDocs')">
+                                <a class="dropdown-item" href="#" onclick="openTab(event, 'PrivacyDocs')">
                                     <span class="dropdown-icon"
-                                        style="background:rgba(14,165,233,0.1);color:#0ea5e9;"><i
-                                            class="fas fa-file-medical"></i></span>
+                                        style="background:rgba(245,158,11,0.1);color:#f59e0b;"><i
+                                            class="fas fa-user-shield"></i></span>
                                     <div>
-                                        <div class="dropdown-item-title">Clinical Document Docs</div>
-                                        <div class="dropdown-item-desc">FHIR parsing &amp; conversion</div>
+                                        <div class="dropdown-item-title">Privacy Filter (Anonymization) Docs</div>
+                                        <div class="dropdown-item-desc">Redaction &amp; DPDP compliance</div>
                                     </div>
                                 </a>
                             </div>
@@ -227,10 +227,10 @@
                 <div class="footer-link-col">
                     <h4 class="footer-heading">Services</h4>
                     <ul>
-                        <li><a href="#" onclick="openTab(null,'PrivacyFilter'); return false;">Privacy Filter</a></li>
+                        <li><a href="#" onclick="openTab(null,'PDF2FHIR'); return false;">Clinical Document</a></li>
                         <li><a href="#" onclick="openTab(null,'ForgeryDetection'); return false;">Forgery Detection</a></li>
                         <li><a href="#" onclick="openTab(null,'PDF2NHCX'); return false;">Insurance Policy</a></li>
-                        <li><a href="#" onclick="openTab(null,'PDF2FHIR'); return false;">Clinical Document</a></li>
+                        <li><a href="#" onclick="openTab(null,'PrivacyFilter'); return false;">Privacy Filter (Anonymization)</a></li>
                     </ul>
                 </div>
 

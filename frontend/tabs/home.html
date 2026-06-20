@@ -26,11 +26,11 @@
 
         <!-- Service Quick Links -->
         <div class="hero-services animate-slide-up" style="animation-delay:0.35s;">
-            <div class="hero-service-card" onclick="openTab(null,'PrivacyFilter'); document.getElementById('navPrivacyFilter').classList.add('active');">
-                <div class="hero-service-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b;"><i class="fas fa-user-shield"></i></div>
+            <div class="hero-service-card" onclick="openTab(null,'PDF2FHIR'); document.getElementById('navClinical').classList.add('active');">
+                <div class="hero-service-icon" style="background:rgba(14,165,233,0.1);color:#0ea5e9;"><i class="fas fa-file-medical"></i></div>
                 <div class="hero-service-info">
-                    <div class="hero-service-name">Privacy Filter</div>
-                    <div class="hero-service-desc">Data/image anonymization engine</div>
+                    <div class="hero-service-name">Clinical Document</div>
+                    <div class="hero-service-desc">PDF to ABDM conversion</div>
                 </div>
             </div>
             <div class="hero-service-card" onclick="openTab(null,'ForgeryDetection'); document.getElementById('navForgery').classList.add('active');">
@@ -47,11 +47,11 @@
                     <div class="hero-service-desc">PDF to NHCX conversion</div>
                 </div>
             </div>
-            <div class="hero-service-card" onclick="openTab(null,'PDF2FHIR'); document.getElementById('navClinical').classList.add('active');">
-                <div class="hero-service-icon" style="background:rgba(14,165,233,0.1);color:#0ea5e9;"><i class="fas fa-file-medical"></i></div>
+            <div class="hero-service-card" onclick="openTab(null,'PrivacyFilter'); document.getElementById('navPrivacyFilter').classList.add('active');">
+                <div class="hero-service-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b;"><i class="fas fa-user-shield"></i></div>
                 <div class="hero-service-info">
-                    <div class="hero-service-name">Clinical Document</div>
-                    <div class="hero-service-desc">PDF to FHIR conversion</div>
+                    <div class="hero-service-name">Privacy Filter (Anonymization)</div>
+                    <div class="hero-service-desc">Data/image anonymization engine</div>
                 </div>
             </div>
     </div>
@@ -78,9 +78,9 @@
             </div>
             <div class="stat-item">
                 <div class="stat-value-container">
-                    <span class="stat-value" id="statDocsRedacted">0</span><span class="stat-plus">+</span>
+                    <span class="stat-value" id="statClinical">0</span><span class="stat-plus">+</span>
                 </div>
-                <div class="stat-label">Data/images anonymizied</div>
+                <div class="stat-label">PDF to FHIR converted</div>
             </div>
             <div class="stat-item">
                 <div class="stat-value-container">
@@ -90,15 +90,15 @@
             </div>
             <div class="stat-item">
                 <div class="stat-value-container">
-                    <span class="stat-value" id="statClinical">0</span><span class="stat-plus">+</span>
-                </div>
-                <div class="stat-label">PDF to FHIR converted</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value-container">
                     <span class="stat-value" id="statInsurance">0</span><span class="stat-plus">+</span>
                 </div>
                 <div class="stat-label">PDF to NHCX converted</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value-container">
+                    <span class="stat-value" id="statDocsRedacted">0</span><span class="stat-plus">+</span>
+                </div>
+                <div class="stat-label">Data/images anonymized</div>
             </div>
         </div>
         <!-- <div class="stats-footer animate-slide-up" style="animation-delay: 0.1s;">
@@ -178,32 +178,32 @@
         </div>
 
         <div class="ecosystem-grid">
-            <!-- Privacy Filter -->
+            <!-- Clinical Document -->
             <div class="eco-card">
-                <div class="eco-card-accent" style="background:#f59e0b;"></div>
+                <div class="eco-card-accent" style="background:#0ea5e9;"></div>
                 <div class="eco-card-body">
                     <div class="eco-card-header">
-                        <div class="eco-card-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b;">
-                            <i class="fas fa-user-shield"></i>
+                        <div class="eco-card-icon" style="background:rgba(14,165,233,0.1);color:#0ea5e9;">
+                            <i class="fas fa-file-medical"></i>
                         </div>
                         <div>
-                            <div class="eco-card-phase" style="color:#f59e0b;">Protect</div>
-                            <h3 class="eco-card-name">Privacy Filter</h3>
+                            <div class="eco-card-phase" style="color:#0ea5e9;">Convert</div>
+                            <h3 class="eco-card-name">Clinical Document</h3>
                         </div>
                     </div>
-                    <p>Anonymize medical images, scans, and clinical documents by removing burned-in patient text, metadata, and PII on CPU with zero data retention.</p>
+                    <p>Transform raw clinical PDFs (discharge summaries &amp; diagnostic reports) into ABDM-compliant FHIR R4 JSON bundles.</p>
                     <ul class="eco-card-features">
-                        <li><span class="dot" style="background:#f59e0b;"></span> DPDP Act compliant</li>
-                        <li><span class="dot" style="background:#f59e0b;"></span> DICOM, NIfTI, image &amp; PDF support</li>
-                        <li><span class="dot" style="background:#f59e0b;"></span> Interactive review</li>
+                        <li><span class="dot" style="background:#0ea5e9;"></span> FHIR R4 validation</li>
+                        <li><span class="dot" style="background:#0ea5e9;"></span> Scanned &amp; printed record support</li>
+                        <li><span class="dot" style="background:#0ea5e9;"></span> LangGraph orchestrated extraction</li>
+                        <!-- <li><span class="dot" style="background:#0ea5e9;"></span> Async Celery processing</li> -->
                     </ul>
-                    <button class="eco-card-link" onclick="openTab(null,'PrivacyFilter'); document.getElementById('navPrivacyFilter').classList.add('active');">
+                    <button class="eco-card-link" onclick="openTab(null,'PDF2FHIR'); document.getElementById('navClinical').classList.add('active');">
                         Launch Service
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
                     </button>
                 </div>
             </div>
-
             <!-- Forensic -->
             <div class="eco-card">
                 <div class="eco-card-accent" style="background:#10b981;"></div>
@@ -258,33 +258,33 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Clinical Document -->
+            <!-- Privacy Filter -->
             <div class="eco-card">
-                <div class="eco-card-accent" style="background:#0ea5e9;"></div>
+                <div class="eco-card-accent" style="background:#f59e0b;"></div>
                 <div class="eco-card-body">
                     <div class="eco-card-header">
-                        <div class="eco-card-icon" style="background:rgba(14,165,233,0.1);color:#0ea5e9;">
-                            <i class="fas fa-file-medical"></i>
+                        <div class="eco-card-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b;">
+                            <i class="fas fa-user-shield"></i>
                         </div>
                         <div>
-                            <div class="eco-card-phase" style="color:#0ea5e9;">Convert</div>
-                            <h3 class="eco-card-name">Clinical Document</h3>
+                            <div class="eco-card-phase" style="color:#f59e0b;">Protect</div>
+                            <h3 class="eco-card-name">Privacy Filter (Anonymization)</h3>
                         </div>
                     </div>
-                    <p>Transform raw clinical PDFs (discharge summaries &amp; diagnostic reports) into ABDM-compliant FHIR R4 JSON bundles.</p>
+                    <p>Anonymize medical images, scans, and clinical documents by removing burned-in patient text, metadata, and PII on CPU with zero data retention.</p>
                     <ul class="eco-card-features">
-                        <li><span class="dot" style="background:#0ea5e9;"></span> FHIR R4 validation</li>
-                        <li><span class="dot" style="background:#0ea5e9;"></span> Scanned &amp; printed record support</li>
-                        <li><span class="dot" style="background:#0ea5e9;"></span> LangGraph orchestrated extraction</li>
-                        <!-- <li><span class="dot" style="background:#0ea5e9;"></span> Async Celery processing</li> -->
+                        <li><span class="dot" style="background:#f59e0b;"></span> DPDP Act compliant</li>
+                        <li><span class="dot" style="background:#f59e0b;"></span> DICOM, NIfTI, image &amp; PDF support</li>
+                        <li><span class="dot" style="background:#f59e0b;"></span> Interactive review</li>
                     </ul>
-                    <button class="eco-card-link" onclick="openTab(null,'PDF2FHIR'); document.getElementById('navClinical').classList.add('active');">
+                    <button class="eco-card-link" onclick="openTab(null,'PrivacyFilter'); document.getElementById('navPrivacyFilter').classList.add('active');">
                         Launch Service
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
                     </button>
                 </div>
             </div>
+
+
         </div>
     </div>
 </section>

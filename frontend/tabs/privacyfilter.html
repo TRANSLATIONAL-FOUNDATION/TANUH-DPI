@@ -562,7 +562,7 @@
             <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0 0 4px;">Plausible 100% Confidential On-Premises Execution</h4>
             <p style="font-size: 0.85rem; line-height: 1.5; color: #475569; margin: 0;">
             
-                Deploy the Privacy Filter service locally with a simple CPU-based installation. No external API calls, no cloud storage, and all processing occurs securely in memory. Designed to support compliance with the Indian DPDP Act for privacy-preserving healthcare applications.
+                Deploy the Privacy Filter (Anonymization) service locally with a simple CPU-based installation. No external API calls, no cloud storage, and all processing occurs securely in memory. Designed to support compliance with the Indian DPDP Act for privacy-preserving healthcare applications.
             </p>
         </div>
     </div>
@@ -616,7 +616,7 @@
     <!-- Sub Navigation inside tool page -->
     <div class="sub-nav-bar">
         <button class="sub-tab-btn active" id="btn-pf-launch" onclick="openSubTab('PrivacyFilter','pf-sub-main',this)">
-            <i class="fas fa-user-shield"></i> Privacy Filter
+            <i class="fas fa-user-shield"></i> Privacy Filter (Anonymization)
         </button>
         <button class="sub-tab-btn" onclick="openSubTab('PrivacyFilter','pf-sub-api',this)">
             <i class="fas fa-code"></i> API Access
@@ -631,7 +631,7 @@
         <div class="tab-header" style="margin-bottom: 16px;">
             <div class="tab-header-text">
                 <h2 style="font-size: 1.25rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                    <i class="fas fa-user-shield" style="color:var(--primary)"></i> Privacy Filter Tool
+                    <i class="fas fa-user-shield" style="color:var(--primary)"></i> Privacy Filter (Anonymization) Tool
                 </h2>
                 <p style="font-size: 0.82rem; color: #64748b; margin-top: 2px;">
                     Upload clinical documents/images, medical reports, or claim forms to de-identify and sanitize patient PII/PHI.
@@ -808,8 +808,8 @@
     <div id="pf-sub-api" class="sub-content" style="display:none">
         <div class="tab-header">
             <div class="tab-header-text">
-                <h2><i class="fas fa-code" style="color:var(--primary)"></i> Privacy Filter API</h2>
-                <p>How to call the Privacy Filter service from your own code or pipeline.</p>
+                <h2><i class="fas fa-code" style="color:var(--primary)"></i> Privacy Filter (Anonymization) API</h2>
+                <p>How to call the Privacy Filter (Anonymization) service from your own code or pipeline.</p>
             </div>
         </div>
 
@@ -823,7 +823,7 @@
         <div class="pf-demo-token-card" style="margin-bottom:24px;">
             <div class="pf-demo-token-header">
                 <i class="fas fa-user-shield" style="color:#14868C;"></i>
-                <span>Privacy Filter API Token</span>
+                <span>Privacy Filter (Anonymization) API Token</span>
                 <span class="pf-demo-token-badge">1-DAY TOKEN</span>
             </div>
             <form id="apiPrivacyTokenForm" class="pf-demo-token-form" autocomplete="off" novalidate>
