@@ -681,10 +681,17 @@
     if (landing) landing.style.display = 'none';
     if (interactive) {
       interactive.style.display = 'block';
-      // Automatically activate the first subtab button
-      const firstBtn = interactive.querySelector('.sub-tab-btn');
-      if (firstBtn) {
-        firstBtn.click();
+      const pendingSub = sessionStorage.getItem('pendingLaunchSubTab');
+      let targetBtn = null;
+      if (pendingSub) {
+        sessionStorage.removeItem('pendingLaunchSubTab');
+        targetBtn = interactive.querySelector(`.sub-tab-btn[onclick*="${pendingSub}"]`);
+      }
+      if (!targetBtn) {
+        targetBtn = interactive.querySelector('.sub-tab-btn');
+      }
+      if (targetBtn) {
+        targetBtn.click();
       }
     }
   };

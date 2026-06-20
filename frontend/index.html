@@ -196,6 +196,7 @@
         <div id="PrivacyDocs" class="tabcontent" style="display: none;"></div>
         <div id="ForgeryDocs" class="tabcontent" style="display: none;"></div>
         <div id="APIAccess" class="tabcontent container" style="display: none;"></div>
+        <div id="Download" class="tabcontent container" style="display: none;"></div>
         <div id="Login" class="tabcontent" style="display: none;"></div>
     </main>
 
@@ -238,11 +239,10 @@
                 <div class="footer-link-col">
                     <h4 class="footer-heading">Organization</h4>
                     <ul>
-                        <li><a href="https://www.tanuh.ai" onclick="openTab(null,'AboutUs'); return false;">About TANUH</a></li>
-                        <li><a href="#" onclick="openTab(null,'AboutUs'); return false;">About DPI</a>
-                        </li>
-                        <li><a href="#" onclick="openTab(null,'AboutUs'); setTimeout(function(){ var el = document.getElementById('team-section'); if(el) el.scrollIntoView({behavior:'smooth'}); }, 300); return false;">Team</a></li>
-                        <li><a href="#" onclick="openTab(null,'AboutUs'); setTimeout(function(){ var el = document.getElementById('contact-section'); if(el) el.scrollIntoView({behavior:'smooth'}); }, 300); return false;">Contact Us</a></li>
+                        <li><a href="https://www.tanuh.ai" target="_blank" rel="noopener noreferrer">About TANUH</a></li>
+                        <li><a href="#" onclick="openTab(null,'AboutUs'); return false;">About DPI</a></li>
+                        <li><a href="#" onclick="openTabAndScrollTo('AboutUs', 'team-section'); return false;">Team</a></li>
+                        <li><a href="#" onclick="openTabAndScrollTo('AboutUs', 'contact-section'); return false;">Contact Us</a></li>
                     </ul>
                 </div>
 
@@ -265,7 +265,7 @@
             <div class="footer-bottom">
                 <p>&copy; 2026 TANUH: The AI Centre of Excellence in Healthcare. All rights reserved.</p>
                 <div class="footer-bottom-logos">
-                    <img src="assets/tanuh.png" alt="TANUH" class="footer-inst-logo">
+                    <img src="assets/tanuh.png" alt="TANUH" class="footer-inst-logo footer-tanuh-logo">
                     <img src="assets/MoE_Logo.svg" alt="Ministry of Education" class="footer-inst-logo">
                     <img src="assets/IISc_Logo.png" alt="IISc" class="footer-inst-logo">
                 </div>

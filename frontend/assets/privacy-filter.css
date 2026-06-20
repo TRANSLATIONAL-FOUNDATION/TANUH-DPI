@@ -614,3 +614,23 @@
   .pf-dl-btn i { font-size: 1.2rem; }
 }
 
+/* Scoped responsive grid layout for How It Works pipeline steps */
+.pf-pipeline-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 24px !important;
+    position: relative !important;
+}
+
+@media (max-width: 1023px) {
+    .pf-pipeline-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .pf-pipeline-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
