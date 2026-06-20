@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Filter Documentation | TANUH DPI</title>
+    <title>Privacy Filter (Anonymization) Documentation | TANUH DPI</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -25,13 +25,13 @@
     
         <main class="docs-main">
             <div class="docs-content-inner">
-            <span style="font-size:0.875rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--brand-primary);">Privacy Filter Documentation</span>
-            <h1 style="margin-top:0.25rem;">Privacy Filter Service</h1>
+            <span style="font-size:0.875rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--brand-primary);">Privacy Filter (Anonymization) Documentation</span>
+            <h1 style="margin-top:0.25rem;">Privacy Filter (Anonymization) Service</h1>
             <p style="font-size:1.1rem; color:var(--text-500); margin-bottom:2rem;">Medical Document Anonymization & PII/PHI Masking Engine -
 Complete Technical & User Documentation</p>
             
             <h1>1. Summary</h1>
-<p>The Privacy Filter service is a comprehensive medical document anonymization engine that detects and removes Personally Identifiable Information (PII) and Protected Health Information (PHI) from a wide range of file formats including DICOM medical images, NIfTI volumes, standard images (PNG, JPG, TIFF, BMP), PDFs, and text documents.</p>
+<p>The Privacy Filter (Anonymization) service is a comprehensive medical document anonymization engine that detects and removes Personally Identifiable Information (PII) and Protected Health Information (PHI) from a wide range of file formats including DICOM medical images, NIfTI volumes, standard images (PNG, JPG, TIFF, BMP), PDFs, and text documents.</p>
 <p>The service employs a multi-layered detection strategy combining metadata analysis, connected-component text region detection, OCR (Tesseract/PaddleOCR), regex-based PHI classification, and Safe Harbor pattern matching. It supports three redaction methods: masking (black rectangles), cropping (border removal), and inpainting (appearance-preserving fill). Post-redaction validation ensures no residual PHI remains.</p>
 <!-- <p>It runs as a FastAPI application on port 8003, with asynchronous task processing via Celery workers on the dedicated 'privacy_filter' queue.</p> -->
 <h1>2. Service Overview</h1>
@@ -107,7 +107,7 @@ Complete Technical & User Documentation</p>
 <h2>6.1 Browser Usage</h2>
 <ol>
 <li>Navigate to the DPI Platform website</li>
-<li>Click the 'Privacy Filter' tab</li>
+<li>Click the 'Privacy Filter (Anonymization)' tab</li>
 <li>Upload a file (DICOM, NIfTI, image, PDF, or text document)</li>
 <li>View detected entities in the entities table (text, type, confidence, position)</li>
 <li>Compare original vs. redacted preview side-by-side</li>
