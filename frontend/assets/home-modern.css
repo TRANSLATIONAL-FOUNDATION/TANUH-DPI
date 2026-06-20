@@ -199,7 +199,7 @@ body {
     font-size: 1.15rem !important; /* Prominent subtitle */
     color: #475569 !important; /* slate-600 */
     max-width: 44rem !important;
-    margin-bottom: 2.2rem !important;
+    margin: 0 auto 2.2rem !important;
 }
 
 .section-label {
@@ -222,6 +222,8 @@ body {
     font-size: 1.05rem !important; /* Clean section description */
     color: #475569 !important;
     max-width: 42rem !important;
+    margin: 0 auto !important;
+    text-align: center !important;
 }
 
 /* ── Hero Connected Particles Canvas ─────────────────────────────────────── */
@@ -287,6 +289,8 @@ body {
     color: inherit !important;
     transition: all 250ms ease !important;
     cursor: pointer !important;
+    height: 100% !important;
+    box-sizing: border-box !important;
 }
 
 .hero-service-card:hover {
@@ -521,13 +525,13 @@ body {
 
 /* ── Slower, Smoother Transitions ────────────────────────────────────────── */
 .animate-slide-up {
-    animation: slideUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+    animation: slideUp 1.5s cubic-bezier(0.16, 1, 0.3, 1) both !important;
 }
 
 .reveal-on-scroll {
     opacity: 0;
     transform: translateY(24px);
-    transition: opacity 1200ms cubic-bezier(0.16, 1, 0.3, 1), transform 1200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+    transition: opacity 1600ms cubic-bezier(0.16, 1, 0.3, 1), transform 1600ms cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .reveal-on-scroll.revealed {
@@ -538,7 +542,7 @@ body {
 .feature-item {
     opacity: 0;
     transform: translateY(16px);
-    transition: opacity 900ms cubic-bezier(0.16, 1, 0.3, 1), transform 900ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+    transition: opacity 1200ms cubic-bezier(0.16, 1, 0.3, 1), transform 1200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .reveal-on-scroll.revealed .feature-item {
@@ -546,17 +550,17 @@ body {
     transform: translateY(0);
 }
 
-.feature-item:nth-child(1) { transition-delay: 0.08s !important; }
-.feature-item:nth-child(2) { transition-delay: 0.16s !important; }
-.feature-item:nth-child(3) { transition-delay: 0.24s !important; }
-.feature-item:nth-child(4) { transition-delay: 0.32s !important; }
-.feature-item:nth-child(5) { transition-delay: 0.40s !important; }
-.feature-item:nth-child(6) { transition-delay: 0.48s !important; }
+.feature-item:nth-child(1) { transition-delay: 0.1s !important; }
+.feature-item:nth-child(2) { transition-delay: 0.25s !important; }
+.feature-item:nth-child(3) { transition-delay: 0.4s !important; }
+.feature-item:nth-child(4) { transition-delay: 0.55s !important; }
+.feature-item:nth-child(5) { transition-delay: 0.7s !important; }
+.feature-item:nth-child(6) { transition-delay: 0.85s !important; }
 
 .eco-card {
     opacity: 0;
     transform: translateY(24px);
-    transition: opacity 1000ms cubic-bezier(0.16, 1, 0.3, 1), transform 1000ms cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s, box-shadow 0.3s !important;
+    transition: opacity 1400ms cubic-bezier(0.16, 1, 0.3, 1), transform 1400ms cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s, box-shadow 0.3s !important;
 }
 
 .reveal-on-scroll.revealed .eco-card {
@@ -564,24 +568,24 @@ body {
     transform: translateY(0);
 }
 
-.eco-card:nth-child(1) { transition-delay: 0.05s !important; }
-.eco-card:nth-child(2) { transition-delay: 0.15s !important; }
-.eco-card:nth-child(3) { transition-delay: 0.25s !important; }
-.eco-card:nth-child(4) { transition-delay: 0.35s !important; }
+.eco-card:nth-child(1) { transition-delay: 0.1s !important; }
+.eco-card:nth-child(2) { transition-delay: 0.3s !important; }
+.eco-card:nth-child(3) { transition-delay: 0.5s !important; }
+.eco-card:nth-child(4) { transition-delay: 0.7s !important; }
 
 /* ── Staggered reveal for Backed By logos ────────────────────────────────── */
 .logo-grid img {
     opacity: 0 !important;
     transform: translateY(16px);
-    transition: opacity 900ms cubic-bezier(0.16, 1, 0.3, 1), transform 900ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+    transition: opacity 1200ms cubic-bezier(0.16, 1, 0.3, 1), transform 1200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-.reveal-on-scroll.revealed img {
+.reveal-on-scroll.revealed.logo-grid img {
     opacity: 0.85 !important;
     transform: translateY(0) !important;
 }
 
-.reveal-on-scroll.revealed img:hover {
+.reveal-on-scroll.revealed.logo-grid img:hover {
     opacity: 1 !important;
 }
 
@@ -629,12 +633,18 @@ body {
 .fg-team-card {
     opacity: 0 !important;
     transform: translateY(24px) !important;
-    transition: opacity 1000ms cubic-bezier(0.16, 1, 0.3, 1), transform 1000ms cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s, box-shadow 0.3s !important;
+    transition: opacity 1000ms cubic-bezier(0.16, 1, 0.3, 1), transform 400ms cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s, box-shadow 0.3s !important;
 }
 
 .fg-team-card.revealed {
     opacity: 1 !important;
     transform: translateY(0) !important;
+}
+
+.fg-team-card.revealed:hover {
+    border-color: var(--brand-primary) !important;
+    box-shadow: 0 10px 20px rgba(20, 134, 140, 0.12) !important;
+    transform: translateY(-6px) !important;
 }
 
 /* Staggered transition delays for team cards */
@@ -780,6 +790,13 @@ body {
 .login-features li:hover i {
     background: rgba(45, 212, 191, 0.25) !important;
     color: #ffffff !important;
+}
+
+.login-left-content {
+    margin: auto 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
 }
 
 .login-brand-copy {
@@ -1036,6 +1053,9 @@ body {
         max-width: 100% !important;
         padding: 3.5rem 2.5rem !important;
     }
+    .login-left-content {
+        margin: 0 0 2rem 0 !important;
+    }
     .login-panel-right {
         padding: 3rem 1.5rem !important;
     }
@@ -1235,6 +1255,366 @@ body {
         gap: 12px !important;
         padding: 20px !important;
     }
+}
+
+.access-card {
+    background: #ffffff !important;
+    border: 1px solid rgba(20, 134, 140, 0.1) !important;
+    border-radius: 12px !important;
+    padding: 1.5rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+    text-align: left !important;
+    opacity: 0 !important;
+    transform: translateY(24px) !important;
+    transition: opacity 1400ms cubic-bezier(0.16, 1, 0.3, 1), transform 400ms cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s, box-shadow 0.3s !important;
+}
+
+.reveal-on-scroll.revealed .access-card {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+.reveal-on-scroll.revealed .access-card:hover {
+    border-color: var(--brand-primary) !important;
+    transform: translateY(-5px) !important;
+    box-shadow: 0 10px 20px rgba(20, 134, 140, 0.06) !important;
+}
+
+.reveal-on-scroll.revealed .access-card:nth-child(1) { transition-delay: 0.1s !important; }
+.reveal-on-scroll.revealed .access-card:nth-child(2) { transition-delay: 0.3s !important; }
+.reveal-on-scroll.revealed .access-card:nth-child(3) { transition-delay: 0.5s !important; }
+
+.access-card-icon {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 8px !important;
+    background: rgba(20, 134, 140, 0.06) !important;
+    color: var(--brand-primary) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1.15rem !important;
+    margin-bottom: 1.25rem !important;
+}
+
+.access-card-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin-bottom: 1rem !important;
+}
+
+.access-card-header .access-card-icon {
+    margin-bottom: 0 !important;
+    flex-shrink: 0 !important;
+}
+
+.access-card-header h3 {
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+    text-align: left !important;
+    line-height: 1.2 !important;
+}
+
+.access-card p {
+    font-size: 0.82rem !important;
+    color: #64748b !important;
+    line-height: 1.5 !important;
+    margin-bottom: 1.25rem !important;
+    flex-grow: 1 !important;
+    text-align: left !important;
+}
+
+.access-links-list {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 0 1.5rem 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+
+.access-links-grid {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 0 1.5rem 0 !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px 16px !important;
+}
+
+.access-link-item {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+}
+
+.access-link-item a {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 0.85rem !important;
+    color: var(--brand-primary) !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+    text-decoration: none !important;
+}
+
+.access-link-item a:hover {
+    color: var(--brand-dark) !important;
+    text-decoration: underline !important;
+}
+
+.access-link-item a i {
+    font-size: 0.95rem !important;
+    color: var(--brand-teal) !important;
+    width: 16px !important;
+    text-align: center !important;
+}
+
+.access-card-btn {
+    width: 100% !important;
+    padding: 10px 16px !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+    border-radius: 8px !important;
+    border: 1.5px solid var(--brand-primary) !important;
+    background: transparent !important;
+    color: var(--brand-primary) !important;
+    cursor: pointer !important;
+    transition: all 0.25s ease !important;
+    margin-top: auto !important;
+}
+
+.access-card-btn:hover {
+    background: var(--brand-primary) !important;
+    color: #ffffff !important;
+}
+
+/* ── Navbar User Chip Alignment overrides ── */
+@media (min-width: 992px) {
+    .nav-user-wrap {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        height: 38px !important;
+        box-sizing: border-box !important;
+    }
+
+    .nav-user-avatar {
+        width: 28px !important;
+        height: 28px !important;
+        border-radius: 50% !important;
+        background: var(--brand-primary) !important;
+        color: #ffffff !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-weight: 700 !important;
+        font-size: 0.78rem !important;
+        line-height: 1 !important;
+        flex-shrink: 0 !important;
+    }
+
+    .nav-user-name {
+        color: #1e293b !important;
+        font-size: 0.85rem !important;
+        font-weight: 600 !important;
+        max-width: 120px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        line-height: 1 !important;
+    }
+
+    .nav-logout-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        height: 30px !important;
+        padding: 0 12px !important;
+        font-size: 0.75rem !important;
+        font-weight: 600 !important;
+        color: #ef4444 !important;
+        background: rgba(239, 68, 68, 0.08) !important;
+        border: 1px solid rgba(239, 68, 68, 0.15) !important;
+        border-radius: 6px !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        box-sizing: border-box !important;
+        line-height: 1 !important;
+    }
+}
+
+@media (max-width: 991px) {
+    .nav-user-wrap {
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+        justify-content: space-between !important;
+        padding: 8px 12px !important;
+        background: rgba(20, 134, 140, 0.04) !important;
+        border-radius: var(--radius-md) !important;
+        margin-top: 8px !important;
+        box-sizing: border-box !important;
+    }
+    
+    .nav-user-avatar {
+        width: 28px !important;
+        height: 28px !important;
+        border-radius: 50% !important;
+        background: var(--brand-primary) !important;
+        color: #ffffff !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-weight: 700 !important;
+        font-size: 0.78rem !important;
+        line-height: 1 !important;
+        flex-shrink: 0 !important;
+    }
+    
+    .nav-user-name {
+        color: #1e293b !important;
+        font-size: 0.85rem !important;
+        font-weight: 600 !important;
+        flex-grow: 1 !important;
+        margin-left: 8px !important;
+        text-align: left !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        line-height: 1 !important;
+    }
+    
+    .nav-logout-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        height: 30px !important;
+        padding: 0 12px !important;
+        font-size: 0.75rem !important;
+        font-weight: 600 !important;
+        color: #ef4444 !important;
+        background: rgba(239, 68, 68, 0.08) !important;
+        border: 1px solid rgba(239, 68, 68, 0.15) !important;
+        border-radius: 6px !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        box-sizing: border-box !important;
+        line-height: 1 !important;
+    }
+}
+
+/* ── Password View Toggle Input Controls ── */
+.login-input-wrapper {
+    position: relative !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.login-input-wrapper input {
+    width: 100% !important;
+    padding-right: 42px !important; /* Spacing for the eye button icon */
+}
+
+.password-toggle-btn {
+    position: absolute !important;
+    right: 12px !important;
+    background: transparent !important;
+    border: none !important;
+    color: #94a3b8 !important; /* slate-400 color */
+    cursor: pointer !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: color 0.25s ease !important;
+    outline: none !important;
+    z-index: 10 !important;
+    height: 100% !important; /* match input height bounds */
+    width: 32px !important;
+}
+
+.password-toggle-btn:hover {
+    color: var(--brand-primary) !important;
+}
+
+.password-toggle-btn .eye-svg {
+    transition: color 0.25s ease, transform 0.25s ease !important;
+    display: block !important;
+    transform-origin: center center !important;
+}
+
+.password-toggle-btn:hover .eye-svg {
+    transform: scale(1.1) !important;
+}
+
+.password-toggle-btn:active .eye-svg {
+    transform: scale(0.9) !important;
+}
+
+/* ── Restored Original Drawing Slash with Elastic Bounce Spin ── */
+
+.password-toggle-btn .eye-slash {
+    stroke-dasharray: 26;
+    stroke-dashoffset: 26;
+    transition: stroke-dashoffset 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.password-toggle-btn.is-active {
+    color: var(--brand-primary) !important;
+}
+
+.password-toggle-btn.is-active .eye-slash {
+    stroke-dashoffset: 0 !important;
+}
+
+/* Smooth transition for body and pupil when eye is slashed */
+.password-toggle-btn .eye-pupil {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease !important;
+    transform-origin: center center !important;
+}
+
+.password-toggle-btn.is-active .eye-pupil {
+    transform: scale(0.8) !important;
+    opacity: 0.8 !important;
+}
+
+.password-toggle-btn .eye-body {
+    transition: opacity 0.3s ease !important;
+}
+
+.password-toggle-btn.is-active .eye-body {
+    opacity: 0.7 !important;
+}
+
+/* Elastic spin and bounce animation when clicked to toggle */
+@keyframes eyeTogglePulse {
+    0% { transform: scale(0.8) rotate(0deg); opacity: 0.5; }
+    50% { transform: scale(1.25) rotate(180deg); opacity: 1; }
+    100% { transform: scale(1) rotate(360deg); opacity: 1; }
+}
+
+.password-toggle-btn.toggled .eye-svg {
+    animation: eyeTogglePulse 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+/* ── Professional Fade Transition for Password Reveal ── */
+.login-field input {
+    transition: border-color 0.2s, box-shadow 0.2s, opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.login-field input.is-toggling {
+    opacity: 0.05 !important;
 }
 
 

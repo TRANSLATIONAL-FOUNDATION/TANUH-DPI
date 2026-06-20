@@ -164,7 +164,7 @@
     // ── Tab Management ──────────────────────────────────────────────────────────
     const loadedTabs = new Set();
 
-    async function openTab(evt, tabName) {
+    async function openTab(evt, tabName, skipScroll) {
         if (evt) evt.preventDefault();
 
         if (window.DPI_Auth && DPI_Auth.isGatedTab(tabName) && !DPI_Auth.isLoggedIn()) {
@@ -207,10 +207,22 @@
                 window.initApiAccess();
             }
             checkAllServiceBadges();
+
+            // Handle pending direct service launch
+            const pendingLaunch = sessionStorage.getItem('pendingLaunchService');
+            if (pendingLaunch === tabName) {
+                sessionStorage.removeItem('pendingLaunchService');
+                setTimeout(() => {
+                    if (tabName === 'PDF2FHIR' && window.CLN_launchService) CLN_launchService();
+                    else if (tabName === 'PDF2NHCX' && window.INS_launchService) INS_launchService();
+                    else if (tabName === 'PrivacyFilter' && window.PF_launchService) PF_launchService();
+                    else if (tabName === 'ForgeryDetection' && window.FG_launchService) FG_launchService();
+                }, 300);
+            }
         }
 
-        if (evt) {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (!skipScroll) {
+            window.scrollTo(0, 0);
         }
 
         try { mixpanel.track('Page View', { 'page_title': tabName }); } catch (e) { }
@@ -231,6 +243,7 @@
             else if (fileName === 'forgerydetection') fileName = 'forgery';
             else if (fileName === 'aboutus') fileName = 'about';
             else if (fileName === 'apiaccess') fileName = 'apiaccess';
+            else if (fileName === 'download') fileName = 'download';
             else if (fileName === 'login') fileName = 'login';
             else if (fileName === 'clinicaldocs') { isDoc = true; docUrl = 'docs/clinical.html'; }
             else if (fileName === 'insurancedocs') { isDoc = true; docUrl = 'docs/insurance.html'; }
@@ -441,6 +454,22 @@
 
     // Expose
     window.openTab = openTab;
+    window.openTabAndScrollTo = async function (tabName, elementId) {
+        await openTab(null, tabName, true);
+        setTimeout(() => {
+            const el = document.getElementById(elementId);
+            if (el) {
+                const navbar = document.getElementById('mainNav');
+                const navbarHeight = navbar ? navbar.offsetHeight : 80;
+                const elementPosition = el.getBoundingClientRect().top + window.pageYOffset;
+                const offsetPosition = elementPosition - navbarHeight - 20;
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        }, 50);
+    };
     window.openDocTab = function (evt, tabName, subTabId) {
         if (evt) {
             evt.preventDefault();
@@ -455,10 +484,66 @@
             }
         }
     };
+    window.directLaunchService = function (tabName, subTabId) {
+        sessionStorage.setItem('pendingLaunchService', tabName);
+        if (subTabId) {
+            sessionStorage.setItem('pendingLaunchSubTab', subTabId);
+        } else {
+            sessionStorage.removeItem('pendingLaunchSubTab');
+        }
+        
+        // Find navbar nav items and activate correct one
+        let navId = '';
+        if (tabName === 'PDF2FHIR') navId = 'navClinical';
+        else if (tabName === 'ForgeryDetection') navId = 'navForgery';
+        else if (tabName === 'PDF2NHCX') navId = 'navInsurance';
+        else if (tabName === 'PrivacyFilter') navId = 'navPrivacyFilter';
+        
+        if (navId) {
+            document.querySelectorAll('.navbar .nav-link, .navbar .dropdown-item').forEach(el => el.classList.remove('active'));
+            const navEl = document.getElementById(navId);
+            if (navEl) navEl.classList.add('active');
+        }
+
+        if (window.DPI_Auth && !DPI_Auth.isLoggedIn()) {
+            DPI_Auth.setPendingTab(tabName);
+            openTab(null, 'Login');
+        } else {
+            openTab(null, tabName);
+        }
+    };
+    window.togglePasswordVisibility = function (inputId, btn) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        
+        btn.classList.add('toggled');
+        setTimeout(() => {
+            btn.classList.remove('toggled');
+        }, 450);
+
+        // Clean professional fade transition to hide the abrupt character swap
+        input.classList.add('is-toggling');
+        setTimeout(() => {
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.classList.add('is-active');
+            } else {
+                input.type = 'password';
+                btn.classList.remove('is-active');
+            }
+            input.classList.remove('is-toggling');
+        }, 100);
+    };
     window.scrollToStats = function () {
         const statsSection = document.querySelector('.stats-band');
         if (statsSection) {
-            statsSection.scrollIntoView({ behavior: 'smooth' });
+            const navbar = document.getElementById('mainNav');
+            const navbarHeight = navbar ? navbar.offsetHeight : 90;
+            const topOffset = statsSection.getBoundingClientRect().top + window.pageYOffset - navbarHeight - 20;
+            window.scrollTo({
+                top: topOffset,
+                behavior: 'smooth'
+            });
         }
     };
 
@@ -530,19 +615,6 @@
             el.classList.add('reveal-on-scroll');
             observer.observe(el);
         });
-
-        // Safety net: guarantee every element becomes visible even if the
-        // observer never fires for it (tab content injected via innerHTML,
-        // fast scrolling, or staggered cards below the fold). This is what
-        // prevents the last eco-card(s) from getting stuck hidden.
-        setTimeout(() => {
-            items.forEach(el => {
-                if (!el.classList.contains('revealed')) {
-                    el.classList.add('revealed');
-                    observer.unobserve(el);
-                }
-            });
-        }, 1200);
     }
 
     // ── Connected Particles Hero Canvas (MONAI-inspired) ─────────────────────

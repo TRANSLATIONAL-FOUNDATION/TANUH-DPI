@@ -165,15 +165,23 @@
 
         if (isLoggedIn()) {
             var user = getUser();
-            loginBtn.style.display = "none";
-            userWrap.style.display = "flex";
-            if (userName && user) userName.textContent = user.name || user.email;
+            loginBtn.style.setProperty("display", "none", "important");
+            userWrap.style.setProperty("display", "flex", "important");
+            if (userName && user) {
+                var displayName = user.name || user.email || "";
+                var shortName = displayName.split(' ')[0]; // Shortcut of name
+                if (shortName.length > 12) {
+                    shortName = shortName.substring(0, 10) + "...";
+                }
+                userName.textContent = shortName;
+                userName.title = displayName; // Full name on hover
+            }
             if (avatar && user && (user.name || user.email)) {
                 avatar.textContent = (user.name || user.email).charAt(0).toUpperCase();
             }
         } else {
-            loginBtn.style.display = "flex";
-            userWrap.style.display = "none";
+            loginBtn.style.setProperty("display", "inline-flex", "important");
+            userWrap.style.setProperty("display", "none", "important");
         }
     }
 
