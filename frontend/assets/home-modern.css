@@ -1076,10 +1076,29 @@ body {
         padding: 0 1.5rem !important;
     }
 
-    /* Hide MoE and IISc logos to prevent branding overflow in narrow headers */
+    /* Show all three logos in narrow headers and scale size to prevent overflow */
     .nav-logo-moe,
     .nav-logo-iisc {
+        display: inline-block !important;
+    }
+    .nav-logo {
+        height: 56px !important;
+    }
+    .nav-logo-moe {
+        height: 54px !important;
+        padding-left: 12px !important;
+        margin-left: 6px !important;
+    }
+    .nav-logo-iisc {
+        height: 52px !important;
+        padding-left: 12px !important;
+        margin-left: 6px !important;
+    }
+    .nav-brand-subtitle {
         display: none !important;
+    }
+    .nav-brand {
+        gap: 14px !important;
     }
 
     /* Display the mobile hamburger toggler */
@@ -1615,6 +1634,26 @@ body {
 
 .login-field input.is-toggling {
     opacity: 0.05 !important;
+}
+
+/* ── Mobile Branding Overflow Refinements ── */
+@media (max-width: 480px) {
+    .nav-brand-text {
+        display: none !important;
+    }
+    .nav-logo {
+        height: 48px !important;
+    }
+    .nav-logo-moe {
+        height: 46px !important;
+        padding-left: 10px !important;
+        margin-left: 5px !important;
+    }
+    .nav-logo-iisc {
+        height: 44px !important;
+        padding-left: 10px !important;
+        margin-left: 5px !important;
+    }
 }
 
 
