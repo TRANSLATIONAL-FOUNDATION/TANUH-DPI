@@ -183,14 +183,14 @@ services:
       - redis
       - session-logger
 
-  # ── Privacy Filter Workers (4 replicas × concurrency 2 = 8 parallel slots) ──
+  # ── Privacy Filter Workers (8 replicas × concurrency 2 = 16 parallel slots) ──
   celery-privacy-worker:
     image: asia-south1-docker.pkg.dev/proj-dpi-shared/dpi-containers/celery-privacy-worker:${IMAGE_TAG:-v1.0.0}
     build:
       context: .
       dockerfile: privacy_filter/Dockerfile
     deploy:
-      replicas: 4
+      replicas: 8
     command: >
       celery -A privacy_filter.celery_app worker
       --loglevel=info
