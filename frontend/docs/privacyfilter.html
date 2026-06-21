@@ -25,9 +25,9 @@
     
         <main class="docs-main">
             <div class="docs-content-inner">
-            <span style="font-size:0.875rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--brand-primary);">Privacy Filter (Anonymization) Documentation</span>
-            <h1 style="margin-top:0.25rem;">Privacy Filter (Anonymization) Service</h1>
-            <p style="font-size:1.1rem; color:var(--text-500); margin-bottom:2rem;">Medical Document Anonymization & PII/PHI Masking Engine -
+            <!-- <span style="font-size:0.875rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--brand-primary);">Privacy Filter (Anonymization) Documentation</span> -->
+            <h1 style="margin-top:0.25rem;">Privacy Filter (Anonymization) Documentation</h1>
+            <p style="font-size:1.1rem; color:var(--text-500); margin-bottom:2rem;">Redaction &amp; DPDP Compliance -
 Complete Technical & User Documentation</p>
             
             <h1>1. Summary</h1>
@@ -74,9 +74,14 @@ Complete Technical & User Documentation</p>
 <div class="table-responsive"><table><thead><tr><th>Registry</th><th>Purpose</th><th>Implementations</th></tr></thead><tbody><tr><td>LoaderRegistry</td><td>Load files into MedicalArtifact</td><td>DicomLoader, NiftiLoader, PDFLoader, ImageLoader</td></tr><tr><td>RedactorRegistry</td><td>Apply pixel/text redaction</td><td>MaskRedactor, CropRedactor, InpaintRedactor</td></tr><tr><td>SaverRegistry</td><td>Save output in original format</td><td>DicomSaver, NiftiSaver, PDFSaver, ImageSaver</td></tr><tr><td>CleanerRegistry</td><td>Strip metadata PHI</td><td>DicomCleaner, NiftiCleaner, EXIFCleaner</td></tr></tbody></table></div> -->
 <h1>4. API Reference</h1>
 <h2>4.1 Authentication</h2>
-<p>POST /api/demo-token with {name, email} to get a 1-day HS256 JWT signed with SECRET_KEY. Include as Authorization: Bearer <token>. Auth bypass: set KEYCLOAK_AUTH_ENABLED=false.</p>
+<p>All redaction endpoints require a Bearer JWT token in the <code>Authorization</code> header. To obtain a token: Log in to the web portal and generate your token from the <strong>API Access</strong> tab within the Privacy Filter service. Direct per-service token generation endpoints (<code>/api/demo-token</code>) are disabled in production.</p>
+<ul>
+<li><strong>Algorithm:</strong> HS256 JWT signed with <code>SECRET_KEY</code></li>
+<li><strong>Default expiry:</strong> 1 day</li>
+<li><strong>Usage:</strong> Include in all requests as <code>Authorization: Bearer &lt;token&gt;</code></li>
+</ul>
 <h2>4.2 Endpoints</h2>
-<div class="table-responsive"><table><thead><tr><th>Method</th><th>Path</th><th>Auth</th><th>Description</th></tr></thead><tbody><tr><td>POST</td><td>/api/demo-token</td><td>None</td><td>Issue demo JWT token</td></tr><tr><td>GET</td><td>/api/health</td><td>None</td><td>Liveness + engine status</td></tr><tr><td>GET</td><td>/api/supported-types</td><td>None</td><td>List supported file extensions</td></tr><tr><td>GET</td><td>/api/stats</td><td>None</td><td>Usage counters (visits, docs redacted)</td></tr><tr><td>POST</td><td>/api/redact</td><td>Bearer</td><td>Sync: upload file, get entities + URLs</td></tr><tr><td>POST</td><td>/api/submit</td><td>Bearer</td><td>Async: upload file, get task_id (202)</td></tr><tr><td>GET</td><td>/api/task-status/{id}</td><td>Bearer</td><td>Poll async task progress</td></tr><tr><td>GET</td><td>/api/task-result/{id}</td><td>Bearer</td><td>Fetch completed redaction result</td></tr><tr><td>GET</td><td>/api/files/{kind}/{key}</td><td>Bearer</td><td>Download original or redacted file</td></tr><tr><td>GET</td><td>/api/render-pages/{kind}/{key}</td><td>Bearer</td><td>Render document to page preview images</td></tr><tr><td>GET</td><td>/api/page-image/{key}/{page}</td><td>None</td><td>Serve individual page PNG</td></tr><tr><td>POST</td><td>/api/apply-redactions</td><td>Bearer</td><td>Apply manual redaction boxes to original</td></tr><tr><td>GET</td><td>/metrics</td><td>None</td><td>Prometheus metrics</td></tr></tbody></table></div>
+<div class="table-responsive"><table><thead><tr><th>Method</th><th>Path</th><th>Auth</th><th>Description</th></tr></thead><tbody><tr><td>GET</td><td><code>/api/health</code></td><td>None</td><td>Liveness + engine status</td></tr><tr><td>GET</td><td><code>/api/supported-types</code></td><td>None</td><td>List supported file extensions</td></tr><tr><td>GET</td><td><code>/api/stats</code></td><td>None</td><td>Usage counters (visits, docs redacted)</td></tr><tr><td>POST</td><td><code>/api/redact</code></td><td>Bearer</td><td>Sync: upload file, get entities + URLs</td></tr><tr><td>POST</td><td><code>/api/submit</code></td><td>Bearer</td><td>Async: upload file, get task_id (202)</td></tr><tr><td>GET</td><td><code>/api/task-status/{id}</code></td><td>Bearer</td><td>Poll async task progress</td></tr><tr><td>GET</td><td><code>/api/task-result/{id}</code></td><td>Bearer</td><td>Fetch completed redaction result</td></tr><tr><td>GET</td><td><code>/api/files/{kind}/{key}</code></td><td>Bearer</td><td>Download original or redacted file</td></tr><tr><td>GET</td><td><code>/api/render-pages/{kind}/{key}</code></td><td>Bearer</td><td>Render document to page preview images</td></tr><tr><td>GET</td><td><code>/api/page-image/{key}/{page}</code></td><td>None</td><td>Serve individual page PNG</td></tr><tr><td>POST</td><td><code>/api/apply-redactions</code></td><td>Bearer</td><td>Apply manual redaction boxes to original</td></tr><tr><td>GET</td><td><code>/metrics</code></td><td>None</td><td>Prometheus metrics</td></tr></tbody></table></div>
 <h2>4.3 Sync Redaction Response Format</h2>
 <pre><code>{"job_id": "abc123", "filename": "scan.dcm", "content_type": "application/dicom", "entities": [{"entity_group": "PERSON_NAME", "score": 0.95, "word": "John Doe", "start": 0, "end": 8, "bbox": {"x1": 10, "y1": 20, "x2": 150, "y2": 40}}], "entity_counts": {"PERSON_NAME": 2, "DATE": 3}, "original_url": "/api/files/uploads/abc123__scan.dcm", "redacted_url": "/api/files/redacted/abc123__redacted.dcm", "notes": {"validation": {"passed": true, "risk_score": 0}}}</code></pre>
 <!-- <h1>5. Celery Task Processing</h1>
@@ -135,6 +140,19 @@ with open("scan.dcm", "rb") as f:
     )
 data = resp.json()
 print("Redacted file URL:", data.get("redacted_url"))</code></pre>
+<h2>6.4 Local Execution (Offline Mode)</h2>
+<p>The Privacy Filter can be run locally using Docker Compose. No cloud APIs or external services are required — all OCR and redaction processing runs on your machine.</p>
+<ol>
+<li><strong>Prerequisites:</strong> Docker and Docker Compose installed on your machine.</li>
+<li><strong>Clone the repository:</strong> <code>git clone https://github.com/TANUH-AI/TANUH-DPI.git</code></li>
+<li><strong>Start the required services:</strong></li>
+</ol>
+<pre><code>docker compose up redis privacy-filter celery-privacy-worker</code></pre>
+<ol start="4">
+<li><strong>Access the service:</strong> Open <code>http://localhost:8003</code> in your browser, or use the API endpoints directly.</li>
+<li><strong>Disable authentication (optional for local dev):</strong> Set <code>KEYCLOAK_AUTH_ENABLED=false</code> in your <code>.env</code> file to skip token verification.</li>
+</ol>
+<p>All processing occurs locally — no document data leaves your machine. Temporary files are automatically purged after processing.</p>
 <h1>7. Performance</h1>
 <div class="table-responsive"><table><thead><tr><th>File Type</th><th>Size</th><th>Estimated Time</th></tr></thead><tbody><tr><td>Single DICOM image</td><td>5-20 MB</td><td>5-15 seconds</td></tr><tr><td>Multi-frame DICOM</td><td>50-200 MB</td><td>15-45 seconds</td></tr><tr><td>NIfTI volume (100+ slices)</td><td>50-500 MB</td><td>30-120 seconds</td></tr><tr><td>Standard image (PNG/JPG)</td><td>1-10 MB</td><td>3-10 seconds</td></tr><tr><td>PDF document (10 pages)</td><td>1-5 MB</td><td>10-30 seconds</td></tr></tbody></table></div>
 <h1>8. DICOM Metadata Handling</h1>
@@ -147,7 +165,6 @@ print("Redacted file URL:", data.get("redacted_url"))</code></pre>
 <h1>9. Known Limitations & Future Enhancements</h1>
 <ul>
 <li>No burned-in pixel annotation OCR for DICOM (relies on corner text detection)</li>
-<li>No rate limiting on API endpoints</li>
 <li>Inpainting redaction is slower than masking (2-3x)</li>
 <li>Large NIfTI volumes (500+ slices) may approach the 10-minute task timeout</li>
 <li>Planned: GPU-accelerated OCR, ML-based PHI detection model, batch processing support</li>

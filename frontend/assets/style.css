@@ -1136,7 +1136,8 @@ a:hover {
     color: var(--text-600);
     line-height: 1.8;
     margin: 0 0 1.25rem;
-    text-align: center;
+    text-align: left;
+    /* text-indent: 2rem; */
 }
 
 .about-content a {

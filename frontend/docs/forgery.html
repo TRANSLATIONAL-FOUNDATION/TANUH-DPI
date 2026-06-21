@@ -25,9 +25,9 @@
     
         <main class="docs-main">
             <div class="docs-content-inner">
-            <span style="font-size:0.875rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--brand-primary);">Forgery Detection Documentation</span>
-            <h1 style="margin-top:0.25rem;">Document Forgery Detection Service</h1>
-            <p style="font-size:1.1rem; color:var(--text-500); margin-bottom:2rem;">Forgensic - Classical CV-Based Tampering Detection
+            <!-- <span style="font-size:0.875rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--brand-primary);">Forgery Detection Documentation</span> -->
+            <h1 style="margin-top:0.25rem;">Forgery Detection Documentation</h1>
+            <p style="font-size:1.1rem; color:var(--text-500); margin-bottom:2rem;">Tampering &amp; Forensic Checks -
 Complete Technical & User Documentation</p>
             
             <h1>1. Summary</h1>
@@ -73,9 +73,14 @@ Complete Technical & User Documentation</p>
 <p>Default preset: npv_focus (set via PIPELINE_PRESET environment variable). Each preset defines 20+ parameters per tampering category including edge_z, stroke_z, min_region_area, component_min_area, etc.</p>
 <h1>4. API Reference</h1>
 <h2>4.1 Authentication</h2>
-<p>POST /forgensic/api/token with {name, email} to get a 1-day HS256 JWT signed with FORGENSIC_SECRET_KEY. Include as Authorization: Bearer <token>. Auth bypass: set FORGENSIC_AUTH_ENABLED=false.</p>
+<p>All job endpoints require a Bearer JWT token in the <code>Authorization</code> header. To obtain a token: Log in to the web portal and generate your token from the <strong>API Access</strong> tab within the Forgery Detection service. Direct per-service token generation endpoints (<code>/api/token</code>) are disabled in production.</p>
+<ul>
+<li><strong>Algorithm:</strong> HS256 JWT signed with <code>FORGENSIC_SECRET_KEY</code></li>
+<li><strong>Default expiry:</strong> 1 day (configurable via <code>FORGENSIC_TOKEN_EXPIRY_DAYS</code>)</li>
+<li><strong>Usage:</strong> Include in all requests as <code>Authorization: Bearer &lt;token&gt;</code></li>
+</ul>
 <h2>4.2 Endpoints</h2>
-<div class="table-responsive"><table><thead><tr><th>Method</th><th>Path</th><th>Auth</th><th>Description</th></tr></thead><tbody><tr><td>POST</td><td>/forgensic/api/token</td><td>None</td><td>Issue demo JWT token</td></tr><tr><td>POST</td><td>/forgensic/jobs</td><td>Bearer</td><td>Upload document, get job_id</td></tr><tr><td>GET</td><td>/forgensic/jobs/{id}</td><td>Bearer</td><td>Poll job status and progress</td></tr><tr><td>GET</td><td>/forgensic/jobs/{id}/results</td><td>Bearer</td><td>Fetch analysis findings (when complete)</td></tr><tr><td>GET</td><td>/forgensic/jobs/{id}/files/{name}</td><td>Bearer</td><td>Download output file (preview/JSON/Excel/YAML)</td></tr><tr><td>GET</td><td>/health</td><td>None</td><td>Liveness probe (checks Redis)</td></tr><tr><td>GET</td><td>/stats</td><td>None</td><td>Active jobs count + total docs analyzed</td></tr><tr><td>GET</td><td>/metrics</td><td>None</td><td>Prometheus metrics</td></tr></tbody></table></div>
+<div class="table-responsive"><table><thead><tr><th>Method</th><th>Path</th><th>Auth</th><th>Description</th></tr></thead><tbody><tr><td>POST</td><td><code>/forgensic/jobs</code></td><td>Bearer</td><td>Upload document, get job_id</td></tr><tr><td>GET</td><td><code>/forgensic/jobs/{id}</code></td><td>Bearer</td><td>Poll job status and progress</td></tr><tr><td>GET</td><td><code>/forgensic/jobs/{id}/results</code></td><td>Bearer</td><td>Fetch analysis findings (when complete)</td></tr><tr><td>GET</td><td><code>/forgensic/jobs/{id}/files/{name}</code></td><td>Bearer</td><td>Download output file (preview/JSON/Excel/YAML)</td></tr><tr><td>GET</td><td><code>/health</code></td><td>None</td><td>Liveness probe (checks Redis)</td></tr><tr><td>GET</td><td><code>/stats</code></td><td>None</td><td>Active jobs count + total docs analyzed</td></tr><tr><td>GET</td><td><code>/metrics</code></td><td>None</td><td>Prometheus metrics</td></tr></tbody></table></div>
 <h2>4.3 Job Lifecycle</h2>
 <ol>
 <li>POST /forgensic/jobs - Upload file (multipart form-data), optional ocr_enabled parameter. Returns {job_id, status: 'queued'}.</li>
@@ -165,6 +170,15 @@ while True:
 # Get findings
 findings = requests.get(f"http://localhost:8004/forgensic/jobs/{job_id}/results", headers=headers).json()
 print(findings)</code></pre>
+<h2>6.4 Local Execution (Offline Mode)</h2>
+<p>A standalone desktop GUI application (<code>forgensic_gui.py</code>) is available for fully offline forgery detection. No server, Redis, GPU, or network connectivity required — all processing runs on standard CPU hardware.</p>
+<ol>
+<li><strong>Download:</strong> Obtain the standalone desktop application from the TANUH DPI repository.</li>
+<li><strong>Run the application:</strong> Launch <code>forgensic_gui.py</code> — a CustomTkinter-based GUI opens.</li>
+<li><strong>Upload a document:</strong> Drag and drop or browse to select a PDF or image file.</li>
+<li><strong>View results:</strong> Annotated preview images and findings are displayed in the GUI. Results are saved locally as annotated images and findings text files.</li>
+</ol>
+<p>The desktop GUI provides the same 10-category CV detection pipeline (C1–C10) as the cloud service, with identical accuracy and explainability.</p>
 <h1>7. Performance</h1>
 <div class="table-responsive"><table><thead><tr><th>Document Type</th><th>Pages</th><th>Estimated Time</th></tr></thead><tbody><tr><td>Single image</td><td>1</td><td>1-3 seconds</td></tr><tr><td>Short PDF</td><td>1-5</td><td>5-15 seconds</td></tr><tr><td>Medium PDF</td><td>5-20</td><td>15-60 seconds</td></tr><tr><td>Large PDF</td><td>20-50</td><td>1-3 minutes</td></tr></tbody></table></div>
 <p>Processing is CPU-bound. Each page goes through 10 independent detectors sequentially. The pipeline is optimized for standard server CPUs (e.g., GCP e2-standard-4).</p>
@@ -175,7 +189,6 @@ print(findings)</code></pre>
 <li>High false positive rate on very noisy/low-quality scans (use 'strict' preset)</li>
 <li>OCR-dependent detectors (C4, C7) require Tesseract to be installed</li>
 <li>No learning/adaptation - all thresholds are static per preset</li>
-<li>No rate limiting on API endpoints</li>
 <li>C8/C9 AI detection may not catch latest generation AI models</li>
 <li>Planned: adaptive thresholding, batch processing, ensemble scoring, ML-augmented detection</li>
 </ul>
