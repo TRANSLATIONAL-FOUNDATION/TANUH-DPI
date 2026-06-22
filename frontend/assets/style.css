@@ -3464,6 +3464,24 @@ select:focus {
     height: 16px;
 }
 
+@media (max-width: 768px) {
+    .api-section-box {
+        padding: 14px 12px;
+        overflow-x: auto;
+    }
+    .api-endpoint-table {
+        font-size: 0.78rem;
+    }
+    .api-endpoint-table th,
+    .api-endpoint-table td {
+        padding: 6px 8px;
+    }
+    .api-code-block {
+        padding: 12px 14px;
+        font-size: 0.76rem;
+    }
+}
+
 /* ── In-Page User Guide Layout ──────────────────────────────────────────── */
 .guide-layout {
     display: flex;

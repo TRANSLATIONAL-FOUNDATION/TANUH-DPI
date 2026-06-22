@@ -442,6 +442,10 @@
   .pf-demo-token-fields { grid-template-columns: 1fr; }
   .pf-demo-token-output-wrap { flex-direction: column; }
   .pf-demo-token-copy { align-self: flex-start; }
+  .pf-demo-token-card { padding: 18px 16px; }
+  .pf-demo-token-header { font-size: 0.88rem; gap: 8px; }
+  .pf-demo-token-actions { flex-wrap: wrap; }
+  .pf-demo-token-expiry-text { margin-left: 0; white-space: normal; font-size: 0.72rem; }
 }
 
 /* ── Meta chips (job id / filename / content-type) ── */
