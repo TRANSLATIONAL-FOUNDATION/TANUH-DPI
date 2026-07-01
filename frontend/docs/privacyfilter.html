@@ -105,7 +105,7 @@ Complete Technical & User Documentation</p>
 <li>Metadata stripping removes all identifying tags before output</li>
 <li>Post-redaction validation ensures no residual PHI remains</li>
 <li>Session logger stores only metadata - never the document content or detected PHI text</li>
-<li>Compliant with HIPAA Safe Harbor de-identification standard (18 identifier categories)</li>
+<li>Compliant with HIPAA Safe Harbor anonymization standard (18 identifier categories)</li>
 </ul>
 <!-- <h1>8. Configuration (Environment Variables)</h1>
 <div class="table-responsive"><table><thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td>REDIS_URL</td><td>redis://localhost:6379/0</td><td>Redis connection</td></tr><tr><td>SESSION_LOGGER_URL</td><td>http://session-logger:8002</td><td>Session logger URL</td></tr><tr><td>SECRET_KEY</td><td>(required)</td><td>HS256 JWT signing key</td></tr><tr><td>KEYCLOAK_AUTH_ENABLED</td><td>true</td><td>Auth toggle</td></tr><tr><td>STORAGE_BACKEND</td><td>local</td><td>Storage backend (local or gcs)</td></tr><tr><td>LOCAL_DATA_DIR</td><td>./data</td><td>Local storage directory</td></tr><tr><td>GCS_BUCKET</td><td>tanuh-bcd-bucket</td><td>GCS bucket name</td></tr><tr><td>GCS_PREFIX</td><td>privacy-app</td><td>GCS path prefix</td></tr><tr><td>TASK_RESULT_TTL</td><td>86400</td><td>Redis result TTL (24h)</td></tr><tr><td>PF_FILE_TTL_SECONDS</td><td>1800</td><td>Temp file cleanup TTL (30 min)</td></tr><tr><td>PF_CLEANUP_INTERVAL_SECONDS</td><td>300</td><td>Cleanup interval (5 min)</td></tr></tbody></table></div> -->
@@ -141,28 +141,15 @@ with open("scan.dcm", "rb") as f:
     )
 data = resp.json()
 print("Redacted file URL:", data.get("redacted_url"))</code></pre>
-<h2>6.4 Local Execution (Offline Mode)</h2>
-<p>The Privacy Filter can be run locally using Docker Compose. No cloud APIs or external services are required — all OCR and redaction processing runs on your machine.</p>
-<ol>
-<li><strong>Prerequisites:</strong> Docker and Docker Compose installed on your machine.</li>
-<li><strong>Clone the repository:</strong> <code>git clone https://github.com/TANUH-AI/TANUH-DPI.git</code></li>
-<li><strong>Start the required services:</strong></li>
-</ol>
-<pre><code>docker compose up redis privacy-filter celery-privacy-worker</code></pre>
-<ol start="4">
-<li><strong>Access the service:</strong> Open <code>http://localhost:8003</code> in your browser, or use the API endpoints directly.</li>
-<li><strong>Disable authentication (optional for local dev):</strong> Set <code>KEYCLOAK_AUTH_ENABLED=false</code> in your <code>.env</code> file to skip token verification.</li>
-</ol>
-<p>All processing occurs locally — no document data leaves your machine. Temporary files are automatically purged after processing.</p>
 <h1>7. Performance</h1>
-<div class="table-responsive"><table><thead><tr><th>File Type</th><th>Size</th><th>Estimated Time</th></tr></thead><tbody><tr><td>Single DICOM image</td><td>5-20 MB</td><td>5-15 seconds</td></tr><tr><td>Multi-frame DICOM</td><td>50-200 MB</td><td>15-45 seconds</td></tr><tr><td>NIfTI volume (100+ slices)</td><td>50-500 MB</td><td>30-120 seconds</td></tr><tr><td>Standard image (PNG/JPG)</td><td>1-10 MB</td><td>3-10 seconds</td></tr><tr><td>PDF document (10 pages)</td><td>1-5 MB</td><td>10-30 seconds</td></tr></tbody></table></div>
+<div class="table-responsive"><table><thead><tr><th>File Type</th><th>Size</th><th>Estimated Time</th></tr></thead><tbody><tr><td>Single DICOM image</td><td>5-20 MB</td><td>5-15 seconds</td></tr><tr><td>Multi-frame DICOM</td><td>50-75 MB</td><td>15-45 seconds</td></tr><tr><td>NIfTI volume (100+ slices)</td><td>50-75 MB</td><td>30-120 seconds</td></tr><tr><td>Standard image (PNG/JPG)</td><td>1-10 MB</td><td>3-10 seconds</td></tr><tr><td>PDF document (10 pages)</td><td>1-50 MB</td><td>10-30 seconds</td></tr></tbody></table></div>
 <h1>8. DICOM Metadata Handling</h1>
 <h2>8.1 PHI Tags Stripped</h2>
 <p>PatientName, PatientID, OtherPatientIDs, PatientBirthDate, PatientAge, PatientAddress, AccessionNumber, StudyID, InstitutionName, ReferringPhysicianName, OperatorsName, PerformingPhysicianName, StationName, DeviceSerialNumber, ProtocolName.</p>
 <h2>8.2 UIDs Regenerated</h2>
 <p>StudyInstanceUID, SeriesInstanceUID, SOPInstanceUID - regenerated via pydicom.uid.generate_uid() to prevent cross-referencing with original studies.</p>
-<h2>8.3 De-identification Flag</h2>
-<p>The DICOM dataset is marked as de-identified (PatientIdentityRemoved = YES) after processing.</p>
+<h2>8.3 Anonymization Flag</h2>
+<p>The DICOM dataset is marked as anonymized (PatientIdentityRemoved = YES) after processing.</p>
 <h1>9. Known Limitations & Future Enhancements</h1>
 <ul>
 <li>No burned-in pixel annotation OCR for DICOM (relies on corner text detection)</li>

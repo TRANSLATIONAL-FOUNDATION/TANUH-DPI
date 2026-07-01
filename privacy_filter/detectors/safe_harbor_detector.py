@@ -91,8 +91,9 @@ _URL = re.compile(
     r"[A-Za-z0-9.-]+\.(?:in|com|org|net|gov|edu|io|co|info)(?:/[^\s]*)?)\b",
 )
 # Indian + generic phone / fax: 0821-2335555, 0821 -2335555, +91 98765 43210
+# Negative lookbehind for ; and : prevents matching journal citations (1995;302:1251-1256)
 _PHONE = re.compile(
-    r"(?<!\d)(?:\+?\d{1,3}[-\s]?)?(?:\(?\d{2,5}\)?[-\s]?)?\d{3,5}[-\s]?\d{4,8}(?!\d)",
+    r"(?<![\d;:])(?:\+?\d{1,3}[-\s]?)?(?:\(?\d{2,5}\)?[-\s]?)?\d{3,5}[-\s]?\d{4,8}(?!\d)",
 )
 
 # ── Organization / lab names ─────────────────────────────────────────────────
@@ -200,6 +201,44 @@ _CLINICAL_ALLOWLIST = {
     "prostate", "kidney", "bladder", "liver", "pancreas",
     "thyroid", "pituitary", "adrenal", "serum", "plasma", "whole",
     "glycated", "glycosylated", "fasting", "random", "postprandial",
+    "control", "controls", "quality", "poor", "good", "excellent",
+    "diabetes", "diabetic", "diabetics", "prediabetes", "pre-diabetes",
+    "screening", "biological", "interval", "target", "optimal",
+    "hypertension", "hypotension", "hyperglycemia", "hypoglycemia",
+    "anemia", "anaemia", "jaundice", "malaria", "dengue", "typhoid",
+    "tuberculosis", "hepatitis", "cirrhosis", "pneumonia", "asthma",
+    "cancer", "carcinoma", "melanoma", "lymphoma", "leukemia", "leukaemia",
+    "benign", "malignant", "metastatic", "invasive", "noninvasive",
+    "acute", "chronic", "severe", "moderate", "mild", "borderline",
+    "elevated", "decreased", "increased", "reduced", "deficiency",
+    "diagnosis", "diagnostic", "prognosis", "pathology", "pathological",
+    "clinical", "subclinical", "asymptomatic", "symptomatic",
+    "treatment", "therapy", "medication", "dosage", "dose",
+    "surgery", "surgical", "procedure", "biopsy", "autopsy",
+    "inflammation", "infection", "infectious", "bacterial", "viral",
+    "congenital", "hereditary", "genetic", "autoimmune",
+    "renal", "hepatic", "cardiac", "pulmonary", "cerebral", "vascular",
+    "anterior", "posterior", "lateral", "medial", "proximal", "distal",
+    "bilateral", "unilateral", "ipsilateral", "contralateral",
+    "systolic", "diastolic", "pulse", "rhythm", "sinus",
+    "volume", "count", "level", "ratio", "index", "value", "range",
+    "total", "differential", "absolute", "relative", "mean", "average",
+    "packed", "corpuscular", "sedimentation", "coagulation",
+    "sensitivity", "specificity", "prevalence", "incidence",
+    "complete", "partial", "preliminary", "final", "supplementary",
+    "routine", "urgent", "stat", "repeat", "follow",
+    "within", "above", "below", "high", "normal", "desirable",
+    "acceptable", "unacceptable", "satisfactory", "unsatisfactory",
+    "mellitus", "microalbuminuria", "albuminuria", "proteinuria",
+    "nephropathy", "neuropathy", "retinopathy", "angiopathy",
+    "hemoglobin", "haemoglobin", "glycosylated", "glycated",
+    "insulin", "dependent", "independent", "resistant",
+    "kidney", "renal", "glomerular", "filtration",
+    "cardiovascular", "coronary", "arterial", "venous",
+    "system", "testing", "variant", "biorad", "method",
+    "foundation", "national", "scientific", "advisory",
+    "board", "committee", "council", "society", "association",
+    "management", "recommendations", "guidelines",
 }
 
 # ── Clinical context detector (lab result lines) ───────────────────────────

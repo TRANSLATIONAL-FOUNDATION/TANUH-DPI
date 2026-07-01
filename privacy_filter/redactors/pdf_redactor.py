@@ -83,6 +83,20 @@ _GLOBAL_LABELS = {
 _TOKEN_STOPWORDS = {
     "dr", "mr", "mrs", "ms", "the", "of", "and", "unit", "male", "female",
     "general", "consultant", "professor", "resident", "by", "no", "id",
+    "for", "with", "from", "into", "that", "this", "then", "than",
+    "not", "but", "are", "was", "were", "been", "has", "have", "had",
+    "its", "all", "any", "can", "may", "will", "also", "each", "per",
+    "national", "international", "scientific", "advisory", "board",
+    "committee", "council", "society", "association", "organization",
+    "foundation", "system", "testing", "variant", "method", "type",
+    "group", "class", "level", "grade", "stage", "phase", "part",
+    "based", "using", "according", "between", "within", "after", "before",
+    "about", "under", "over", "through", "during", "following",
+    "management", "recommendations", "guidelines", "standards",
+    "department", "division", "section", "service", "program",
+    "journal", "report", "review", "study", "research", "article",
+    "patients", "subjects", "individuals", "persons", "cases",
+    "data", "information", "records", "files", "documents",
 }
 
 

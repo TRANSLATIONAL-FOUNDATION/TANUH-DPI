@@ -79,7 +79,7 @@
     try {
       // If it contains __redacted, it is always in the redacted directory
       const apiKind = key.includes("__redacted") ? "redacted" : (kind === "original" ? "uploads" : "redacted");
-      const r = await fetch(`${BASE()}/api/render-pages/${apiKind}/${key}`, { headers: AUTH(), signal: AbortSignal.timeout(30000) });
+      const r = await fetch(`${BASE()}/api/render-pages/${apiKind}/${key}`, { headers: AUTH(), signal: AbortSignal.timeout(120000) });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const data = await r.json();
 
